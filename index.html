@@ -135,7 +135,6 @@
     </div>
   </section>
 
-  <!-- Popup summary -->
   <div id="summaryModal" class="modal">
     <div class="box">
       <h3>ยืนยันการบันทึก</h3>
@@ -152,6 +151,16 @@
 <script>
 const API_URL="https://satoshi-smart-ledger.tttta2556.workers.dev/"
 let records=[],chart=null,tempPayload=null
+
+function formatDate(d){
+  if(!d)return""
+  const dt=new Date(d)
+  if(isNaN(dt))return d
+  const day=("0"+dt.getDate()).slice(-2)
+  const month=("0"+(dt.getMonth()+1)).slice(-2)
+  const year=dt.getFullYear()
+  return `${day}/${month}/${year}`
+}
 
 function showPopup(msg){document.getElementById("popupBox").innerText=msg;document.getElementById("popup").style.display="flex"}
 function hidePopup(){document.getElementById("popup").style.display="none"}
@@ -181,16 +190,8 @@ function setMode(m){
   document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block"
   document.getElementById("filesExpense").style.display=isIncome?"none":"grid"
   document.getElementById("itemWrap").style.display=isIncome?"none":"block"
-
-  // ✅ ล็อคผู้ดำเนินการ = ศุภกร ถ้าเป็นโหมดเบิก
   const op=document.getElementById("operator")
-  if(isIncome){
-    op.value="ศุภกร เจิมจรุง"
-    op.disabled=true
-  }else{
-    op.disabled=false
-    op.value=""
-  }
+  if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
 }
 
 function fillSelect(id,items,ph){
@@ -247,7 +248,7 @@ document.getElementById("confirmSubmitBtn").addEventListener("click",async()=>{
 
 function buildSummary(p){
   let html=`<div><b>โหมด:</b> ${p.mode}</div>`
-  html+=`<div><b>วันที่:</b> ${p.date}</div>`
+  html+=`<div><b>วันที่:</b> ${formatDate(p.date)}</div>`
   html+=`<div><b>จำนวนเงิน:</b> ${p.amount.toLocaleString()} บาท</div>`
   if(p.item)html+=`<div><b>รายละเอียด:</b> ${p.item}</div>`
   if(p.supplier)html+=`<div><b>ร้านค้า:</b> ${p.supplier}</div>`
@@ -267,7 +268,7 @@ function renderHistory(){
     const wrap=document.createElement("div")
     wrap.className="history-item "+(isIncome?"income":"expense")
     const sign=isIncome?"+":"-"
-    wrap.innerHTML=`<div class="history-top"><div>${r.date||""}</div><div class="history-money ${isIncome?"income":"expense"}">${sign}${Number(r.amount||0).toLocaleString()} บาท</div></div>`
+    wrap.innerHTML=`<div class="history-top"><div>${formatDate(r.date)||""}</div><div class="history-money ${isIncome?"income":"expense"}">${sign}${Number(r.amount||0).toLocaleString()} บาท</div></div>`
     list.appendChild(wrap)
   })
 }
@@ -282,7 +283,6 @@ function renderDashboard(){
   let html="<h3>สรุปรายจ่ายตามโครงการ</h3>";labels.forEach((k,i)=>html+=`<div>${k}: ${data[i].toLocaleString()} บาท</div>`);document.getElementById("summaryBox").innerHTML=html
 }
 
-// ====== Amount field ======
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt")
 amountEl.addEventListener("input",()=>{let raw=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"");if(raw.split(".").length>2){ raw=raw.substring(0,raw.lastIndexOf(".")) }amountEl.value=raw})
 amountEl.addEventListener("blur",()=>{let raw=amountEl.value.replace(/,/g,"");if(raw===""){amountTxt.textContent="";return}let num=parseFloat(raw);if(isNaN(num)){amountTxt.textContent="";return}amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});const [i,d]=num.toFixed(2).split(".");amountTxt.textContent="("+thaiMoneyText(i,d)+")"})
@@ -292,4 +292,3 @@ window.addEventListener("DOMContentLoaded",loadOptions)
 </script>
 </body>
 </html>
-
