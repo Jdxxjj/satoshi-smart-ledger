@@ -27,13 +27,6 @@
     .submit{margin-top:24px;width:100%;padding:15px;background:#333;color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:1.05rem;font-weight:600;transition:.2s}
     .submit:hover{background:#B27A01}
     .amount-display{margin-top:6px;color:#777;font-style:italic}
-    .history-item{background:#fafafa;border-radius:12px;padding:14px 16px;margin-bottom:12px;border-left:6px solid #ddd}
-    .history-item.income{border-left-color:#06c755}
-    .history-item.expense{border-left-color:#d93025}
-    .history-top{display:flex;justify-content:space-between;font-weight:700;color:#222;align-items:center}
-    .history-money.income{color:#06c755}
-    .history-money.expense{color:#d93025}
-    .btn-detail{padding:6px 10px;font-size:.85rem;border:none;border-radius:6px;background:#B27A01;color:#fff;cursor:pointer;margin-left:10px}
     .dash{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;justify-content:center}
     #donutWrap{width:360px}
     #donutChart{max-width:360px}
@@ -61,6 +54,7 @@
     <button class="tab" data-id="dashboard">แดชบอร์ด</button>
   </div>
 
+  <!-- ADD PAGE -->
   <section id="add" class="page active">
     <div class="card">
       <h2>เพิ่มรายการ</h2>
@@ -167,13 +161,49 @@
     </div>
   </section>
 
+  <!-- HISTORY PAGE -->
   <section id="history" class="page">
     <div class="card">
       <h2>ประวัติการทำรายการ</h2>
-      <div id="historyList"></div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <input type="text" id="searchBox" placeholder="ค้นหารายการ..." style="flex:2;padding:8px;border:1px solid #ccc;border-radius:6px">
+        <select id="filterMode" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:6px">
+          <option value="">ทั้งหมด</option>
+          <option value="เบิก">เบิก</option>
+          <option value="จ่าย">จ่าย</option>
+        </select>
+        <select id="sortBy" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:6px">
+          <option value="date_desc">วันที่ (ใหม่→เก่า)</option>
+          <option value="date_asc">วันที่ (เก่า→ใหม่)</option>
+          <option value="amount_desc">จำนวนเงิน (มาก→น้อย)</option>
+          <option value="amount_asc">จำนวนเงิน (น้อย→มาก)</option>
+          <option value="operator_asc">ผู้ดำเนินการ (A→Z)</option>
+          <option value="operator_desc">ผู้ดำเนินการ (Z→A)</option>
+        </select>
+      </div>
+
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:#f1f1f1">
+            <th style="padding:8px;border:1px solid #ddd">วันที่</th>
+            <th style="padding:8px;border:1px solid #ddd">โหมด</th>
+            <th style="padding:8px;border:1px solid #ddd">รายละเอียด</th>
+            <th style="padding:8px;border:1px solid #ddd">จำนวนเงิน</th>
+            <th style="padding:8px;border:1px solid #ddd">ผู้ดำเนินการ</th>
+            <th style="padding:8px;border:1px solid #ddd">ไฟล์แนบ</th>
+          </tr>
+        </thead>
+        <tbody id="historyTable"></tbody>
+      </table>
+
+      <div style="text-align:center;margin-top:12px">
+        <button id="loadMoreBtn" class="btn btn-ok">โหลดเพิ่ม</button>
+      </div>
     </div>
   </section>
 
+  <!-- DASHBOARD -->
   <section id="dashboard" class="page">
     <div class="card">
       <h2>แดชบอร์ด</h2>
@@ -184,6 +214,7 @@
     </div>
   </section>
 
+  <!-- MODALS -->
   <div id="detailModal" class="modal">
     <div class="box">
       <h3>รายละเอียดรายการ</h3>
@@ -212,7 +243,6 @@ const progressWrap=document.getElementById("progressWrap")
 const progressBar=document.querySelector("#progressBar div")
 
 function resetProgress(){progressBar.style.width="0%";progressWrap.style.display="none"}
-
 function formatDate(d){if(!d)return"";const dt=new Date(d);if(isNaN(dt))return d;return ("0"+dt.getDate()).slice(-2)+"/"+("0"+(dt.getMonth()+1)).slice(-2)+"/"+dt.getFullYear()}
 function openModal(id){document.getElementById(id).style.display="flex"}
 function closeModal(id){document.getElementById(id).style.display="none"}
@@ -377,30 +407,77 @@ document.getElementById("confirmSubmitBtn").addEventListener("click",async()=>{
   }
 })
 
-function renderHistory(){
-  const list=document.getElementById("historyList");list.innerHTML=""
-  records.forEach(r=>{
-    const wrap=document.createElement("div")
-    wrap.className="history-item "+(r.mode==="เบิก"?"income":"expense")
-    const money=`${r.mode==="เบิก"?"+":"-"}${Math.abs(Number(r.amount||0)).toLocaleString()} บาท`
-    wrap.innerHTML=`<div class="history-top">
-      <div>${r.id||"-"} | ${formatDate(r.date)}</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="history-money ${r.mode==="เบิก"?"income":"expense"}">${money}</div>
-        <button class="btn-detail">รายละเอียด</button>
-      </div>
-    </div>`
-    wrap.querySelector(".btn-detail").addEventListener("click",()=>{
-      const slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[])
-      const receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[])
-      const rec={...r,slips:slipsArr,receipts:receiptsArr}
-      document.getElementById("detailContent").innerHTML=buildSummary(rec)
-      openModal("detailModal")
-    })
-    list.appendChild(wrap)
+/* ---------- HISTORY TABLE WITH FILTER/SORT ---------- */
+let historyPage={page:1,perPage:10,filtered:[]}
+
+function applyFilters(){
+  let q=document.getElementById("searchBox").value.toLowerCase()
+  let mode=document.getElementById("filterMode").value
+  let sort=document.getElementById("sortBy").value
+  let arr=records.filter(r=>{
+    let s=(r.item+" "+r.supplier+" "+r.project+" "+r.building+" "+r.operator).toLowerCase()
+    if(q && !s.includes(q)) return false
+    if(mode && r.mode!==mode) return false
+    return true
   })
+  if(sort==="date_desc") arr.sort((a,b)=>new Date(b.date)-new Date(a.date))
+  if(sort==="date_asc") arr.sort((a,b)=>new Date(a.date)-new Date(b.date))
+  if(sort==="amount_desc") arr.sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount))
+  if(sort==="amount_asc") arr.sort((a,b)=>Math.abs(a.amount)-Math.abs(b.amount))
+  if(sort==="operator_asc") arr.sort((a,b)=>a.operator.localeCompare(b.operator))
+  if(sort==="operator_desc") arr.sort((a,b)=>b.operator.localeCompare(a.operator))
+  historyPage.filtered=arr
+  historyPage.page=1
+  renderHistoryTable()
 }
 
+function renderHistoryTable(){
+  let tbody=document.getElementById("historyTable")
+  tbody.innerHTML=""
+  let start=0, end=historyPage.page*historyPage.perPage
+  let show=historyPage.filtered.slice(start,end)
+  show.forEach(r=>{
+    let slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[])
+    let receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[])
+    let att=[...slipsArr,...receiptsArr].map(u=>{
+      if(u.endsWith(".jpg")||u.endsWith(".png")) return `<img src="${u}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;margin:2px;cursor:pointer" onclick="window.open('${u}')">`
+      else if(u.endsWith(".pdf")) return `<span style="color:red;font-weight:600;cursor:pointer" onclick="window.open('${u}')">PDF</span>`
+      return `<a href="${u}" target="_blank">ไฟล์</a>`
+    }).join(" ")
+    let tr=document.createElement("tr")
+    tr.style.cursor="pointer"
+    tr.innerHTML=`
+      <td style="padding:8px;border:1px solid #ddd">${formatDate(r.date)}</td>
+      <td style="padding:8px;border:1px solid #ddd">${r.mode}</td>
+      <td style="padding:8px;border:1px solid #ddd">${r.item||"-"}</td>
+      <td style="padding:8px;border:1px solid #ddd;text-align:right;color:${r.mode==='เบิก'?'#06c755':'#d93025'}">${Number(r.amount).toLocaleString()}</td>
+      <td style="padding:8px;border:1px solid #ddd">${r.operator||"-"}</td>
+      <td style="padding:8px;border:1px solid #ddd">${att||"-"}</td>
+    `
+    tr.addEventListener("click",()=>openDetail(r.id))
+    tbody.appendChild(tr)
+  })
+  document.getElementById("loadMoreBtn").style.display=(historyPage.filtered.length> end)?"inline-block":"none"
+}
+
+function openDetail(id){
+  let r=records.find(x=>x.id==id)
+  if(!r) return
+  let slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[])
+  let receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[])
+  let rec={...r,slips:slipsArr,receipts:receiptsArr}
+  document.getElementById("detailContent").innerHTML=buildSummary(rec)
+  openModal("detailModal")
+}
+
+document.getElementById("searchBox").addEventListener("input",applyFilters)
+document.getElementById("filterMode").addEventListener("change",applyFilters)
+document.getElementById("sortBy").addEventListener("change",applyFilters)
+document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage.page++;renderHistoryTable()})
+
+function renderHistory(){applyFilters()}
+
+/* ---------- DASHBOARD ---------- */
 function renderDashboard(){
   const ctx=document.getElementById("donutChart").getContext("2d")
   if(chart) chart.destroy()
@@ -413,6 +490,7 @@ function renderDashboard(){
   document.getElementById("summaryBox").innerHTML="<h3>สรุปรายจ่ายตามโครงการ</h3>"+Object.entries(byProject).map(([k,v])=>`${k}: ${v.toLocaleString()} บาท`).join("<br>")
 }
 
+/* ---------- LOAD OPTIONS ---------- */
 function fillSelect(id,arr){const sel=document.getElementById(id);sel.innerHTML=`<option value="">-- เลือก --</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("")}
 async function loadOptions(){
   const d=await fetch(API_URL).then(r=>r.json())
@@ -434,6 +512,7 @@ document.getElementById("addBuildingBtn").addEventListener("click",async()=>{
   if(val){await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})});await loadOptions();document.getElementById("building").value=val}
 })
 
+/* ---------- AMOUNT FORMAT ---------- */
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt")
 amountEl.addEventListener("input",()=>{
   let s=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"")
@@ -462,4 +541,3 @@ window.addEventListener("DOMContentLoaded",async()=>{setMode("เบิก");awa
 </script>
 </body>
 </html>
-
