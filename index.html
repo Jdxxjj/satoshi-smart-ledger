@@ -114,13 +114,43 @@
   <section id="history" class="page"><div class="card"><h2>ประวัติการทำรายการ</h2><div id="historyList"></div></div></section>
   <section id="dashboard" class="page"><div class="card"><h2>แดชบอร์ด</h2><div class="dash"><div id="donutWrap"><canvas id="donutChart"></canvas></div><div class="summary" id="summaryBox"></div></div></div></section>
 
+  <!-- popup -->
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
 
 <script>
-const API_URL="https://script.google.com/macros/s/XXXXX/exec"
-let records=[],chart=null
+const API_URL="https://script.google.com/macros/s/AKfycbyFNjFXts62O-VT_ZdMgZDWOBMAeWdMQz9ON0KlVku_qOHX10JHm4pnHNm48Q-ydWQw/exec>>>"
+let records=[],chart=null,tempPayload=null
 
-// -------- จำนวนเงิน รองรับทศนิยม + คำอ่านไทย + เบิก=+, จ่าย=- ----------
+// === Navigation Tabs ===
+document.querySelectorAll(".tab").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"))
+    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"))
+    b.classList.add("active")
+    document.getElementById(b.dataset.id).classList.add("active")
+    if(b.dataset.id==="dashboard")renderDashboard()
+    if(b.dataset.id==="history")renderHistory()
+  })
+})
+
+// === Toggle เบิก/จ่าย ===
+document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"))
+document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"))
+
+function setMode(m){
+  document.getElementById("mode").value=m
+  document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก")
+  document.getElementById("btnExpense").classList.toggle("selected",m==="จ่าย")
+  const isIncome=m==="เบิก"
+  document.querySelectorAll(".expense-only").forEach(el=>el.style.display=isIncome?"none":"grid")
+  document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block"
+  document.getElementById("filesExpense").style.display=isIncome?"none":"grid"
+  document.getElementById("itemWrap").style.display=isIncome?"none":"block"
+  const op=document.getElementById("operator")
+  if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
+}
+
+// === Amount Format ===
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt")
 amountEl.addEventListener("input",()=>{
   let raw=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"")
@@ -129,7 +159,7 @@ amountEl.addEventListener("input",()=>{
   if(decPart.length>2) decPart=decPart.substring(0,2)
   intPart=intPart.replace(/^0+(?=\d)/,"")
   let intFormatted=Number(intPart||0).toLocaleString("en-US")
-  amountEl.value=decPart!==""?intFormatted+"."+decPart:intFormatted+(raw.endsWith(".")?".":"")
+  amountEl.value=decPart!==""?intFormatted+"."+decPart:intFormatted
   let num=parseFloat(intPart+"."+(decPart||"0"))||0
   const[i,d]=num.toFixed(2).split(".")
   amountTxt.textContent="("+thaiMoneyText(i,d)+")"
@@ -143,16 +173,7 @@ function thaiMoneyText(i,d){
   let s="";if(d[0]!=="0") s+=(d[0]==="1"?"":d[0]==="2"?"ยี่":n[+d[0]])+"สิบ";if(d[1]!=="0") s+=(d[1]==="1"?"เอ็ด":n[+d[1]]);return t+"บาท"+s+"สตางค์"
 }
 
-// -------------- แก้ตรง submit ให้เบิก=+, จ่าย=- -----------------
-document.getElementById("form").addEventListener("submit",async e=>{
-  e.preventDefault()
-  const mode=document.getElementById("mode").value
-  const date=document.getElementById("date").value
-  let amountVal=parseFloat(document.getElementById("amount").value.replace(/,/g,""))
-  if(mode==="จ่าย") amountVal=-Math.abs(amountVal) // จ่ายเป็นลบ
-  else amountVal=Math.abs(amountVal)               // เบิกเป็นบวก
-  // ส่ง payload ไปเหมือนเดิม...
-})
+window.addEventListener("DOMContentLoaded",loadOptions)
 </script>
 </body>
 </html>
