@@ -33,6 +33,7 @@
     .summary{min-width:280px;max-width:420px;flex:1;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:18px}
     .summary h3{margin:8px 0 12px}
     @media (max-width:780px){.row{grid-template-columns:1fr}}
+
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);justify-content:center;align-items:center;z-index:999}
     .modal .box{background:#fff;border-radius:14px;max-width:480px;width:100%;padding:22px;box-shadow:0 6px 16px rgba(0,0,0,.2)}
     .modal h3{margin:0 0 14px}
@@ -40,11 +41,26 @@
     .btn{padding:10px 16px;border:none;border-radius:8px;cursor:pointer}
     .btn-ok{background:#06c755;color:#fff}
     .btn-cancel{background:#d93025;color:#fff}
+
     #popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center}
     #popupBox{background:#fff;padding:24px 28px;border-radius:12px;font-size:1.2rem;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+
     #progressWrap{margin-top:10px;display:none}
     #progressBar{width:100%;height:14px;border-radius:8px;background:#eee;overflow:hidden}
     #progressBar div{height:100%;width:0;background:#06c755;transition:width .3s}
+
+    /* History Card Style */
+    .history-card{
+      background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.05);transition:.2s;cursor:pointer
+    }
+    .history-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+    .history-top{display:flex;justify-content:space-between;align-items:center;font-weight:600;margin-bottom:6px;color:#333}
+    .history-id{font-size:.9rem;color:#666}
+    .history-amount{font-size:1.2rem;font-weight:700}
+    .history-mid{font-size:.95rem;color:#444;margin-bottom:6px}
+    .history-operator{font-size:.85rem;color:#777;margin-top:2px}
+    .history-files{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px}
   </style>
 </head>
 <body>
@@ -124,14 +140,8 @@
         </div>
 
         <div class="row expense-only" id="filesExpense" style="display:none">
-          <div>
-            <label>สลิป</label>
-            <input type="file" id="slipExpense" multiple>
-          </div>
-          <div>
-            <label>ใบเสร็จ</label>
-            <input type="file" id="receiptExpense" multiple>
-          </div>
+          <div><label>สลิป</label><input type="file" id="slipExpense" multiple></div>
+          <div><label>ใบเสร็จ</label><input type="file" id="receiptExpense" multiple></div>
         </div>
 
         <div id="progressWrap"><div id="progressBar"><div></div></div></div>
@@ -155,7 +165,6 @@
             <div class="error" id="err-operator"></div>
           </div>
         </div>
-
         <button type="submit" id="submitBtn" class="submit">บันทึก</button>
       </form>
     </div>
@@ -165,7 +174,6 @@
   <section id="history" class="page">
     <div class="card">
       <h2>ประวัติการทำรายการ</h2>
-
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
         <input type="text" id="searchBox" placeholder="ค้นหารายการ..." style="flex:2;padding:8px;border:1px solid #ccc;border-radius:6px">
         <select id="filterMode" style="flex:1;padding:8px;border:1px solid #ccc;border-radius:6px">
@@ -182,21 +190,7 @@
           <option value="operator_desc">ผู้ดำเนินการ (Z→A)</option>
         </select>
       </div>
-
-      <table style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr style="background:#f1f1f1">
-            <th style="padding:8px;border:1px solid #ddd">วันที่</th>
-            <th style="padding:8px;border:1px solid #ddd">โหมด</th>
-            <th style="padding:8px;border:1px solid #ddd">รายละเอียด</th>
-            <th style="padding:8px;border:1px solid #ddd">จำนวนเงิน</th>
-            <th style="padding:8px;border:1px solid #ddd">ผู้ดำเนินการ</th>
-            <th style="padding:8px;border:1px solid #ddd">ไฟล์แนบ</th>
-          </tr>
-        </thead>
-        <tbody id="historyTable"></tbody>
-      </table>
-
+      <div id="historyList"></div>
       <div style="text-align:center;margin-top:12px">
         <button id="loadMoreBtn" class="btn btn-ok">โหลดเพิ่ม</button>
       </div>
@@ -241,8 +235,8 @@ const API_URL="https://satoshi-smart-ledger.tttta2556.workers.dev/"
 let records=[],chart=null,tempPayload=null,slips=[],receipts=[]
 const progressWrap=document.getElementById("progressWrap")
 const progressBar=document.querySelector("#progressBar div")
-
 function resetProgress(){progressBar.style.width="0%";progressWrap.style.display="none"}
+
 function formatDate(d){if(!d)return"";const dt=new Date(d);if(isNaN(dt))return d;return ("0"+dt.getDate()).slice(-2)+"/"+("0"+(dt.getMonth()+1)).slice(-2)+"/"+dt.getFullYear()}
 function openModal(id){document.getElementById(id).style.display="flex"}
 function closeModal(id){document.getElementById(id).style.display="none"}
@@ -294,122 +288,8 @@ function buildSummary(p){
   `
 }
 
-function fileToBase64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{res(fr.result.split(",")[1])};fr.onerror=rej;fr.readAsDataURL(file)})}
-async function uploadBase64(action,base64,mimeType,filename){
-  const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,data:base64,mimeType,filename})})
-  const j=await r.json();if(!j.ok) throw new Error("upload failed");return j.url
-}
-async function uploadGroupBase64(inputEl,type,progressCb){
-  const files=Array.from(inputEl.files||[]);if(files.length===0)return[]
-  const urls=[];let done=0
-  for(const f of files){
-    const b64=await fileToBase64(f)
-    const action=(type==="slip")?"uploadSlip":"uploadReceipt"
-    const url=await uploadBase64(action,b64,f.type,f.name)
-    urls.push(url);done++
-    progressCb(done,files.length)
-  }
-  return urls
-}
-
-function clearErrors(){
-  document.querySelectorAll(".error").forEach(e=>e.textContent="")
-  document.querySelectorAll("input,select").forEach(el=>el.classList.remove("error-input"))
-}
-function showError(inputId,msg){
-  const el=document.getElementById(inputId)
-  const err=document.getElementById("err-"+inputId)
-  if(err) err.textContent=msg||"กรอกข้อมูลให้ครบ"
-  if(el) el.classList.add("error-input")
-  if(el && typeof el.scrollIntoView==="function"){el.scrollIntoView({behavior:"smooth",block:"center"})}
-}
-
-function validateForm(){
-  clearErrors()
-  let ok=true
-  const mode=document.getElementById("mode").value
-  const date=document.getElementById("date").value
-  const amountRaw=(document.getElementById("amount").value||"").replace(/,/g,"")
-  const amount=parseFloat(amountRaw)
-  const operator=document.getElementById("operator").value
-
-  if(!date){showError("date","กรุณาเลือกวันที่");ok=false}
-  if(isNaN(amount)){showError("amount","กรุณากรอกจำนวนเงิน");ok=false}
-  if(!operator){showError("operator","กรุณาเลือกผู้ดำเนินการ");ok=false}
-
-  if(mode==="จ่าย"){
-    const need=[["item","กรุณากรอกรายละเอียด"],["supplierExpense","กรุณาเลือกร้านค้า"],["project","กรุณาเลือกโครงการ"],["building","กรุณาเลือกอาคาร"],["jobType","กรุณาเลือกประเภทงาน"],["category","กรุณาเลือกหมวดงาน"],["paymentType","กรุณาเลือกประเภทรายการจ่าย"]]
-    need.forEach(([id,msg])=>{const v=document.getElementById(id).value;if(!v){showError(id,msg);ok=false}})
-  }
-  return ok
-}
-
-document.getElementById("form").addEventListener("submit",async e=>{
-  e.preventDefault()
-  if(!validateForm()) return
-
-  const mode=document.getElementById("mode").value
-  const date=document.getElementById("date").value
-  const amount=parseFloat((document.getElementById("amount").value||"").replace(/,/g,""))
-  const operator=document.getElementById("operator").value
-
-  slips=[];receipts=[]
-  resetProgress()
-
-  if(mode==="จ่าย"){
-    const slipFiles=document.getElementById("slipExpense").files.length
-    const receiptFiles=document.getElementById("receiptExpense").files.length
-    const total=slipFiles+receiptFiles
-    if(total>0){
-      progressWrap.style.display="block"
-      const updateProgress=(done,t)=>{progressBar.style.width=((done/t)*100)+"%"}
-      slips=await uploadGroupBase64(document.getElementById("slipExpense"),"slip",updateProgress)
-      receipts=await uploadGroupBase64(document.getElementById("receiptExpense"),"receipt",updateProgress)
-      setTimeout(resetProgress,400)
-    }
-  }
-
-  tempPayload={
-    mode,date,
-    item:mode==="จ่าย"?document.getElementById("item").value:"",
-    supplier:mode==="จ่าย"?document.getElementById("supplierExpense").value:"",
-    project:mode==="จ่าย"?document.getElementById("project").value:"",
-    building:mode==="จ่าย"?document.getElementById("building").value:"",
-    jobType:mode==="จ่าย"?document.getElementById("jobType").value:"",
-    category:mode==="จ่าย"?document.getElementById("category").value:"",
-    paymentType:mode==="จ่าย"?document.getElementById("paymentType").value:"",
-    amount:mode==="จ่าย"?-Math.abs(amount):Math.abs(amount),
-    operator,
-    slips,receipts
-  }
-  document.getElementById("summaryContent").innerHTML=buildSummary(tempPayload)
-  openModal("summaryModal")
-})
-
-document.getElementById("confirmSubmitBtn").addEventListener("click",async()=>{
-  closeModal("summaryModal");showPopup("กำลังบันทึก...")
-  try{
-    const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(tempPayload)})
-    const j=await res.json()
-    if(j.ok){
-      showPopup("บันทึกสำเร็จ")
-      setTimeout(hidePopup,1200)
-      document.getElementById("form").reset()
-      setMode("เบิก")
-      await loadOptions()
-    }else{
-      showPopup("บันทึกล้มเหลว");setTimeout(hidePopup,1500)
-    }
-  }catch{
-    showPopup("ผิดพลาด");setTimeout(hidePopup,1500)
-  }finally{
-    resetProgress()
-  }
-})
-
-/* ---------- HISTORY TABLE WITH FILTER/SORT ---------- */
+/* ---------- HISTORY CARD ---------- */
 let historyPage={page:1,perPage:10,filtered:[]}
-
 function applyFilters(){
   let q=document.getElementById("searchBox").value.toLowerCase()
   let mode=document.getElementById("filterMode").value
@@ -428,53 +308,54 @@ function applyFilters(){
   if(sort==="operator_desc") arr.sort((a,b)=>b.operator.localeCompare(a.operator))
   historyPage.filtered=arr
   historyPage.page=1
-  renderHistoryTable()
+  renderHistoryStatement()
 }
-
-function renderHistoryTable(){
-  let tbody=document.getElementById("historyTable")
-  tbody.innerHTML=""
-  let start=0, end=historyPage.page*historyPage.perPage
-  let show=historyPage.filtered.slice(start,end)
+function renderHistoryStatement(){
+  const list=document.getElementById("historyList")
+  list.innerHTML=""
+  let end=historyPage.page*historyPage.perPage
+  let show=historyPage.filtered.slice(0,end)
   show.forEach(r=>{
     let slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[])
     let receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[])
     let att=[...slipsArr,...receiptsArr].map(u=>{
-      if(u.endsWith(".jpg")||u.endsWith(".png")) return `<img src="${u}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;margin:2px;cursor:pointer" onclick="window.open('${u}')">`
-      else if(u.endsWith(".pdf")) return `<span style="color:red;font-weight:600;cursor:pointer" onclick="window.open('${u}')">PDF</span>`
+      if(u.endsWith(".jpg")||u.endsWith(".png")) 
+        return `<img src="${u}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="window.open('${u}')">`
+      else if(u.endsWith(".pdf")) 
+        return `<span style="color:red;font-weight:600;cursor:pointer" onclick="window.open('${u}')">PDF</span>`
       return `<a href="${u}" target="_blank">ไฟล์</a>`
     }).join(" ")
-    let tr=document.createElement("tr")
-    tr.style.cursor="pointer"
-    tr.innerHTML=`
-      <td style="padding:8px;border:1px solid #ddd">${formatDate(r.date)}</td>
-      <td style="padding:8px;border:1px solid #ddd">${r.mode}</td>
-      <td style="padding:8px;border:1px solid #ddd">${r.item||"-"}</td>
-      <td style="padding:8px;border:1px solid #ddd;text-align:right;color:${r.mode==='เบิก'?'#06c755':'#d93025'}">${Number(r.amount).toLocaleString()}</td>
-      <td style="padding:8px;border:1px solid #ddd">${r.operator||"-"}</td>
-      <td style="padding:8px;border:1px solid #ddd">${att||"-"}</td>
+    let sign=r.mode==="เบิก"?"+":"-"
+    let color=r.mode==="เบิก"?"#06c755":"#d93025"
+    let money=`${sign}${Math.abs(Number(r.amount)).toLocaleString()} บาท`
+    let div=document.createElement("div")
+    div.className="history-card"
+    div.innerHTML=`
+      <div class="history-top">
+        <div class="history-id">ID: ${r.id||"-"} • ${formatDate(r.date)} (${r.mode})</div>
+        <div class="history-amount" style="color:${color}">${money}</div>
+      </div>
+      <div class="history-mid">
+        <div>${r.item||"-"}</div>
+        <div class="history-operator">ผู้ดำเนินการ: ${r.operator||"-"}</div>
+      </div>
+      ${att?`<div class="history-files">${att}</div>`:""}
     `
-    tr.addEventListener("click",()=>openDetail(r.id))
-    tbody.appendChild(tr)
+    div.addEventListener("click",()=>openDetail(r.id))
+    list.appendChild(div)
   })
   document.getElementById("loadMoreBtn").style.display=(historyPage.filtered.length> end)?"inline-block":"none"
 }
-
 function openDetail(id){
   let r=records.find(x=>x.id==id)
   if(!r) return
-  let slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[])
-  let receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[])
-  let rec={...r,slips:slipsArr,receipts:receiptsArr}
-  document.getElementById("detailContent").innerHTML=buildSummary(rec)
+  document.getElementById("detailContent").innerHTML=buildSummary(r)
   openModal("detailModal")
 }
-
 document.getElementById("searchBox").addEventListener("input",applyFilters)
 document.getElementById("filterMode").addEventListener("change",applyFilters)
 document.getElementById("sortBy").addEventListener("change",applyFilters)
-document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage.page++;renderHistoryTable()})
-
+document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage.page++;renderHistoryStatement()})
 function renderHistory(){applyFilters()}
 
 /* ---------- DASHBOARD ---------- */
@@ -502,7 +383,6 @@ async function loadOptions(){
   fillSelect("category",d.options.categories||[])
   fillSelect("paymentType",d.options.paymentTypes||[])
 }
-
 document.getElementById("addSupplierBtn").addEventListener("click",async()=>{
   const val=prompt("กรอกชื่อร้านค้าใหม่")
   if(val){await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})});await loadOptions();document.getElementById("supplierExpense").value=val}
@@ -527,7 +407,6 @@ amountEl.addEventListener("blur",()=>{
   const raw=amountEl.value.replace(/,/g,""); const num=parseFloat(raw)
   if(!isNaN(num)){amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); const [i,d]=num.toFixed(2).split("."); amountTxt.textContent="("+thaiMoneyText(i,d)+")"}
 })
-
 function thaiMoneyText(i,d){
   const n=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"],p=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"]
   i=(i||"0").replace(/^0+/,"")||"0"; let t="",L=i.length
@@ -536,7 +415,6 @@ function thaiMoneyText(i,d){
   let s=""; if(d[0]!=="0") s+=(d[0]==="1"?"":d[0]==="2"?"ยี่":n[+d[0]])+"สิบ"; if(d[1]!=="0") s+=(d[1]==="1"?"เอ็ด":n[+d[1]])
   return t+"บาท"+s+"สตางค์"
 }
-
 window.addEventListener("DOMContentLoaded",async()=>{setMode("เบิก");await loadOptions()})
 </script>
 </body>
