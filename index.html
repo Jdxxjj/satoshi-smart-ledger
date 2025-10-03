@@ -31,7 +31,6 @@
     .history-top{display:flex;justify-content:space-between;font-weight:700;color:#222}
     .history-money.income{color:#06c755}
     .history-money.expense{color:#d93025}
-    .toggle-detail{margin-top:10px;padding:6px 12px;border:none;border-radius:8px;background:#B27A01;color:#fff;cursor:pointer;font-size:.9rem}
     .dash{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;justify-content:center}
     #donutWrap{width:360px}
     #donutChart{max-width:360px}
@@ -71,17 +70,28 @@
         </div>
         <div id="supplierExpenseWrap" class="full" style="display:none">
           <label>ร้านค้า</label>
-          <select id="supplierExpense"></select>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="supplierExpense" style="flex:1"></select>
+            <button type="button" id="addSupplierBtn" class="btn btn-ok">+ เพิ่มร้านค้าใหม่</button>
+          </div>
         </div>
         <div class="row expense-only" style="display:none">
           <div><label>ชื่อโครงการ</label><select id="project"></select></div>
-          <div><label>อาคาร</label><select id="building"></select></div>
+          <div>
+            <label>อาคาร</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <select id="building" style="flex:1"></select>
+              <button type="button" id="addBuildingBtn" class="btn btn-ok">+ เพิ่มอาคารใหม่</button>
+            </div>
+          </div>
         </div>
         <div class="row expense-only" style="display:none">
           <div><label>ประเภทงาน</label><select id="jobType"></select></div>
           <div><label>หมวดงาน</label><select id="category"></select></div>
         </div>
-        <div class="row expense-only" style="display:none"><div class="full"><label>ประเภทรายการจ่าย</label><select id="paymentType"></select></div></div>
+        <div class="row expense-only" style="display:none">
+          <div class="full"><label>ประเภทรายการจ่าย</label><select id="paymentType"></select></div>
+        </div>
         <div class="row">
           <div>
             <label>จำนวนเงิน</label>
@@ -108,16 +118,39 @@
     </div>
   </section>
 
-  <section id="history" class="page"><div class="card"><h2>ประวัติการทำรายการ</h2><div id="historyList"></div></div></section>
-  <section id="dashboard" class="page"><div class="card"><h2>แดชบอร์ด</h2><div class="dash"><div id="donutWrap"><canvas id="donutChart"></canvas></div><div class="summary" id="summaryBox"></div></div></div></section>
+  <section id="history" class="page">
+    <div class="card">
+      <h2>ประวัติการทำรายการ</h2>
+      <div id="historyList"></div>
+    </div>
+  </section>
+
+  <section id="dashboard" class="page">
+    <div class="card">
+      <h2>แดชบอร์ด</h2>
+      <div class="dash">
+        <div id="donutWrap"><canvas id="donutChart"></canvas></div>
+        <div class="summary" id="summaryBox"></div>
+      </div>
+    </div>
+  </section>
 
   <!-- Popup summary -->
-  <div id="summaryModal" class="modal"><div class="box"><h3>ยืนยันการบันทึก</h3><div id="summaryContent"></div><div class="btns"><button class="btn btn-cancel" onclick="closeModal('summaryModal')">ยกเลิก</button><button class="btn btn-ok" id="confirmSubmitBtn">ยืนยัน</button></div></div></div>
+  <div id="summaryModal" class="modal">
+    <div class="box">
+      <h3>ยืนยันการบันทึก</h3>
+      <div id="summaryContent"></div>
+      <div class="btns">
+        <button class="btn btn-cancel" onclick="closeModal('summaryModal')">ยกเลิก</button>
+        <button class="btn btn-ok" id="confirmSubmitBtn">ยืนยัน</button>
+      </div>
+    </div>
+  </div>
 
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
 
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbwTs_UVyRMdLRvlUhpzrXFkwgJ-zzbabG6UPdP5wCpMypTst3MFT41n2EAaLcnWMPc/exec"
+const API_URL="https://script.google.com/macros/s/AKfycbx3L2kjQUmBwSa5cetncRYhpeSxujkAF8373XJ9MDpaCnphjgwugDkXPXhvXNJvAZip/exec"
 let records=[],chart=null,tempPayload=null
 
 function showPopup(msg){document.getElementById("popupBox").innerText=msg;document.getElementById("popup").style.display="flex"}
@@ -148,6 +181,16 @@ function setMode(m){
   document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block"
   document.getElementById("filesExpense").style.display=isIncome?"none":"grid"
   document.getElementById("itemWrap").style.display=isIncome?"none":"block"
+
+  // ✅ ล็อคผู้ดำเนินการ = ศุภกร ถ้าเป็นโหมดเบิก
+  const op=document.getElementById("operator")
+  if(isIncome){
+    op.value="ศุภกร เจิมจรุง"
+    op.disabled=true
+  }else{
+    op.disabled=false
+    op.value=""
+  }
 }
 
 function fillSelect(id,items,ph){
@@ -249,5 +292,3 @@ window.addEventListener("DOMContentLoaded",loadOptions)
 </script>
 </body>
 </html>
-
-
