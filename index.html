@@ -25,7 +25,7 @@
     .submit{margin-top:24px;width:100%;padding:15px;background:#333;color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:1.05rem;font-weight:600;transition:.2s}
     .submit:hover{background:#B27A01}
     .amount-display{margin-top:6px;color:#777;font-style:italic}
-    .history-item{background:#fafafa;border-radius:12px;padding:14px 16px;margin-bottom:12px;border-left:6px solid #ddd}
+    .history-item{background:#fafafa;border-radius:12px;padding:14px 16px;margin-bottom:12px;border-left:6px solid #ddd;cursor:pointer}
     .history-item.income{border-left-color:#06c755}
     .history-item.expense{border-left-color:#d93025}
     .history-top{display:flex;justify-content:space-between;font-weight:700;color:#222}
@@ -146,6 +146,16 @@
     </div>
   </div>
 
+  <div id="detailModal" class="modal">
+    <div class="box">
+      <h3>รายละเอียดรายการ</h3>
+      <div id="detailContent"></div>
+      <div class="btns">
+        <button class="btn btn-cancel" onclick="closeModal('detailModal')">ปิด</button>
+      </div>
+    </div>
+  </div>
+
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
 
 <script>
@@ -167,37 +177,33 @@ function hidePopup(){document.getElementById("popup").style.display="none"}
 function openModal(id){document.getElementById(id).style.display="flex"}
 function closeModal(id){document.getElementById(id).style.display="none"}
 
-document.querySelectorAll(".tab").forEach(b=>{
-  b.addEventListener("click",()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"))
-    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"))
-    b.classList.add("active")
-    document.getElementById(b.dataset.id).classList.add("active")
-    if(b.dataset.id==="dashboard")renderDashboard()
-    if(b.dataset.id==="history")renderHistory()
-  })
-})
-
-document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"))
-document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"))
-
-function setMode(m){
-  document.getElementById("mode").value=m
-  document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก")
-  document.getElementById("btnExpense").classList.toggle("selected",m==="จ่าย")
-  const isIncome=m==="เบิก"
-  document.querySelectorAll(".expense-only").forEach(el=>el.style.display=isIncome?"none":"grid")
-  document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block"
-  document.getElementById("filesExpense").style.display=isIncome?"none":"grid"
-  document.getElementById("itemWrap").style.display=isIncome?"none":"block"
-  const op=document.getElementById("operator")
-  if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
+function buildSummary(p){
+  let html=`<div><b>ID:</b> ${p.id||"-"}</div>`
+  html+=`<div><b>โหมด:</b> ${p.mode}</div>`
+  html+=`<div><b>วันที่:</b> ${formatDate(p.date)}</div>`
+  html+=`<div><b>จำนวนเงิน:</b> ${p.amount.toLocaleString()} บาท</div>`
+  if(p.item)html+=`<div><b>รายละเอียด:</b> ${p.item}</div>`
+  if(p.supplier)html+=`<div><b>ร้านค้า:</b> ${p.supplier}</div>`
+  if(p.project)html+=`<div><b>โครงการ:</b> ${p.project}</div>`
+  if(p.building)html+=`<div><b>อาคาร:</b> ${p.building}</div>`
+  if(p.jobType)html+=`<div><b>ประเภทงาน:</b> ${p.jobType}</div>`
+  if(p.category)html+=`<div><b>หมวดงาน:</b> ${p.category}</div>`
+  if(p.paymentType)html+=`<div><b>ประเภทรายการจ่าย:</b> ${p.paymentType}</div>`
+  html+=`<div><b>ผู้ดำเนินการ:</b> ${p.operator}</div>`
+  return html
 }
 
-function fillSelect(id,items,ph){
-  const sel=document.getElementById(id);sel.innerHTML=""
-  const opt=document.createElement("option");opt.value="";opt.textContent=ph;sel.appendChild(opt)
-  ;(items||[]).forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o)})
+function renderHistory(){
+  const list=document.getElementById("historyList");list.innerHTML=""
+  records.forEach(r=>{
+    const isIncome=r.mode==="เบิก"
+    const wrap=document.createElement("div")
+    wrap.className="history-item "+(isIncome?"income":"expense")
+    const sign=isIncome?"+":"-"
+    wrap.innerHTML=`<div class="history-top"><div>${r.id||"-"} | ${formatDate(r.date)||""}</div><div class="history-money ${isIncome?"income":"expense"}">${sign}${Number(r.amount||0).toLocaleString()} บาท</div></div>`
+    wrap.addEventListener("click",()=>{document.getElementById("detailContent").innerHTML=buildSummary(r);openModal("detailModal")})
+    list.appendChild(wrap)
+  })
 }
 
 async function fetchJSON(url){const res=await fetch(url);return await res.json()}
@@ -221,6 +227,12 @@ async function loadOptions(){
   renderHistory();renderDashboard()
 }
 
+function fillSelect(id,items,ph){
+  const sel=document.getElementById(id);sel.innerHTML=""
+  const opt=document.createElement("option");opt.value="";opt.textContent=ph;sel.appendChild(opt)
+  ;(items||[]).forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o)})
+}
+
 document.getElementById("form").addEventListener("submit",async e=>{
   e.preventDefault()
   const mode=document.getElementById("mode").value
@@ -228,7 +240,10 @@ document.getElementById("form").addEventListener("submit",async e=>{
   const amountVal=parseFloat(document.getElementById("amount").value.replace(/,/g,""))
   if(!mode||!date||isNaN(amountVal)){showPopup("กรอกข้อมูลไม่ครบ");setTimeout(hidePopup,1500);return}
   let slips=[],receipts=[]
-  if(mode==="จ่าย"){slips=await uploadGroup(document.getElementById("slipExpense"),"slip");receipts=await uploadGroup(document.getElementById("receiptExpense"),"receipt")}
+  if(mode==="จ่าย"){
+    slips=await uploadGroup(document.getElementById("slipExpense"),"slip")
+    receipts=await uploadGroup(document.getElementById("receiptExpense"),"receipt")
+  }
   const signedAmount = mode==="จ่าย" ? -Math.abs(amountVal) : Math.abs(amountVal)
   tempPayload={mode,date,item:mode==="เบิก"?"":document.getElementById("item").value,supplier:mode==="เบิก"?"":document.getElementById("supplierExpense").value,project:mode==="เบิก"?"":document.getElementById("project").value,building:mode==="เบิก"?"":document.getElementById("building").value,jobType:mode==="เบิก"?"":document.getElementById("jobType").value,category:mode==="เบิก"?"":document.getElementById("category").value,paymentType:mode==="เบิก"?"":document.getElementById("paymentType").value,amount:signedAmount,operator:document.getElementById("operator").value,slips,receipts}
   document.getElementById("summaryContent").innerHTML=buildSummary(tempPayload)
@@ -242,36 +257,11 @@ document.getElementById("confirmSubmitBtn").addEventListener("click",async()=>{
     const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(tempPayload)})
     const j=await res.json();if(!j.ok) throw 0
     showPopup("บันทึกสำเร็จ");setTimeout(hidePopup,1500)
-    records.unshift({...tempPayload,id:j.id});document.getElementById("form").reset();await loadOptions()
+    records.unshift({...tempPayload,id:j.id})
+    document.getElementById("form").reset()
+    await loadOptions()
   }catch(err){showPopup("บันทึกไม่สำเร็จ");setTimeout(hidePopup,1500)}
 })
-
-function buildSummary(p){
-  let html=`<div><b>โหมด:</b> ${p.mode}</div>`
-  html+=`<div><b>วันที่:</b> ${formatDate(p.date)}</div>`
-  html+=`<div><b>จำนวนเงิน:</b> ${p.amount.toLocaleString()} บาท</div>`
-  if(p.item)html+=`<div><b>รายละเอียด:</b> ${p.item}</div>`
-  if(p.supplier)html+=`<div><b>ร้านค้า:</b> ${p.supplier}</div>`
-  if(p.project)html+=`<div><b>โครงการ:</b> ${p.project}</div>`
-  if(p.building)html+=`<div><b>อาคาร:</b> ${p.building}</div>`
-  if(p.jobType)html+=`<div><b>ประเภทงาน:</b> ${p.jobType}</div>`
-  if(p.category)html+=`<div><b>หมวดงาน:</b> ${p.category}</div>`
-  if(p.paymentType)html+=`<div><b>ประเภทรายการจ่าย:</b> ${p.paymentType}</div>`
-  html+=`<div><b>ผู้ดำเนินการ:</b> ${p.operator}</div>`
-  return html
-}
-
-function renderHistory(){
-  const list=document.getElementById("historyList");list.innerHTML=""
-  records.forEach(r=>{
-    const isIncome=r.mode==="เบิก"
-    const wrap=document.createElement("div")
-    wrap.className="history-item "+(isIncome?"income":"expense")
-    const sign=isIncome?"+":"-"
-    wrap.innerHTML=`<div class="history-top"><div>${formatDate(r.date)||""}</div><div class="history-money ${isIncome?"income":"expense"}">${sign}${Number(r.amount||0).toLocaleString()} บาท</div></div>`
-    list.appendChild(wrap)
-  })
-}
 
 function renderDashboard(){
   const ctx=document.getElementById("donutChart").getContext("2d")
@@ -287,6 +277,21 @@ const amountEl=document.getElementById("amount"), amountTxt=document.getElementB
 amountEl.addEventListener("input",()=>{let raw=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"");if(raw.split(".").length>2){ raw=raw.substring(0,raw.lastIndexOf(".")) }amountEl.value=raw})
 amountEl.addEventListener("blur",()=>{let raw=amountEl.value.replace(/,/g,"");if(raw===""){amountTxt.textContent="";return}let num=parseFloat(raw);if(isNaN(num)){amountTxt.textContent="";return}amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});const [i,d]=num.toFixed(2).split(".");amountTxt.textContent="("+thaiMoneyText(i,d)+")"})
 function thaiMoneyText(i,d){const n=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"],p=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"];i=(i||"0").replace(/^0+/,"")||"0";let t="",L=i.length;for(let k=0;k<L;k++){let x=parseInt(i[k]);if(x){if(k==L-1&&x==1&&L>1)t+="เอ็ด";else if(k==L-2&&x==2)t+="ยี่";else if(k==L-2&&x==1)t+="";else t+=n[x];t+=p[L-k-1]}}if(!d||d==="00")return t+"บาทถ้วน";let s="";if(d[0]!=="0") s+=(d[0]==="1"?"":d[0]==="2"?"ยี่":n[+d[0]])+"สิบ";if(d[1]!=="0") s+=(d[1]==="1"?"เอ็ด":n[+d[1]]);return t+"บาท"+s+"สตางค์"}
+
+document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"))
+document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"))
+function setMode(m){
+  document.getElementById("mode").value=m
+  document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก")
+  document.getElementById("btnExpense").classList.toggle("selected",m==="จ่าย")
+  const isIncome=m==="เบิก"
+  document.querySelectorAll(".expense-only").forEach(el=>el.style.display=isIncome?"none":"grid")
+  document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block"
+  document.getElementById("filesExpense").style.display=isIncome?"none":"grid"
+  document.getElementById("itemWrap").style.display=isIncome?"none":"block"
+  const op=document.getElementById("operator")
+  if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
+}
 
 window.addEventListener("DOMContentLoaded",loadOptions)
 </script>
