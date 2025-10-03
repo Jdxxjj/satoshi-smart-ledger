@@ -265,9 +265,31 @@ function renderDashboard(){
   document.getElementById("summaryBox").innerHTML=Object.entries(byProject).map(([k,v])=>`${k}: ${v.toLocaleString()} บาท`).join("<br>")
 }
 
-async function loadOptions(){const d=await fetch(API_URL).then(r=>r.json());records=d.items||[];renderHistory();renderDashboard()}
+function fillSelect(id,arr){const sel=document.getElementById(id);sel.innerHTML=`<option value="">-- เลือก --</option>`+arr.map(v=>`<option value="${v}">${v}</option>`).join("")}
+
+async function loadOptions(){
+  const d=await fetch(API_URL).then(r=>r.json())
+  records=d.items||[]
+  renderHistory();renderDashboard()
+  fillSelect("supplierExpense",d.options.suppliers||[])
+  fillSelect("project",d.options.projects||[])
+  fillSelect("building",d.options.buildings||[])
+  fillSelect("jobType",d.options.jobTypes||[])
+  fillSelect("category",d.options.categories||[])
+  fillSelect("paymentType",d.options.paymentTypes||[])
+}
+
+// ===== ปุ่มเพิ่มร้านค้า/อาคาร =====
+document.getElementById("addSupplierBtn").addEventListener("click",async()=>{
+  const val=prompt("กรอกชื่อร้านค้าใหม่")
+  if(val){await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})});await loadOptions();document.getElementById("supplierExpense").value=val}
+})
+document.getElementById("addBuildingBtn").addEventListener("click",async()=>{
+  const val=prompt("กรอกชื่ออาคารใหม่")
+  if(val){await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})});await loadOptions();document.getElementById("building").value=val}
+})
+
 window.addEventListener("DOMContentLoaded",loadOptions)
 </script>
 </body>
 </html>
-
