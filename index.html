@@ -114,18 +114,17 @@
   <section id="history" class="page"><div class="card"><h2>ประวัติการทำรายการ</h2><div id="historyList"></div></div></section>
   <section id="dashboard" class="page"><div class="card"><h2>แดชบอร์ด</h2><div class="dash"><div id="donutWrap"><canvas id="donutChart"></canvas></div><div class="summary" id="summaryBox"></div></div></div></section>
 
-  <!-- Popup -->
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbxts3sAC5Jyd0iIjxTodQn--VpqwS5iDWytWdrlCLUPI31CJaK_QakLaYIEylRTMkhw/exec"
 let records=[],chart=null
 
-// popup helpers
 function showPopup(msg){document.getElementById("popupBox").innerText=msg;document.getElementById("popup").style.display="flex"}
 function hidePopup(){document.getElementById("popup").style.display="none"}
+function openModal(id){document.getElementById(id).style.display="flex"}
+function closeModal(id){document.getElementById(id).style.display="none"}
 
-// tabs
 document.querySelectorAll(".tab").forEach(b=>{
   b.addEventListener("click",()=>{
     document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"))
@@ -137,7 +136,6 @@ document.querySelectorAll(".tab").forEach(b=>{
   })
 })
 
-// mode
 document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"))
 document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"))
 
@@ -154,15 +152,14 @@ function setMode(m){
   if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
 }
 
-// dropdown filler
 function fillSelect(id,items,ph){
   const sel=document.getElementById(id);sel.innerHTML=""
   const opt=document.createElement("option");opt.value="";opt.textContent=ph;sel.appendChild(opt)
   ;(items||[]).forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o)})
 }
 
-// data loader
 async function fetchJSON(url){const res=await fetch(url);return await res.json()}
+
 async function loadOptions(){
   const d=await fetchJSON(API_URL)
   records=d.items||[]
@@ -175,71 +172,27 @@ async function loadOptions(){
   renderHistory();renderDashboard()
 }
 
-// history
-function renderHistory(){
-  const list=document.getElementById("historyList");list.innerHTML=""
-  records.forEach(r=>{
-    const isIncome=r.mode==="เบิก"
-    const wrap=document.createElement("div")
-    wrap.className="history-item "+(isIncome?"income":"expense")
-    const sign=isIncome?"+":"-"
-    wrap.innerHTML=`<div class="history-top"><div>${r.date||""}</div><div class="history-money ${isIncome?"income":"expense"}">${sign}${Number(r.amount||0).toLocaleString()} บาท</div></div>`
-    list.appendChild(wrap)
-  })
-}
-
-// dashboard
-function renderDashboard(){
-  const ctx=document.getElementById("donutChart").getContext("2d")
-  if(chart) chart.destroy()
-  const byProject={}
-  records.filter(r=>r.mode==="จ่าย").forEach(r=>{
-    const k=r.project||"ไม่ระบุ"
-    byProject[k]=(byProject[k]||0)+Math.abs(Number(r.amount)||0)
-  })
-  const labels=Object.keys(byProject),data=Object.values(byProject),colors=labels.map(()=>"#"+Math.floor(Math.random()*16777215).toString(16))
-  chart=new Chart(ctx,{type:"doughnut",data:{labels,datasets:[{data,backgroundColor:colors}]},options:{responsive:true,cutout:"65%"}})
-  let html="<h3>สรุปตามโครงการ</h3>"
-  labels.forEach((lb,i)=>{html+=`${lb}: ${data[i].toLocaleString()} บาท<br>`})
-  if(!labels.length) html+="ไม่มีข้อมูล"
-  document.getElementById("summaryBox").innerHTML=html
-}
-
-// จำนวนเงิน รองรับทศนิยม
+// ====== Amount field ======
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt")
+
+// ให้พิมพ์ตัวเลข+จุดได้
 amountEl.addEventListener("input",()=>{
   let raw=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"")
-  const firstDot=raw.indexOf(".")
-  if(firstDot!==-1){
-    raw=raw.slice(0,firstDot+1)+raw.slice(firstDot+1).replace(/\./g,"")
-  }
-  const parts=raw.split(".")
-  let intPart=parts[0]||"0"
-  let decPart=parts[1]||""
-  if(decPart.length>2)decPart=decPart.slice(0,2)
-  intPart=intPart.replace(/^0+(?=\d)/,"")
-  const intFormatted=(intPart===""?0:intPart*1).toLocaleString("en-US")
-  amountEl.value=decPart!==""?`${intFormatted}.${decPart}`:intFormatted
-  const num=parseFloat(intPart+"."+(decPart||"0"))
-  if(!isNaN(num)){
-    const[i,d]=num.toFixed(2).split(".")
-    amountTxt.textContent="("+thaiMoneyText(i,d)+")"
-  }else{
-    amountTxt.textContent=""
-  }
+  if(raw.split(".").length>2){ raw=raw.substring(0,raw.lastIndexOf(".")) }
+  amountEl.value=raw
 })
+
+// จัด format เมื่อ blur
 amountEl.addEventListener("blur",()=>{
-  const cleaned=amountEl.value.replace(/,/g,"")
-  const num=parseFloat(cleaned)
-  if(isNaN(num)){
-    amountEl.value=""
-    amountTxt.textContent=""
-    return
-  }
-  amountEl.value=num.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})
-  const[i,d]=num.toFixed(2).split(".")
+  let raw=amountEl.value.replace(/,/g,"")
+  if(raw===""){amountTxt.textContent="";return}
+  let num=parseFloat(raw)
+  if(isNaN(num)){amountTxt.textContent="";return}
+  amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})
+  const [i,d]=num.toFixed(2).split(".")
   amountTxt.textContent="("+thaiMoneyText(i,d)+")"
 })
+
 function thaiMoneyText(i,d){
   const n=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"],p=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"]
   i=(i||"0").replace(/^0+/,"")||"0";let t="",L=i.length
