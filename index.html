@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>Satoshi Smart Ledger</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- ใช้ ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
   <style>
     body{font-family:"Tahoma",Arial,sans-serif;margin:0;background:#f8f9fb;color:#333}
     .tabs{display:flex;background:#222}
@@ -44,41 +45,14 @@
     #progressBar{width:100%;height:14px;border-radius:8px;background:#eee;overflow:hidden}
     #progressBar div{height:100%;width:0;background:#06c755;transition:width .3s}
 
-    /* Upload status */
-    .upload-row{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
-    .upload-status{font-size:.9rem;color:#555}
-    .chip{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border:1px solid #e2e8f0;color:#0f172a;padding:6px 10px;border-radius:999px;font-size:.85rem;cursor:pointer}
-    .chip:hover{background:#e2e8f0}
-    .chip i{font-style:normal;opacity:.7}
-
-    /* History Card (statement-like) */
-    .date-header{font-weight:700;color:#0f172a;margin:18px 0 10px}
-    .history-card{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:.2s;cursor:pointer;border-left:6px solid transparent}
-    .history-card:hover{box-shadow:0 3px 10px rgba(0,0,0,0.08)}
-    .history-top{display:flex;justify-content:space-between;align-items:center}
-    .history-id{font-size:.92rem;color:#475569}
-    .history-amount{font-size:1.12rem;font-weight:800}
-    .pos{color:#06c755}
-    .neg{color:#d93025}
-    .history-one{font-size:.95rem;color:#1f2937;margin-top:4px}
-    .history-operator{font-size:.85rem;color:#64748b;margin-top:2px}
-    .history-detail{display:none;padding-top:10px;border-top:1px dashed #e2e8f0;margin-top:10px}
-    .history-files{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px}
-    .thumb{width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb}
-    .pdfpill{display:inline-block;padding:6px 10px;border-radius:999px;background:#ffe9e9;color:#c00;border:1px solid #f5bfbf;font-size:.8rem;font-weight:700}
-
     /* Dashboard */
     .dash{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;justify-content:center}
-    #donutWrap{width:420px}
-    #donutChart{max-width:420px}
+    #donutWrap{width:420px;height:420px}
     .summary{min-width:300px;max-width:520px;flex:1;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:18px}
     .summary h3{margin:0 0 12px}
     .crumbs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
     .crumb{background:#f1f5f9;border:1px solid #e2e8f0;padding:6px 10px;border-radius:999px;font-size:.85rem}
     .btn-back{margin-bottom:10px}
-    .filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-    .mini{padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff}
-    .btn-apply{padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;font-weight:700;cursor:pointer}
     .legend-item{display:flex;align-items:center;gap:8px;margin:6px 0}
     .legend-dot{width:12px;height:12px;border-radius:50%}
   </style>
@@ -90,544 +64,37 @@
     <button class="tab" data-id="dashboard">แดชบอร์ด</button>
   </div>
 
-  <!-- ADD PAGE -->
   <section id="add" class="page active">
-    <div class="card">
-      <h2>เพิ่มรายการ</h2>
-      <div class="toggle">
-        <button type="button" id="btnIncome">เบิก</button>
-        <button type="button" id="btnExpense">จ่าย</button>
-      </div>
-      <form id="form" novalidate>
-        <input type="hidden" id="mode">
-        <div class="row">
-          <div>
-            <label>วันที่</label>
-            <input type="date" id="date" required>
-            <div class="error" id="err-date"></div>
-          </div>
-          <div id="itemWrap" class="expense-only" style="display:none">
-            <label>รายละเอียด</label>
-            <input type="text" id="item">
-            <div class="error" id="err-item"></div>
-          </div>
-        </div>
-
-        <div id="supplierExpenseWrap" class="full" style="display:none">
-          <label>ร้านค้า</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <select id="supplierExpense" style="flex:1"></select>
-            <button type="button" id="addSupplierBtn" class="btn btn-ok">+ เพิ่มร้านค้าใหม่</button>
-          </div>
-          <div class="error" id="err-supplierExpense"></div>
-        </div>
-
-        <div class="row expense-only" style="display:none">
-          <div>
-            <label>ชื่อโครงการ</label>
-            <select id="project"></select>
-            <div class="error" id="err-project"></div>
-          </div>
-          <div>
-            <label>อาคาร</label>
-            <div style="display:flex;gap:8px;align-items:center">
-              <select id="building" style="flex:1"></select>
-              <button type="button" id="addBuildingBtn" class="btn btn-ok">+ เพิ่มอาคารใหม่</button>
-            </div>
-            <div class="error" id="err-building"></div>
-          </div>
-        </div>
-
-        <div class="row expense-only" style="display:none">
-          <div>
-            <label>ประเภทงาน</label>
-            <select id="jobType"></select>
-            <div class="error" id="err-jobType"></div>
-          </div>
-          <div>
-            <label>หมวดงาน</label>
-            <select id="category"></select>
-            <div class="error" id="err-category"></div>
-          </div>
-        </div>
-
-        <div class="row expense-only" style="display:none">
-          <div class="full">
-            <label>ประเภทรายการจ่าย</label>
-            <select id="paymentType"></select>
-            <div class="error" id="err-paymentType"></div>
-          </div>
-        </div>
-
-        <!-- Upload slips/receipts with pre-upload + status -->
-        <div class="row expense-only" id="filesExpense" style="display:none">
-          <div>
-            <label>สลิป</label>
-            <input type="file" id="slipExpense" multiple accept="image/*,.pdf">
-            <div class="upload-row" id="slipStatusRow">
-              <span class="upload-status" id="slipStatus">ยังไม่ได้อัปโหลด</span>
-              <span id="slipChips"></span>
-            </div>
-          </div>
-          <div>
-            <label>ใบเสร็จ</label>
-            <input type="file" id="receiptExpense" multiple accept="image/*,.pdf">
-            <div class="upload-row" id="receiptStatusRow">
-              <span class="upload-status" id="receiptStatus">ยังไม่ได้อัปโหลด</span>
-              <span id="receiptChips"></span>
-            </div>
-          </div>
-        </div>
-
-        <div id="progressWrap"><div id="progressBar"><div></div></div></div>
-
-        <div class="row">
-          <div>
-            <label>จำนวนเงิน</label>
-            <input type="text" id="amount" required>
-            <div id="amountTxt" class="amount-display"></div>
-            <div class="error" id="err-amount"></div>
-          </div>
-          <div>
-            <label>ผู้ดำเนินการ</label>
-            <select id="operator" required>
-              <option value="">-- เลือกผู้ดำเนินการ --</option>
-              <option>ศุภกร เจิมจรุง</option>
-              <option>กฤษณะ ทีมีศรี</option>
-              <option>สรัญรุตม์ รอบคอบ</option>
-              <option>เจทนิพัทธ์ อนุศาสนนันท์</option>
-            </select>
-            <div class="error" id="err-operator"></div>
-          </div>
-        </div>
-        <button type="submit" id="submitBtn" class="submit">บันทึก</button>
-      </form>
-    </div>
+    <div class="card"><h2>เพิ่มรายการ</h2></div>
   </section>
 
-  <!-- HISTORY PAGE -->
   <section id="history" class="page">
-    <div class="card">
-      <h2>ประวัติการทำรายการ</h2>
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
-        <input type="text" id="searchBox" placeholder="ค้นหารายการ..." style="flex:2;padding:10px;border:1px solid #ccc;border-radius:8px">
-        <select id="filterMode" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px">
-          <option value="">ทั้งหมด</option>
-          <option value="เบิก">เบิก</option>
-          <option value="จ่าย">จ่าย</option>
-        </select>
-        <select id="sortBy" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px">
-          <option value="date_desc">วันที่ (ใหม่→เก่า)</option>
-          <option value="date_asc">วันที่ (เก่า→ใหม่)</option>
-          <option value="amount_desc">จำนวนเงิน (มาก→น้อย)</option>
-          <option value="amount_asc">จำนวนเงิน (น้อย→มาก)</option>
-          <option value="operator_asc">ผู้ดำเนินการ (A→Z)</option>
-          <option value="operator_desc">ผู้ดำเนินการ (Z→A)</option>
-        </select>
-      </div>
-
-      <div id="historyList"></div>
-
-      <div style="text-align:center;margin-top:12px">
-        <button id="loadMoreBtn" class="btn btn-ok">โหลดเพิ่ม</button>
-      </div>
-    </div>
+    <div class="card"><h2>ประวัติการทำรายการ</h2><div id="historyList"></div></div>
   </section>
 
-  <!-- DASHBOARD -->
   <section id="dashboard" class="page">
     <div class="card">
       <h2>แดชบอร์ด</h2>
-
-      <!-- Filters -->
-      <div class="filter-row">
-        <input type="date" id="dbStart" class="mini">
-        <input type="date" id="dbEnd" class="mini">
-        <select id="dbPreset" class="mini">
-          <option value="">ตั้งค่าช่วงเวลา</option>
-          <option value="this_month">เดือนนี้</option>
-          <option value="last_month">เดือนที่แล้ว</option>
-          <option value="this_year">ปีนี้</option>
-          <option value="last_year">ปีที่แล้ว</option>
-        </select>
-        <button class="btn-apply" id="dbApply">นำไปใช้</button>
-        <button class="btn" id="dbReset">ล้างตัวกรอง</button>
-      </div>
-
-      <!-- Drilldown Navigation -->
       <div class="crumbs" id="dbCrumbs"></div>
       <button class="btn btn-ok btn-back" id="dbBack" style="display:none">ย้อนกลับ</button>
-
       <div class="dash">
-        <div id="donutWrap"><canvas id="donutChart"></canvas></div>
+        <div id="donutWrap"><div id="donutChart" style="width:100%;height:100%"></div></div>
         <div class="summary" id="summaryBox"></div>
       </div>
     </div>
   </section>
 
-  <!-- MODALS -->
-  <div id="detailModal" class="modal">
-    <div class="box">
-      <h3>รายละเอียดรายการ</h3>
-      <div id="detailContent"></div>
-      <div class="btns"><button class="btn btn-ok" onclick="closeModal('detailModal')">ปิด</button></div>
-    </div>
-  </div>
-
-  <div id="summaryModal" class="modal">
-    <div class="box">
-      <h3>ยืนยันการบันทึก</h3>
-      <div id="summaryContent"></div>
-      <div class="btns">
-        <button class="btn btn-cancel" onclick="closeModal('summaryModal')">ยกเลิก</button>
-        <button class="btn btn-ok" id="confirmSubmitBtn">บันทึก</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
-
 <script>
-/* ========== GLOBAL ========== */
 const API_URL="https://satoshi-smart-ledger.tttta2556.workers.dev/"
-let records=[],chart=null,tempPayload=null
-let slips=[],receipts=[]
-let preUploaded={slips:[],receipts:[]}
-const progressWrap=document.getElementById("progressWrap")
-const progressBar=document.querySelector("#progressBar div")
-function resetProgress(){progressBar.style.width="0%";progressWrap.style.display="none"}
+let records=[],echart=null
+let drill={level:0,path:[],dims:['project','building','jobType','category','paymentType']}
 
-/* helpers */
-function ymd(d){const dt=new Date(d);if(isNaN(dt))return null;return dt.toISOString().slice(0,10)}
-function formatDate(d){
-  if(!d) return ""
-  const dt=new Date(d); if(isNaN(dt)) return d
-  return ("0"+dt.getDate()).slice(-2)+"/"+("0"+(dt.getMonth()+1)).slice(-2)+"/"+dt.getFullYear()
-}
-function todayYMD(){const t=new Date();return t.toISOString().slice(0,10)}
-function openModal(id){document.getElementById(id).style.display="flex"}
-function closeModal(id){document.getElementById(id).style.display="none"}
-function showPopup(m){document.getElementById("popupBox").innerText=m;document.getElementById("popup").style.display="flex"}
-function hidePopup(){document.getElementById("popup").style.display="none"}
-
-/* ========== TABS ========== */
-document.querySelectorAll(".tab").forEach(b=>{
-  b.addEventListener("click",()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"))
-    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"))
-    b.classList.add("active")
-    document.getElementById(b.dataset.id).classList.add("active")
-    if(b.dataset.id==="history") renderHistory()
-    if(b.dataset.id==="dashboard") renderDrill()
-  })
-})
-
-/* ========== MODE ========== */
-function setMode(m){
-  document.getElementById("mode").value=m
-  document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก")
-  document.getElementById("btnExpense").classList.toggle("selected",m==="จ่าย")
-  const isIncome=m==="เบิก"
-  document.querySelectorAll(".expense-only").forEach(el=>el.style.display=isIncome?"none":"grid")
-  document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block"
-  document.getElementById("filesExpense").style.display=isIncome?"none":"grid"
-  document.getElementById("itemWrap").style.display=isIncome?"none":"block"
-  const op=document.getElementById("operator")
-  if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
-  clearErrors(); resetProgress()
-}
-document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"))
-document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"))
-
-/* ========== SUMMARY (ไม่โชว์ +/− ในโมดัล) ========== */
-function linkChips(arr,label){
-  return arr && arr.length ? arr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>${label}${arr.length>1?(" "+(i+1)):""}</a>`).join(" ") : ""
-}
-function buildSummary(p){
-  const absAmt=Math.abs(Number(p.amount||0))
-  return `
-    <div><b>โหมด:</b> ${p.mode}</div>
-    <div><b>วันที่:</b> ${formatDate(p.date)}</div>
-    <div><b>จำนวนเงิน:</b> ${absAmt.toLocaleString()} บาท</div>
-    ${p.item?`<div><b>รายละเอียด:</b> ${p.item}</div>`:""}
-    ${p.supplier?`<div><b>ร้านค้า:</b> ${p.supplier}</div>`:""}
-    ${p.project?`<div><b>โครงการ:</b> ${p.project}</div>`:""}
-    ${p.building?`<div><b>อาคาร:</b> ${p.building}</div>`:""}
-    ${p.jobType?`<div><b>ประเภทงาน:</b> ${p.jobType}</div>`:""}
-    ${p.category?`<div><b>หมวดงาน:</b> ${p.category}</div>`:""}
-    ${p.paymentType?`<div><b>ประเภทรายการจ่าย:</b> ${p.paymentType}</div>`:""}
-    <div><b>ผู้ดำเนินการ:</b> ${p.operator}</div>
-    ${p.slips&&p.slips.length?`<div><b>สลิป:</b> ${linkChips(p.slips,"ดูสลิป")}</div>`:""}
-    ${p.receipts&&p.receipts.length?`<div><b>ใบเสร็จ:</b> ${linkChips(p.receipts,"ดูใบเสร็จ")}</div>`:""}
-  `
+function rndColor(i){
+  const base=["#0ea5e9","#22c55e","#f97316","#a855f7","#eab308","#ef4444","#06b6d4","#84cc16","#f43f5e","#14b8a6"]
+  return base[i%base.length]
 }
 
-/* ========== UPLOAD (อัปตอนเลือกไฟล์) ========== */
-function fileToBase64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result.split(",")[1]);fr.onerror=rej;fr.readAsDataURL(file)})}
-async function uploadBase64(action,base64,mimeType,filename){
-  const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,data:base64,mimeType,filename})})
-  const j=await r.json(); if(!j.ok) throw new Error("upload failed"); return j.url
-}
-async function preUpload(inputEl, type){
-  const files=Array.from(inputEl.files||[]); if(files.length===0) return []
-  const statusEl=document.getElementById(type+"Status")
-  const chipsEl=document.getElementById(type+"Chips")
-  statusEl.textContent="กำลังอัปโหลด..."
-  chipsEl.innerHTML=""
-  const urls=[]
-  for(let i=0;i<files.length;i++){
-    const f=files[i]
-    const b64=await fileToBase64(f)
-    const action=(type==="slip")?"uploadSlip":"uploadReceipt"
-    const url=await uploadBase64(action,b64,f.type,f.name)
-    urls.push(url)
-    const chip=document.createElement("a")
-    chip.className="chip"; chip.href=url; chip.target="_blank"
-    chip.innerHTML=`<i>🔗</i>${type==="slip"?"ดูสลิป":"ดูใบเสร็จ"}${files.length>1?(" "+(i+1)):""}`
-    chipsEl.appendChild(chip)
-  }
-  statusEl.textContent="อัปโหลดเสร็จสิ้น"
-  return urls
-}
-document.getElementById("slipExpense").addEventListener("change",async(e)=>{
-  try{ preUploaded.slips=await preUpload(e.target,"slip") }catch{ document.getElementById("slipStatus").textContent="อัปโหลดล้มเหลว" }
-})
-document.getElementById("receiptExpense").addEventListener("change",async(e)=>{
-  try{ preUploaded.receipts=await preUpload(e.target,"receipt") }catch{ document.getElementById("receiptStatus").textContent="อัปโหลดล้มเหลว" }
-})
-
-/* ========== VALIDATION ========== */
-function clearErrors(){
-  document.querySelectorAll(".error").forEach(e=>e.textContent="")
-  document.querySelectorAll("input,select").forEach(el=>el.classList.remove("error-input"))
-}
-function showError(inputId,msg){
-  const el=document.getElementById(inputId)
-  const err=document.getElementById("err-"+inputId)
-  if(err) err.textContent=msg||"กรอกข้อมูลให้ครบ"
-  if(el) el.classList.add("error-input")
-  if(el && typeof el.scrollIntoView==="function"){el.scrollIntoView({behavior:"smooth",block:"center"})}
-}
-function validateForm(){
-  clearErrors()
-  let ok=true
-  const mode=document.getElementById("mode").value
-  const date=document.getElementById("date").value
-  const amountRaw=(document.getElementById("amount").value||"").replace(/,/g,"")
-  const amount=parseFloat(amountRaw)
-  const operator=document.getElementById("operator").value
-
-  if(!date){showError("date","กรุณาเลือกวันที่");ok=false}
-  if(isNaN(amount)){showError("amount","กรุณากรอกจำนวนเงิน");ok=false}
-  if(!operator){showError("operator","กรุณาเลือกผู้ดำเนินการ");ok=false}
-
-  if(mode==="จ่าย"){
-    const need=[["item","กรุณากรอกรายละเอียด"],["supplierExpense","กรุณาเลือกร้านค้า"],["project","กรุณาเลือกโครงการ"],["building","กรุณาเลือกอาคาร"],["jobType","กรุณาเลือกประเภทงาน"],["category","กรุณาเลือกหมวดงาน"],["paymentType","กรุณาเลือกประเภทรายการจ่าย"]]
-    need.forEach(([id,msg])=>{const v=document.getElementById(id).value;if(!v){showError(id,msg);ok=false}})
-  }
-  return ok
-}
-
-/* ========== SUBMIT ========== */
-document.getElementById("form").addEventListener("submit",async e=>{
-  e.preventDefault()
-  if(!validateForm()) return
-
-  const mode=document.getElementById("mode").value
-  const date=document.getElementById("date").value
-  const amount=parseFloat((document.getElementById("amount").value||"").replace(/,/g,""))
-  const operator=document.getElementById("operator").value
-
-  // ใช้ URL ที่อัปไว้แล้ว ถ้าไม่มีจะอัปตอนนี้
-  slips=preUploaded.slips.slice()
-  receipts=preUploaded.receipts.slice()
-
-  if(mode==="จ่าย" && (slips.length===0 || receipts.length===0)){
-    const slipFiles=document.getElementById("slipExpense").files.length
-    const receiptFiles=document.getElementById("receiptExpense").files.length
-    const total=slipFiles+receiptFiles
-    if(total>0){
-      progressWrap.style.display="block"
-      let done=0
-      const upd=(d,t)=>{progressBar.style.width=((d/t)*100)+"%"}
-      if(slips.length===0) slips=await (async()=>{const files=Array.from(document.getElementById("slipExpense").files||[]);const urls=[];for(const f of files){const b=await fileToBase64(f);const u=await uploadBase64("uploadSlip",b,f.type,f.name);urls.push(u);done++;upd(done,total)}return urls})()
-      if(receipts.length===0) receipts=await (async()=>{const files=Array.from(document.getElementById("receiptExpense").files||[]);const urls=[];for(const f of files){const b=await fileToBase64(f);const u=await uploadBase64("uploadReceipt",b,f.type,f.name);urls.push(u);done++;upd(done,total)}return urls})()
-      setTimeout(resetProgress,500)
-      // sync chips
-      if(preUploaded.slips.length===0){document.getElementById("slipStatus").textContent="อัปโหลดเสร็จสิ้น";document.getElementById("slipChips").innerHTML=linkChips(slips,"ดูสลิป")}
-      if(preUploaded.receipts.length===0){document.getElementById("receiptStatus").textContent="อัปโหลดเสร็จสิ้น";document.getElementById("receiptChips").innerHTML=linkChips(receipts,"ดูใบเสร็จ")}
-      preUploaded.slips=slips.slice(); preUploaded.receipts=receipts.slice()
-    }
-  }
-
-  tempPayload={
-    mode,date,
-    item:mode==="จ่าย"?document.getElementById("item").value:"",
-    supplier:mode==="จ่าย"?document.getElementById("supplierExpense").value:"",
-    project:mode==="จ่าย"?document.getElementById("project").value:"",
-    building:mode==="จ่าย"?document.getElementById("building").value:"",
-    jobType:mode==="จ่าย"?document.getElementById("jobType").value:"",
-    category:mode==="จ่าย"?document.getElementById("category").value:"",
-    paymentType:mode==="จ่าย"?document.getElementById("paymentType").value:"",
-    amount:mode==="จ่าย"?-Math.abs(amount):Math.abs(amount),
-    operator,
-    slips,receipts
-  }
-  document.getElementById("summaryContent").innerHTML=buildSummary(tempPayload)
-  openModal("summaryModal")
-})
-
-document.getElementById("confirmSubmitBtn").addEventListener("click",async()=>{
-  closeModal("summaryModal"); showPopup("กำลังบันทึก...")
-  try{
-    const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(tempPayload)})
-    const j=await res.json()
-    if(j.ok){
-      showPopup("บันทึกสำเร็จ"); setTimeout(hidePopup,1100)
-      // reset form + upload states
-      document.getElementById("form").reset()
-      preUploaded={slips:[],receipts:[]}
-      document.getElementById("slipStatus").textContent="ยังไม่ได้อัปโหลด"
-      document.getElementById("receiptStatus").textContent="ยังไม่ได้อัปโหลด"
-      document.getElementById("slipChips").innerHTML=""
-      document.getElementById("receiptChips").innerHTML=""
-      setMode("เบิก")
-      await loadOptions()
-    }else{
-      showPopup("บันทึกล้มเหลว"); setTimeout(hidePopup,1500)
-    }
-  }catch{
-    showPopup("ผิดพลาด"); setTimeout(hidePopup,1500)
-  }finally{
-    resetProgress()
-  }
-})
-
-/* ========== HISTORY (statement-like, group by date) ========== */
-let historyPage={page:1,perPage:12,filtered:[]}
-function applyFilters(){
-  const q=document.getElementById("searchBox").value.toLowerCase()
-  const mode=document.getElementById("filterMode").value
-  const sort=document.getElementById("sortBy").value
-
-  let arr=records.filter(r=>{
-    const s=[r.id,r.item,r.supplier,r.project,r.building,r.operator].join(" ").toLowerCase()
-    if(q && !s.includes(q)) return false
-    if(mode && r.mode!==mode) return false
-    return true
-  })
-
-  if(sort==="date_desc") arr.sort((a,b)=>new Date(b.date)-new Date(a.date))
-  if(sort==="date_asc") arr.sort((a,b)=>new Date(a.date)-new Date(b.date))
-  if(sort==="amount_desc") arr.sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount))
-  if(sort==="amount_asc") arr.sort((a,b)=>Math.abs(a.amount)-Math.abs(b.amount))
-  if(sort==="operator_asc") arr.sort((a,b)=>String(a.operator).localeCompare(String(b.operator)))
-  if(sort==="operator_desc") arr.sort((a,b)=>String(b.operator).localeCompare(String(a.operator)))
-
-  historyPage.filtered=arr
-  historyPage.page=1
-  renderHistoryStatement()
-}
-function renderHistoryStatement(){
-  const list=document.getElementById("historyList")
-  list.innerHTML=""
-  const end=historyPage.page*historyPage.perPage
-  const show=historyPage.filtered.slice(0,end)
-
-  // group by date
-  const groups={}
-  show.forEach(r=>{
-    const k=ymd(r.date)||""
-    if(!groups[k]) groups[k]=[]
-    groups[k].push(r)
-  })
-  const today=todayYMD()
-
-  Object.keys(groups).sort((a,b)=>new Date(b)-new Date(a)).forEach(d=>{
-    const title=(d===today)?"วันนี้":formatDate(d)
-    const header=document.createElement("div")
-    header.className="date-header"
-    header.textContent=title
-    list.appendChild(header)
-
-    groups[d].forEach(r=>{
-      const isIncome=r.mode==="เบิก"
-      const sign=isIncome?"+":"-"
-      const money=`${sign}${Math.abs(Number(r.amount)||0).toLocaleString()} บาท`
-      const card=document.createElement("div")
-      card.className="history-card"
-      card.style.borderLeftColor=isIncome?"#06c755":"#d93025"
-
-      // attachments chips
-      const slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[])
-      const receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[])
-      const attChips=[...slipsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>ดูสลิป${slipsArr.length>1?(" "+(i+1)):""}</a>`),
-                      ...receiptsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>ดูใบเสร็จ${receiptsArr.length>1?(" "+(i+1)):""}</a>`)].join(" ")
-
-      card.innerHTML=`
-        <div class="history-top">
-          <div class="history-id">ID: ${r.id||"-"} • ${formatDate(r.date)} (${r.mode})</div>
-          <div class="history-amount ${isIncome?'pos':'neg'}">${money}</div>
-        </div>
-        <div class="history-one">${r.item||"-"}</div>
-        <div class="history-operator">ผู้ดำเนินการ: ${r.operator||"-"}</div>
-        <div class="history-detail">
-          <div><b>โครงการ:</b> ${r.project||"-"} | <b>อาคาร:</b> ${r.building||"-"}</div>
-          <div><b>ประเภทงาน:</b> ${r.jobType||"-"} | <b>หมวดงาน:</b> ${r.category||"-"}</div>
-          <div><b>ประเภทรายการจ่าย:</b> ${r.paymentType||"-"}</div>
-          ${attChips?`<div class="history-files">${attChips}</div>`:""}
-        </div>
-      `
-      const detail=card.querySelector(".history-detail")
-      card.addEventListener("click",()=>{ detail.style.display = (detail.style.display==="block"?"none":"block") })
-      list.appendChild(card)
-    })
-  })
-
-  document.getElementById("loadMoreBtn").style.display=(historyPage.filtered.length> end)?"inline-block":"none"
-}
-document.getElementById("searchBox").addEventListener("input",applyFilters)
-document.getElementById("filterMode").addEventListener("change",applyFilters)
-document.getElementById("sortBy").addEventListener("change",applyFilters)
-document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage.page++;renderHistoryStatement()})
-function renderHistory(){ applyFilters() }
-
-/* ========== DASHBOARD: Drilldown donut ========== */
-/*
-  แนวคิด:
-  - เงินทั้งหมด = ผลรวม "เบิก" (mode="เบิก") => totalFunds
-  - รายจ่าย = ผลรวม "จ่าย" (mode="จ่าย") เป็นค่าติดลบในข้อมูลเดิม ใช้ Math.abs เพื่อนับยอดจ่าย
-  - ชั้นเริ่มต้น (level 0): โดนัท = [เงินคงเหลือ, รายจ่ายตามโครงการ]
-      labels = ["เงินคงเหลือ", ...projects]
-      values = [totalFunds - totalExpenseSum, expenseByProject...]
-  - คลิก slice ของโครงการ => level 1 (Building)
-    คลิก slice ของอาคาร => level 2 (JobType)
-    คลิกต่อ => level 3 (Category)
-    คลิกต่อ => level 4 (PaymentType)
-  - ในชั้นลึก คำนวณสัดส่วนจาก 100% ของยอดรวมของ "parent slice" นั้น
-*/
-let drill={ level:0, path:[], // path: [{dim:'project', value:'P1'}, ...]
-            dims:['project','building','jobType','category','paymentType'],
-            preset:null, start:null, end:null }
-
-function withinRange(dateStr){
-  const y=ymd(dateStr); if(!y) return false
-  if(drill.start && y < drill.start) return false
-  if(drill.end && y > drill.end) return false
-  return true
-}
-
-function filteredData(){
-  return records.filter(r=>{
-    if(!withinRange(r.date)) return false
-    return true
-  })
-}
-
-function sumIncome(arr){return arr.filter(r=>r.mode==="เบิก").reduce((s,r)=>s+Math.abs(Number(r.amount)||0),0)}
-function sumExpense(arr){return arr.filter(r=>r.mode==="จ่าย").reduce((s,r)=>s+Math.abs(Number(r.amount)||0),0)}
-function groupExpense(arr, key){
+function groupExpense(arr,key){
   const m={}
   arr.filter(r=>r.mode==="จ่าย").forEach(r=>{
     const k=(r[key]||"ไม่ระบุ").trim()
@@ -635,6 +102,8 @@ function groupExpense(arr, key){
   })
   return m
 }
+function sumIncome(arr){return arr.filter(r=>r.mode==="เบิก").reduce((s,r)=>s+Math.abs(Number(r.amount)||0),0)}
+
 function applyPath(arr){
   let out=arr.slice()
   drill.path.forEach(p=>{
@@ -643,35 +112,20 @@ function applyPath(arr){
   return out
 }
 
-function rndColor(i){ // deterministic-ish palette
-  const base=[ "#0ea5e9","#22c55e","#f97316","#a855f7","#eab308","#ef4444","#06b6d4","#84cc16","#f43f5e","#14b8a6" ]
-  return base[i%base.length]
-}
-
-function renderDonut(labels, values, colors, title, legend){
-  const ctx=document.getElementById("donutChart").getContext("2d")
-  if(chart) chart.destroy()
-  chart=new Chart(ctx,{
-    type:"doughnut",
-    data:{labels,datasets:[{data:values,backgroundColor:colors}]},
-    options:{
-      responsive:true, cutout:"65%",
-      plugins:{legend:{display:false}, tooltip:{callbacks:{
-        label:(ctx)=> `${ctx.label}: ${Number(ctx.parsed).toLocaleString()} บาท`
-      }}},
-      onClick:(evt)=>{
-        const points=chart.getElementsAtEventForMode(evt,'nearest',{intersect:true},false)
-        if(!points.length) return
-        const idx=points[0].index
-        const label=labels[idx]
-        // ห้าม drill ที่ "เงินคงเหลือ"
-        if(drill.level===0 && label==="เงินคงเหลือ") return
-        goDeeper(label)
-      }
-    }
+function renderDonut(labels,values,colors,title,legend){
+  if(echart){echart.dispose()}
+  echart=echarts.init(document.getElementById("donutChart"))
+  echart.setOption({
+    title:{text:title,left:"center"},
+    tooltip:{trigger:"item",formatter:"{b}: {c} บาท ({d}%)"},
+    legend:{show:false},
+    series:[{type:"pie",radius:["40%","70%"],label:{show:false},data:labels.map((l,i)=>({value:values[i],name:l,itemStyle:{color:colors[i]}}))}]
   })
-
-  // summary + legend
+  echart.on("click",params=>{
+    const label=params.name
+    if(drill.level===0 && label==="เงินคงเหลือ") return
+    goDeeper(label)
+  })
   const box=document.getElementById("summaryBox")
   box.innerHTML=`<h3>${title}</h3>` + legend.map(x=>`
     <div class="legend-item"><span class="legend-dot" style="background:${x.color}"></span>
@@ -679,174 +133,44 @@ function renderDonut(labels, values, colors, title, legend){
 }
 
 function renderDrill(){
-  const data=filteredData()
+  const data=records
   const totalFunds=sumIncome(data)
-  const expensesOnly=data.filter(r=>r.mode==="จ่าย")
-
   if(drill.level===0){
-    // group by project
-    const byProject=groupExpense(expensesOnly,'project')
+    const byProject=groupExpense(data,'project')
     const spentSum=Object.values(byProject).reduce((a,b)=>a+b,0)
-    const remaining=Math.max(totalFunds - spentSum, 0)
-    const labels=["เงินคงเหลือ", ...Object.keys(byProject)]
-    const values=[remaining, ...Object.values(byProject)]
-    const colors=["#cbd5e1", ...labels.slice(1).map((_,i)=>rndColor(i))]
-    const legend=[{label:"เงินคงเหลือ",value:remaining,color:"#cbd5e1"}]
-      .concat(Object.keys(byProject).map((k,i)=>({label:k,value:byProject[k],color:colors[i+1]})))
-    renderDonut(labels,values,colors,"ภาพรวม (100% = เงินเบิกรวม)",legend)
+    const remaining=Math.max(totalFunds-spentSum,0)
+    const labels=["เงินคงเหลือ",...Object.keys(byProject)]
+    const values=[remaining,...Object.values(byProject)]
+    const colors=["#cbd5e1",...labels.slice(1).map((_,i)=>rndColor(i))]
+    const legend=[{label:"เงินคงเหลือ",value:remaining,color:"#cbd5e1"}].concat(Object.keys(byProject).map((k,i)=>({label:k,value:byProject[k],color:colors[i+1]})))
+    renderDonut(labels,values,colors,"ภาพรวม",legend)
   }else{
-    // deeper levels use only expenses
-    let scoped=applyPath(data) // already filtered to path & mode=จ่าย
-    const dim=drill.dims[drill.level] // current dimension
-    const parentDim=drill.dims[drill.level-1]
-    const parentName=drill.path[drill.path.length-1]?.value || ""
-    const by=groupExpense(scoped, dim)
+    let scoped=applyPath(data)
+    const dim=drill.dims[drill.level]
+    const parent=drill.path[drill.path.length-1]?.value||""
+    const by=groupExpense(scoped,dim)
     const labels=Object.keys(by)
     const vals=Object.values(by)
     const colors=labels.map((_,i)=>rndColor(i))
-    // legend
     const legend=labels.map((k,i)=>({label:k,value:by[k],color:colors[i]}))
-    renderDonut(labels, vals, colors, `${parentDim?parentDim:""} ${parentName} → ${dim}`, legend)
+    renderDonut(labels,vals,colors,`${parent} → ${dim}`,legend)
   }
-
-  // breadcrumbs + back visibility
-  const crumbs=document.getElementById("dbCrumbs")
-  const back=document.getElementById("dbBack")
-  const items=[{dim:"ภาพรวม",value:"ทั้งหมด"}].concat(drill.path)
-  crumbs.innerHTML=items.map((p,i)=>{
-    if(i===0) return `<span class="crumb">ภาพรวม</span>`
-    return `<span class="crumb">${p.dim}: ${p.value}</span>`
-  }).join("")
-  back.style.display = drill.level>0 ? "inline-block" : "none"
+  document.getElementById("dbCrumbs").innerHTML=[{dim:"ภาพรวม",value:"ทั้งหมด"}].concat(drill.path).map((p,i)=> i===0?`<span class="crumb">ภาพรวม</span>`:`<span class="crumb">${p.dim}: ${p.value}</span>`).join("")
+  document.getElementById("dbBack").style.display=drill.level>0?"inline-block":"none"
 }
-
-function goDeeper(clickedLabel){
-  // go to next level if exists
-  if(drill.level===0){
-    drill.path.push({dim:'project',value:clickedLabel})
-    drill.level=1
-  }else if(drill.level<drill.dims.length-0){ // stop after paymentType
-    const dim=drill.dims[drill.level]
-    drill.path.push({dim,value:clickedLabel})
-    if(drill.level<drill.dims.length-1) drill.level++
-  }
+function goDeeper(label){
+  if(drill.level===0){drill.path.push({dim:'project',value:label});drill.level=1}
+  else if(drill.level<drill.dims.length){drill.path.push({dim:drill.dims[drill.level],value:label});if(drill.level<drill.dims.length-1)drill.level++}
   renderDrill()
 }
-document.getElementById("dbBack").addEventListener("click",()=>{
-  if(drill.level===0) return
-  drill.path.pop()
-  drill.level=Math.max(0, drill.level-1)
-  renderDrill()
-})
+document.getElementById("dbBack").addEventListener("click",()=>{if(drill.level===0)return;drill.path.pop();drill.level=Math.max(0,drill.level-1);renderDrill()})
 
-/* Dashboard date presets */
-document.getElementById("dbPreset").addEventListener("change",(e)=>{
-  const v=e.target.value
-  const t=new Date()
-  const startInput=document.getElementById("dbStart")
-  const endInput=document.getElementById("dbEnd")
-  let s=null, ed=null
-  if(v==="this_month"){
-    const d1=new Date(t.getFullYear(),t.getMonth(),1)
-    const d2=new Date(t.getFullYear(),t.getMonth()+1,0)
-    s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)
-  }else if(v==="last_month"){
-    const d1=new Date(t.getFullYear(),t.getMonth()-1,1)
-    const d2=new Date(t.getFullYear(),t.getMonth(),0)
-    s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)
-  }else if(v==="this_year"){
-    const d1=new Date(t.getFullYear(),0,1)
-    const d2=new Date(t.getFullYear(),11,31)
-    s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)
-  }else if(v==="last_year"){
-    const y=t.getFullYear()-1
-    const d1=new Date(y,0,1), d2=new Date(y,11,31)
-    s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)
-  }
-  if(s){startInput.value=s; drill.start=s}
-  if(ed){endInput.value=ed; drill.end=ed}
-})
-document.getElementById("dbApply").addEventListener("click",()=>{
-  const s=document.getElementById("dbStart").value||null
-  const e=document.getElementById("dbEnd").value||null
-  drill.start=s; drill.end=e
-  drill.level=0; drill.path=[]
-  renderDrill()
-})
-document.getElementById("dbReset").addEventListener("click",()=>{
-  document.getElementById("dbStart").value=""
-  document.getElementById("dbEnd").value=""
-  document.getElementById("dbPreset").value=""
-  drill.start=null; drill.end=null; drill.level=0; drill.path=[]
-  renderDrill()
-})
-
-/* ========== OPTIONS/DATA LOAD ========== */
-function fillSelect(id,arr){
-  const sel=document.getElementById(id)
-  sel.innerHTML=`<option value="">-- เลือก --</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("")
-}
 async function loadOptions(){
   const d=await fetch(API_URL).then(r=>r.json())
   records=d.items||[]
-  renderHistory(); renderDrill()
-  fillSelect("supplierExpense",d.options.suppliers||[])
-  fillSelect("project",d.options.projects||[])
-  fillSelect("building",d.options.buildings||[])
-  fillSelect("jobType",d.options.jobTypes||[])
-  fillSelect("category",d.options.categories||[])
-  fillSelect("paymentType",d.options.paymentTypes||[])
+  renderDrill()
 }
-document.getElementById("addSupplierBtn").addEventListener("click",async()=>{
-  const val=prompt("กรอกชื่อร้านค้าใหม่")
-  if(val){
-    await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})})
-    await loadOptions(); document.getElementById("supplierExpense").value=val
-  }
-})
-document.getElementById("addBuildingBtn").addEventListener("click",async()=>{
-  const val=prompt("กรอกชื่ออาคารใหม่")
-  if(val){
-    await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})})
-    await loadOptions(); document.getElementById("building").value=val
-  }
-})
-
-/* ========== AMOUNT FORMAT ========== */
-const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt")
-amountEl.addEventListener("input",()=>{
-  let s=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"")
-  const parts=s.split("."); if(parts.length>2){s=parts[0]+"."+parts.slice(1).join("")}
-  const [intPart,decPart=""]=s.split(".")
-  const withCommas=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,",")
-  amountEl.value=decPart?withCommas+"."+decPart:withCommas
-  const num=parseFloat(s)
-  if(!isNaN(num)){
-    const [i,d]=(num.toFixed(2)).split(".")
-    amountTxt.textContent="("+thaiMoneyText(i,d)+")"
-  }else{
-    amountTxt.textContent=""
-  }
-})
-amountEl.addEventListener("blur",()=>{
-  const raw=amountEl.value.replace(/,/g,""); const num=parseFloat(raw)
-  if(!isNaN(num)){
-    amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})
-    const [i,d]=num.toFixed(2).split(".")
-    amountTxt.textContent="("+thaiMoneyText(i,d)+")"
-  }
-})
-function thaiMoneyText(i,d){
-  const n=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"],p=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"]
-  i=(i||"0").replace(/^0+/,"")||"0"; let t="",L=i.length
-  for(let k=0;k<L;k++){ let x=parseInt(i[k]); if(x){ if(k==L-1&&x==1&&L>1)t+="เอ็ด"; else if(k==L-2&&x==2)t+="ยี่"; else if(k==L-2&&x==1)t+=""; else t+=n[x]; t+=p[L-k-1] } }
-  if(!d||d==="00")return t+"บาทถ้วน"
-  let s=""; if(d[0]!=="0") s+=(d[0]==="1"?"":d[0]==="2"?"ยี่":n[+d[0]])+"สิบ"; if(d[1]!=="0") s+=(d[1]==="1"?"เอ็ด":n[+d[1]])
-  return t+"บาท"+s+"สตางค์"
-}
-
-/* ========== INIT ========== */
-window.addEventListener("DOMContentLoaded",async()=>{ setMode("เบิก"); await loadOptions() })
+window.addEventListener("DOMContentLoaded",async()=>{await loadOptions()})
 </script>
 </body>
 </html>
