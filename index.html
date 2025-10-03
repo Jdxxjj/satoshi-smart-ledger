@@ -114,37 +114,22 @@
   <section id="history" class="page"><div class="card"><h2>ประวัติการทำรายการ</h2><div id="historyList"></div></div></section>
   <section id="dashboard" class="page"><div class="card"><h2>แดชบอร์ด</h2><div class="dash"><div id="donutWrap"><canvas id="donutChart"></canvas></div><div class="summary" id="summaryBox"></div></div></div></section>
 
-  <div id="supplierModal" class="modal"><div class="box"><h3>เพิ่มร้านค้าใหม่</h3><input type="text" id="newSupplier"><div class="btns"><button class="btn btn-cancel" onclick="closeModal('supplierModal')">ยกเลิก</button><button class="btn btn-ok" id="saveSupplierBtn">บันทึก</button></div></div></div>
-  <div id="buildingModal" class="modal"><div class="box"><h3>เพิ่มอาคารใหม่</h3><input type="text" id="newBuilding"><div class="btns"><button class="btn btn-cancel" onclick="closeModal('buildingModal')">ยกเลิก</button><button class="btn btn-ok" id="saveBuildingBtn">บันทึก</button></div></div></div>
-
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
 
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbyFNjFXts62O-VT_ZdMgZDWOBMAeWdMQz9ON0KlVku_qOHX10JHm4pnHNm48Q-ydWQw/exec"
+const API_URL="https://script.google.com/macros/s/XXXXX/exec"
 let records=[],chart=null
 
-function showPopup(msg){document.getElementById("popupBox").innerText=msg;document.getElementById("popup").style.display="flex"}
-function hidePopup(){document.getElementById("popup").style.display="none"}
-function openModal(id){document.getElementById(id).style.display="flex"}
-function closeModal(id){document.getElementById(id).style.display="none"}
-
-// -------- จำนวนเงินรองรับทศนิยม + คำอ่านไทย ----------
+// -------- จำนวนเงิน รองรับทศนิยม + คำอ่านไทย + เบิก=+, จ่าย=- ----------
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt")
 amountEl.addEventListener("input",()=>{
   let raw=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"")
   if(raw===""){amountTxt.textContent="";return}
-
-  let parts=raw.split(".")
-  let intPart=parts[0]||"0"
-  let decPart=parts[1]||""
-
+  let parts=raw.split("."),intPart=parts[0]||"0",decPart=parts[1]||""
   if(decPart.length>2) decPart=decPart.substring(0,2)
   intPart=intPart.replace(/^0+(?=\d)/,"")
-
   let intFormatted=Number(intPart||0).toLocaleString("en-US")
-  if(parts.length>1){amountEl.value=intFormatted+"."+decPart}
-  else{amountEl.value=intFormatted+(raw.endsWith(".")?".":"")}
-
+  amountEl.value=decPart!==""?intFormatted+"."+decPart:intFormatted+(raw.endsWith(".")?".":"")
   let num=parseFloat(intPart+"."+(decPart||"0"))||0
   const[i,d]=num.toFixed(2).split(".")
   amountTxt.textContent="("+thaiMoneyText(i,d)+")"
@@ -157,6 +142,17 @@ function thaiMoneyText(i,d){
   if(!d||d==="00")return t+"บาทถ้วน"
   let s="";if(d[0]!=="0") s+=(d[0]==="1"?"":d[0]==="2"?"ยี่":n[+d[0]])+"สิบ";if(d[1]!=="0") s+=(d[1]==="1"?"เอ็ด":n[+d[1]]);return t+"บาท"+s+"สตางค์"
 }
+
+// -------------- แก้ตรง submit ให้เบิก=+, จ่าย=- -----------------
+document.getElementById("form").addEventListener("submit",async e=>{
+  e.preventDefault()
+  const mode=document.getElementById("mode").value
+  const date=document.getElementById("date").value
+  let amountVal=parseFloat(document.getElementById("amount").value.replace(/,/g,""))
+  if(mode==="จ่าย") amountVal=-Math.abs(amountVal) // จ่ายเป็นลบ
+  else amountVal=Math.abs(amountVal)               // เบิกเป็นบวก
+  // ส่ง payload ไปเหมือนเดิม...
+})
 </script>
 </body>
 </html>
