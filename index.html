@@ -117,147 +117,34 @@
   <div id="supplierModal" class="modal"><div class="box"><h3>เพิ่มร้านค้าใหม่</h3><input type="text" id="newSupplier"><div class="btns"><button class="btn btn-cancel" onclick="closeModal('supplierModal')">ยกเลิก</button><button class="btn btn-ok" id="saveSupplierBtn">บันทึก</button></div></div></div>
   <div id="buildingModal" class="modal"><div class="box"><h3>เพิ่มอาคารใหม่</h3><input type="text" id="newBuilding"><div class="btns"><button class="btn btn-cancel" onclick="closeModal('buildingModal')">ยกเลิก</button><button class="btn btn-ok" id="saveBuildingBtn">บันทึก</button></div></div></div>
 
-  <!-- Popup summary -->
-  <div id="summaryModal" class="modal"><div class="box"><h3>ยืนยันการบันทึก</h3><div id="summaryContent" style="max-height:300px;overflow:auto;font-size:0.95rem;line-height:1.5"></div><div class="btns"><button class="btn btn-cancel" onclick="closeModal('summaryModal')">ยกเลิก</button><button class="btn btn-ok" id="confirmSubmitBtn">ยืนยันบันทึก</button></div></div></div>
-
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
 
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbyFNjFXts62O-VT_ZdMgZDWOBMAeWdMQz9ON0KlVku_qOHX10JHm4pnHNm48Q-ydWQw/exec"
-let records=[],chart=null,tempPayload=null
+let records=[],chart=null
 
 function showPopup(msg){document.getElementById("popupBox").innerText=msg;document.getElementById("popup").style.display="flex"}
 function hidePopup(){document.getElementById("popup").style.display="none"}
 function openModal(id){document.getElementById(id).style.display="flex"}
 function closeModal(id){document.getElementById(id).style.display="none"}
 
-document.querySelectorAll(".tab").forEach(b=>{
-  b.addEventListener("click",()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"))
-    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"))
-    b.classList.add("active")
-    document.getElementById(b.dataset.id).classList.add("active")
-    if(b.dataset.id==="dashboard")renderDashboard()
-    if(b.dataset.id==="history")renderHistory()
-  })
-})
-
-document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"))
-document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"))
-
-function setMode(m){
-  document.getElementById("mode").value=m
-  document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก")
-  document.getElementById("btnExpense").classList.toggle("selected",m==="จ่าย")
-  const isIncome=m==="เบิก"
-  document.querySelectorAll(".expense-only").forEach(el=>el.style.display=isIncome?"none":"grid")
-  document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block"
-  document.getElementById("filesExpense").style.display=isIncome?"none":"grid"
-  document.getElementById("itemWrap").style.display=isIncome?"none":"block"
-  const op=document.getElementById("operator")
-  if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
-}
-
-function fillSelect(id,items,ph){
-  const sel=document.getElementById(id);sel.innerHTML=""
-  const opt=document.createElement("option");opt.value="";opt.textContent=ph;sel.appendChild(opt)
-  ;(items||[]).forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o)})
-}
-
-async function fetchJSON(url){const res=await fetch(url);return await res.json()}
-async function uploadGroup(el,type){
-  const files=Array.from(el.files||[]);if(files.length===0)return[]
-  const fd=new FormData();files.forEach(f=>fd.append("file",f))
-  fd.append("fileType",type)
-  const res=await fetch(API_URL,{method:"POST",body:fd})
-  const j=await res.json();return j.urls||[]
-}
-
-async function loadOptions(){
-  const d=await fetchJSON(API_URL)
-  records=d.items||[]
-  fillSelect("supplierExpense",d.options.suppliers,"-- เลือกร้านค้า --")
-  fillSelect("project",d.options.projects,"-- เลือกโครงการ --")
-  fillSelect("building",d.options.buildings,"-- เลือกอาคาร --")
-  fillSelect("jobType",d.options.jobTypes,"-- เลือกประเภทงาน --")
-  fillSelect("category",d.options.categories,"-- เลือกหมวดงาน --")
-  fillSelect("paymentType",d.options.paymentTypes,"-- เลือกประเภทรายการจ่าย --")
-  renderHistory();renderDashboard()
-}
-
-function buildSummary(p){
-  let html=`<div><b>โหมด:</b> ${p.mode}</div>`
-  html+=`<div><b>วันที่:</b> ${p.date}</div>`
-  html+=`<div><b>จำนวนเงิน:</b> ${Number(p.amount||0).toLocaleString()} บาท</div>`
-  if(p.item)html+=`<div><b>รายละเอียด:</b> ${p.item}</div>`
-  if(p.supplier)html+=`<div><b>ร้านค้า:</b> ${p.supplier}</div>`
-  if(p.project)html+=`<div><b>โครงการ:</b> ${p.project}</div>`
-  if(p.building)html+=`<div><b>อาคาร:</b> ${p.building}</div>`
-  if(p.jobType)html+=`<div><b>ประเภทงาน:</b> ${p.jobType}</div>`
-  if(p.category)html+=`<div><b>หมวดงาน:</b> ${p.category}</div>`
-  if(p.paymentType)html+=`<div><b>ประเภทรายการจ่าย:</b> ${p.paymentType}</div>`
-  html+=`<div><b>ผู้ดำเนินการ:</b> ${p.operator}</div>`
-  return html
-}
-
-document.getElementById("form").addEventListener("submit",async e=>{
-  e.preventDefault()
-  const mode=document.getElementById("mode").value
-  const date=document.getElementById("date").value
-  const amountVal=parseFloat(document.getElementById("amount").value.replace(/,/g,""))
-  if(!mode||!date||isNaN(amountVal)){showPopup("กรอกข้อมูลไม่ครบ");setTimeout(hidePopup,1500);return}
-  let slips=[],receipts=[]
-  if(mode==="จ่าย"){slips=await uploadGroup(document.getElementById("slipExpense"),"slip");receipts=await uploadGroup(document.getElementById("receiptExpense"),"receipt")}
-  tempPayload={mode,date,item:mode==="เบิก"?"":document.getElementById("item").value,supplier:mode==="เบิก"?"":document.getElementById("supplierExpense").value,project:mode==="เบิก"?"":document.getElementById("project").value,building:mode==="เบิก"?"":document.getElementById("building").value,jobType:mode==="เบิก"?"":document.getElementById("jobType").value,category:mode==="เบิก"?"":document.getElementById("category").value,paymentType:mode==="เบิก"?"":document.getElementById("paymentType").value,amount:amountVal,operator:document.getElementById("operator").value,slips,receipts}
-  document.getElementById("summaryContent").innerHTML=buildSummary(tempPayload)
-  openModal("summaryModal")
-})
-
-document.getElementById("confirmSubmitBtn").addEventListener("click",async()=>{
-  closeModal("summaryModal")
-  showPopup("กำลังบันทึก...")
-  try{
-    const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(tempPayload)})
-    const j=await res.json();if(!j.ok) throw 0
-    showPopup("บันทึกสำเร็จ");setTimeout(hidePopup,1500)
-    records.unshift({...tempPayload,id:j.id});document.getElementById("form").reset();document.getElementById("operator").disabled=false;await loadOptions()
-  }catch(err){showPopup("บันทึกไม่สำเร็จ");setTimeout(hidePopup,1500)}
-})
-
-function renderHistory(){
-  const list=document.getElementById("historyList");list.innerHTML=""
-  records.forEach(r=>{
-    const isIncome=r.mode==="เบิก"
-    const wrap=document.createElement("div")
-    wrap.className="history-item "+(isIncome?"income":"expense")
-    const sign=isIncome?"+":"-"
-    const slips=String(r.slips||"").split(",").filter(Boolean)
-    const receipts=String(r.receipts||"").split(",").filter(Boolean)
-    wrap.innerHTML=`<div class="history-top"><div>${r.date||""}</div><div class="history-money ${isIncome?"income":"expense"}">${sign}${Number(r.amount||0).toLocaleString()} บาท</div></div><button class="toggle-detail">ดูรายละเอียด</button><div class="detail" style="display:none">${!isIncome?`<div>รายละเอียด: ${r.item||"-"}</div>`:""}<div>ร้านค้า: ${r.supplier||"-"}</div>${!isIncome?`<div>โครงการ: ${r.project||"-"}</div><div>อาคาร: ${r.building||"-"}</div><div>ประเภทงาน: ${r.jobType||"-"}</div><div>หมวดงาน: ${r.category||"-"}</div><div>ประเภทรายการจ่าย: ${r.paymentType||"-"}</div><div>สลิป: ${slips.length?slips.map((u,i)=>`<a href="${u}" target="_blank">สลิป${i+1}</a>`).join(", "):"-"}</div><div>ใบเสร็จ: ${receipts.length?receipts.map((u,i)=>`<a href="${u}" target="_blank">ใบเสร็จ${i+1}</a>`).join(", "):"-"}</div>`:""}<div>ผู้ดำเนินการ: ${r.operator||"-"}</div></div>`
-    wrap.querySelector(".toggle-detail").addEventListener("click",()=>{const d=wrap.querySelector(".detail");d.style.display=d.style.display==="block"?"none":"block"})
-    list.appendChild(wrap)
-  })
-}
-
-function renderDashboard(){
-  const ctx=document.getElementById("donutChart").getContext("2d")
-  if(chart) chart.destroy()
-  const byProject={}
-  records.filter(r=>r.mode==="จ่าย").forEach(r=>{const k=r.project||"ไม่ระบุ";byProject[k]=(byProject[k]||0)+Math.abs(Number(r.amount)||0)})
-  const labels=Object.keys(byProject),data=Object.values(byProject),colors=labels.map(()=>"#"+Math.floor(Math.random()*16777215).toString(16))
-  chart=new Chart(ctx,{type:"doughnut",data:{labels,datasets:[{data,backgroundColor:colors}]},options:{responsive:true,cutout:"65%",plugins:{legend:{display:true}}}})
-  let html="<h3>สรุปตามโครงการ</h3>";labels.forEach((lb,i)=>{html+=`${lb}: ${data[i].toLocaleString()} บาท<br>`});if(!labels.length) html+="ไม่มีข้อมูล";document.getElementById("summaryBox").innerHTML=html
-}
-
+// -------- จำนวนเงินรองรับทศนิยม + คำอ่านไทย ----------
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt")
 amountEl.addEventListener("input",()=>{
   let raw=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"")
   if(raw===""){amountTxt.textContent="";return}
-  let parts=raw.split("."),intPart=parts[0]||"0",decPart=parts[1]||""
+
+  let parts=raw.split(".")
+  let intPart=parts[0]||"0"
+  let decPart=parts[1]||""
+
   if(decPart.length>2) decPart=decPart.substring(0,2)
   intPart=intPart.replace(/^0+(?=\d)/,"")
+
   let intFormatted=Number(intPart||0).toLocaleString("en-US")
-  amountEl.value=decPart!==""?intFormatted+"."+decPart:intFormatted
+  if(parts.length>1){amountEl.value=intFormatted+"."+decPart}
+  else{amountEl.value=intFormatted+(raw.endsWith(".")?".":"")}
+
   let num=parseFloat(intPart+"."+(decPart||"0"))||0
   const[i,d]=num.toFixed(2).split(".")
   amountTxt.textContent="("+thaiMoneyText(i,d)+")"
@@ -270,9 +157,6 @@ function thaiMoneyText(i,d){
   if(!d||d==="00")return t+"บาทถ้วน"
   let s="";if(d[0]!=="0") s+=(d[0]==="1"?"":d[0]==="2"?"ยี่":n[+d[0]])+"สิบ";if(d[1]!=="0") s+=(d[1]==="1"?"เอ็ด":n[+d[1]]);return t+"บาท"+s+"สตางค์"
 }
-
-window.addEventListener("DOMContentLoaded",loadOptions)
 </script>
 </body>
 </html>
-
