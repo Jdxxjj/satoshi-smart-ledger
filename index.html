@@ -65,15 +65,14 @@
       </div>
       <form id="form">
         <input type="hidden" id="mode">
+        <input type="hidden" id="editId">
         <div class="row">
           <div><label>วันที่</label><input type="date" id="date" required></div>
           <div id="itemWrap" class="expense-only" style="display:none"><label>รายละเอียด</label><input type="text" id="item"></div>
         </div>
         <div id="supplierExpenseWrap" class="full" style="display:none">
           <label>ร้านค้า</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <select id="supplierExpense" style="flex:1"></select>
-          </div>
+          <select id="supplierExpense"></select>
         </div>
         <div class="row expense-only" style="display:none">
           <div><label>ชื่อโครงการ</label><select id="project"></select></div>
@@ -149,6 +148,21 @@ function hidePopup(){document.getElementById("popup").style.display="none"}
 function openModal(id){document.getElementById(id).style.display="flex"}
 function closeModal(id){document.getElementById(id).style.display="none"}
 
+function setMode(m){
+  document.getElementById("mode").value=m
+  document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก")
+  document.getElementById("btnExpense").classList.toggle("selected",m==="จ่าย")
+  const isIncome=m==="เบิก"
+  document.querySelectorAll(".expense-only").forEach(el=>el.style.display=isIncome?"none":"grid")
+  document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block"
+  document.getElementById("itemWrap").style.display=isIncome?"none":"block"
+  const op=document.getElementById("operator")
+  if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
+}
+
+document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"))
+document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"))
+
 function buildSummary(p){
   return `
     <div><b>ID:</b> ${p.id||"-"}</div>
@@ -171,7 +185,7 @@ function renderHistory(){
   records.forEach(r=>{
     const wrap=document.createElement("div")
     wrap.className="history-item "+(r.mode==="เบิก"?"income":"expense")
-    wrap.innerHTML=`<div class="history-top"><div>${r.id||"-"} | ${formatDate(r.date)}</div><div class="history-money ${r.mode==="เบิก"?"income":"expense"}">${r.mode==="เบิก"?"+":"-"}${Number(r.amount||0).toLocaleString()} บาท</div></div>`
+    wrap.innerHTML=`<div class="history-top"><div>${r.id?r.id:"-"} ${r.date?"| "+formatDate(r.date):""}</div><div class="history-money ${r.mode==="เบิก"?"income":"expense"}">${r.mode==="เบิก"?"+":"-"}${Number(r.amount||0).toLocaleString()} บาท</div></div>`
     wrap.addEventListener("click",()=>{currentRecord=r;document.getElementById("detailContent").innerHTML=buildSummary(r);openModal("detailModal")})
     list.appendChild(wrap)
   })
@@ -182,6 +196,7 @@ async function loadOptions(){const d=await fetch(API_URL).then(r=>r.json());reco
 document.getElementById("deleteBtn").addEventListener("click",async()=>{
   if(!currentRecord)return
   showPopup("กำลังลบ...")
+  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"delete",id:currentRecord.id})})
   records=records.filter(x=>x.id!==currentRecord.id)
   renderHistory();hidePopup();closeModal("detailModal")
 })
@@ -190,6 +205,7 @@ document.getElementById("editBtn").addEventListener("click",()=>{
   if(!currentRecord)return
   closeModal("detailModal")
   document.querySelector("[data-id='add']").click()
+  document.getElementById("editId").value=currentRecord.id
   document.getElementById("mode").value=currentRecord.mode
   document.getElementById("date").value=currentRecord.date.split("T")[0]
   document.getElementById("amount").value=currentRecord.amount
@@ -203,6 +219,17 @@ document.getElementById("editBtn").addEventListener("click",()=>{
   document.getElementById("operator").value=currentRecord.operator
 })
 
+document.getElementById("form").addEventListener("submit",async e=>{
+  e.preventDefault()
+  const id=document.getElementById("editId").value
+  const payload={id:id||null,mode:document.getElementById("mode").value,date:document.getElementById("date").value,item:document.getElementById("item").value,supplier:document.getElementById("supplierExpense").value,project:document.getElementById("project").value,building:document.getElementById("building").value,jobType:document.getElementById("jobType").value,category:document.getElementById("category").value,paymentType:document.getElementById("paymentType").value,amount:parseFloat(document.getElementById("amount").value.replace(/,/g,"")),operator:document.getElementById("operator").value}
+  showPopup("กำลังบันทึก...")
+  const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(id?{action:"update",...payload}:{...payload})})
+  const j=await res.json()
+  hidePopup()
+  if(j.ok){await loadOptions();document.getElementById("form").reset();document.getElementById("editId").value=""}
+})
+
 function renderDashboard(){
   const ctx=document.getElementById("donutChart").getContext("2d")
   if(chart) chart.destroy()
@@ -210,6 +237,12 @@ function renderDashboard(){
   records.filter(r=>r.mode==="จ่าย").forEach(r=>{const k=r.project||"ไม่ระบุ";byProject[k]=(byProject[k]||0)+Math.abs(Number(r.amount)||0)})
   chart=new Chart(ctx,{type:"doughnut",data:{labels:Object.keys(byProject),datasets:[{data:Object.values(byProject),backgroundColor:Object.keys(byProject).map(()=>"#"+Math.floor(Math.random()*16777215).toString(16))}]},options:{responsive:true,cutout:"65%"}})
 }
+
+// ====== Amount field ======
+const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt")
+amountEl.addEventListener("input",()=>{let raw=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"");if(raw.split(".").length>2){ raw=raw.substring(0,raw.lastIndexOf(".")) }amountEl.value=raw})
+amountEl.addEventListener("blur",()=>{let raw=amountEl.value.replace(/,/g,"");if(raw===""){amountTxt.textContent="";return}let num=parseFloat(raw);if(isNaN(num)){amountTxt.textContent="";return}amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});const [i,d]=num.toFixed(2).split(".");amountTxt.textContent="("+thaiMoneyText(i,d)+")"})
+function thaiMoneyText(i,d){const n=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"],p=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"];i=(i||"0").replace(/^0+/,"")||"0";let t="",L=i.length;for(let k=0;k<L;k++){let x=parseInt(i[k]);if(x){if(k==L-1&&x==1&&L>1)t+="เอ็ด";else if(k==L-2&&x==2)t+="ยี่";else if(k==L-2&&x==1)t+="";else t+=n[x];t+=p[L-k-1]}}if(!d||d==="00")return t+"บาทถ้วน";let s="";if(d[0]!=="0") s+=(d[0]==="1"?"":d[0]==="2"?"ยี่":n[+d[0]])+"สิบ";if(d[1]!=="0") s+=(d[1]==="1"?"เอ็ด":n[+d[1]]);return t+"บาท"+s+"สตางค์"}
 
 window.addEventListener("DOMContentLoaded",loadOptions)
 </script>
