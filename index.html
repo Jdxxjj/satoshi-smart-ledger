@@ -93,6 +93,10 @@
         <div class="row expense-only" style="display:none">
           <div class="full"><label>ประเภทรายการจ่าย</label><select id="paymentType"></select></div>
         </div>
+        <div class="row expense-only" id="filesExpense" style="display:none">
+          <div><label>สลิป</label><input type="file" id="slipExpense" accept="image/*,application/pdf" multiple></div>
+          <div><label>ใบเสร็จ</label><input type="file" id="receiptExpense" accept="image/*,application/pdf" multiple></div>
+        </div>
         <div class="row">
           <div>
             <label>จำนวนเงิน</label>
@@ -109,10 +113,6 @@
               <option>เจทนิพัทธ์ อนุศาสนนันท์</option>
             </select>
           </div>
-        </div>
-        <div id="filesExpense" class="row expense-only" style="display:none">
-          <div><label>สลิป</label><input type="file" id="slipExpense" multiple></div>
-          <div><label>ใบเสร็จ</label><input type="file" id="receiptExpense" multiple></div>
         </div>
         <button type="submit" class="submit">บันทึก</button>
       </form>
@@ -187,25 +187,19 @@ function setMode(m){
   const isIncome=m==="เบิก"
   document.querySelectorAll(".expense-only").forEach(el=>el.style.display=isIncome?"none":"grid")
   document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block"
+  document.getElementById("filesExpense").style.display=isIncome?"none":"grid"
+  document.getElementById("itemWrap").style.display=isIncome?"none":"block"
   const op=document.getElementById("operator")
   if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
 }
 document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"))
 document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"))
 
-async function uploadGroup(el,type){
-  const files=Array.from(el.files||[]);if(files.length===0)return[]
-  const fd=new FormData();files.forEach(f=>fd.append("file",f))
-  fd.append("fileType",type)
-  const res=await fetch(API_URL,{method:"POST",body:fd})
-  const j=await res.json();return j.urls||[]
-}
-
 function buildSummary(p){
   return `
     <div><b>โหมด:</b> ${p.mode}</div>
     <div><b>วันที่:</b> ${formatDate(p.date)}</div>
-    <div><b>จำนวนเงิน:</b> ${p.amount.toLocaleString()} บาท</div>
+    <div><b>จำนวนเงิน:</b> ${Number(p.amount||0).toLocaleString()} บาท</div>
     ${p.item?`<div><b>รายละเอียด:</b> ${p.item}</div>`:""}
     ${p.supplier?`<div><b>ร้านค้า:</b> ${p.supplier}</div>`:""}
     ${p.project?`<div><b>โครงการ:</b> ${p.project}</div>`:""}
@@ -214,21 +208,54 @@ function buildSummary(p){
     ${p.category?`<div><b>หมวดงาน:</b> ${p.category}</div>`:""}
     ${p.paymentType?`<div><b>ประเภทรายการจ่าย:</b> ${p.paymentType}</div>`:""}
     <div><b>ผู้ดำเนินการ:</b> ${p.operator}</div>
+    ${p.slips&&p.slips.length?`<div><b>สลิป:</b> ${p.slips.map(u=>`<a href="${u}" target="_blank">ไฟล์</a>`).join(", ")}</div>`:""}
+    ${p.receipts&&p.receipts.length?`<div><b>ใบเสร็จ:</b> ${p.receipts.map(u=>`<a href="${u}" target="_blank">ไฟล์</a>`).join(", ")}</div>`:""}
   `
+}
+
+function fileToBase64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const result=fr.result.split(",")[1];res(result)};fr.onerror=rej;fr.readAsDataURL(file)})}
+async function uploadBase64(action,base64,mimeType,filename){
+  const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action, data:base64, mimeType, filename})})
+  const j=await r.json()
+  if(!j.ok) throw new Error("upload failed")
+  return j.url
+}
+async function uploadGroupBase64(inputEl,type){
+  const files=Array.from(inputEl.files||[]);if(files.length===0)return[]
+  const urls=[]
+  for(const f of files){
+    const b64=await fileToBase64(f)
+    const action=(type==="slip")?"uploadSlip":"uploadReceipt"
+    const url=await uploadBase64(action,b64,f.type,f.name)
+    urls.push(url)
+  }
+  return urls
 }
 
 document.getElementById("form").addEventListener("submit",async e=>{
   e.preventDefault()
   const mode=document.getElementById("mode").value
   const date=document.getElementById("date").value
-  const amount=parseFloat(document.getElementById("amount").value.replace(/,/g,""))
+  const amount=parseFloat((document.getElementById("amount").value||"").replace(/,/g,""))
   if(!mode||!date||isNaN(amount)){showPopup("ข้อมูลไม่ครบ");setTimeout(hidePopup,1500);return}
   slips=[];receipts=[]
   if(mode==="จ่าย"){
-    slips=await uploadGroup(document.getElementById("slipExpense"),"slip")
-    receipts=await uploadGroup(document.getElementById("receiptExpense"),"receipt")
+    slips=await uploadGroupBase64(document.getElementById("slipExpense"),"slip")
+    receipts=await uploadGroupBase64(document.getElementById("receiptExpense"),"receipt")
   }
-  tempPayload={mode,date,item:mode==="จ่าย"?document.getElementById("item").value:"",supplier:mode==="จ่าย"?document.getElementById("supplierExpense").value:"",project:mode==="จ่าย"?document.getElementById("project").value:"",building:mode==="จ่าย"?document.getElementById("building").value:"",jobType:mode==="จ่าย"?document.getElementById("jobType").value:"",category:mode==="จ่าย"?document.getElementById("category").value:"",paymentType:mode==="จ่าย"?document.getElementById("paymentType").value:"",amount:mode==="จ่าย"?-Math.abs(amount):Math.abs(amount),operator:document.getElementById("operator").value,slips,receipts}
+  tempPayload={
+    mode,date,
+    item:mode==="จ่าย"?document.getElementById("item").value:"",
+    supplier:mode==="จ่าย"?document.getElementById("supplierExpense").value:"",
+    project:mode==="จ่าย"?document.getElementById("project").value:"",
+    building:mode==="จ่าย"?document.getElementById("building").value:"",
+    jobType:mode==="จ่าย"?document.getElementById("jobType").value:"",
+    category:mode==="จ่าย"?document.getElementById("category").value:"",
+    paymentType:mode==="จ่าย"?document.getElementById("paymentType").value:"",
+    amount:mode==="จ่าย"?-Math.abs(amount):Math.abs(amount),
+    operator:document.getElementById("operator").value,
+    slips,receipts
+  }
   document.getElementById("summaryContent").innerHTML=buildSummary(tempPayload)
   openModal("summaryModal")
 })
@@ -238,7 +265,7 @@ document.getElementById("confirmSubmitBtn").addEventListener("click",async()=>{
   try{
     const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(tempPayload)})
     const j=await res.json()
-    if(j.ok){showPopup("บันทึกสำเร็จ");setTimeout(hidePopup,1500);document.getElementById("form").reset();await loadOptions()}
+    if(j.ok){showPopup("บันทึกสำเร็จ");setTimeout(hidePopup,1400);document.getElementById("form").reset();setMode("เบิก");await loadOptions()}
     else{showPopup("บันทึกล้มเหลว");setTimeout(hidePopup,1500)}
   }catch{showPopup("ผิดพลาด");setTimeout(hidePopup,1500)}
 })
@@ -248,10 +275,21 @@ function renderHistory(){
   records.forEach(r=>{
     const wrap=document.createElement("div")
     wrap.className="history-item "+(r.mode==="เบิก"?"income":"expense")
-    const btn=document.createElement("button");btn.className="btn-detail";btn.textContent="รายละเอียด"
-    btn.addEventListener("click",()=>{document.getElementById("detailContent").innerHTML=buildSummary(r)+(r.slips?`<div><b>สลิป:</b> ${r.slips}</div>`:"")+(r.receipts?`<div><b>ใบเสร็จ:</b> ${r.receipts}</div>`:"");openModal("detailModal")})
-    wrap.innerHTML=`<div class="history-top"><div>${r.id||"-"} | ${formatDate(r.date)}</div><div class="history-money ${r.mode==="เบิก"?"income":"expense"}">${r.mode==="เบิก"?"+":"-"}${Number(r.amount||0).toLocaleString()} บาท</div></div>`
-    wrap.querySelector(".history-top").appendChild(btn)
+    const money=`${r.mode==="เบิก"?"+":"-"}${Math.abs(Number(r.amount||0)).toLocaleString()} บาท`
+    wrap.innerHTML=`<div class="history-top">
+      <div>${r.id||"-"} | ${formatDate(r.date)}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="history-money ${r.mode==="เบิก"?"income":"expense"}">${money}</div>
+        <button class="btn-detail">รายละเอียด</button>
+      </div>
+    </div>`
+    wrap.querySelector(".btn-detail").addEventListener("click",()=>{
+      const slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[])
+      const receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[])
+      const rec={...r,slips:slipsArr,receipts:receiptsArr}
+      document.getElementById("detailContent").innerHTML=buildSummary(rec)
+      openModal("detailModal")
+    })
     list.appendChild(wrap)
   })
 }
@@ -260,12 +298,15 @@ function renderDashboard(){
   const ctx=document.getElementById("donutChart").getContext("2d")
   if(chart) chart.destroy()
   const byProject={}
-  records.filter(r=>r.mode==="จ่าย").forEach(r=>{const k=r.project||"ไม่ระบุ";byProject[k]=(byProject[k]||0)+Math.abs(Number(r.amount)||0)})
+  records.filter(r=>r.mode==="จ่าย").forEach(r=>{
+    const k=r.project||"ไม่ระบุ"
+    byProject[k]=(byProject[k]||0)+Math.abs(Number(r.amount)||0)
+  })
   chart=new Chart(ctx,{type:"doughnut",data:{labels:Object.keys(byProject),datasets:[{data:Object.values(byProject),backgroundColor:Object.keys(byProject).map(()=>"#"+Math.floor(Math.random()*16777215).toString(16))}]},options:{responsive:true,cutout:"65%"}})
-  document.getElementById("summaryBox").innerHTML=Object.entries(byProject).map(([k,v])=>`${k}: ${v.toLocaleString()} บาท`).join("<br>")
+  document.getElementById("summaryBox").innerHTML="<h3>สรุปรายจ่ายตามโครงการ</h3>"+Object.entries(byProject).map(([k,v])=>`${k}: ${v.toLocaleString()} บาท`).join("<br>")
 }
 
-function fillSelect(id,arr){const sel=document.getElementById(id);sel.innerHTML=`<option value="">-- เลือก --</option>`+arr.map(v=>`<option value="${v}">${v}</option>`).join("")}
+function fillSelect(id,arr){const sel=document.getElementById(id);sel.innerHTML=`<option value="">-- เลือก --</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("")}
 
 async function loadOptions(){
   const d=await fetch(API_URL).then(r=>r.json())
@@ -279,7 +320,6 @@ async function loadOptions(){
   fillSelect("paymentType",d.options.paymentTypes||[])
 }
 
-// ===== ปุ่มเพิ่มร้านค้า/อาคาร =====
 document.getElementById("addSupplierBtn").addEventListener("click",async()=>{
   const val=prompt("กรอกชื่อร้านค้าใหม่")
   if(val){await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})});await loadOptions();document.getElementById("supplierExpense").value=val}
@@ -289,7 +329,30 @@ document.getElementById("addBuildingBtn").addEventListener("click",async()=>{
   if(val){await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})});await loadOptions();document.getElementById("building").value=val}
 })
 
-window.addEventListener("DOMContentLoaded",loadOptions)
+const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt")
+amountEl.addEventListener("input",()=>{
+  let s=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"")
+  const parts=s.split("."); if(parts.length>2){s=parts[0]+"."+parts.slice(1).join("")}
+  const [intPart,decPart=""]=s.split(".")
+  const withCommas=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,",")
+  amountEl.value=decPart?withCommas+"."+decPart:withCommas
+  const num=parseFloat(s); if(!isNaN(num)){const [i,d]=(num.toFixed(2)).split("."); amountTxt.textContent="("+thaiMoneyText(i,d)+")"} else {amountTxt.textContent=""}
+})
+amountEl.addEventListener("blur",()=>{
+  const raw=amountEl.value.replace(/,/g,""); const num=parseFloat(raw)
+  if(!isNaN(num)){amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); const [i,d]=num.toFixed(2).split("."); amountTxt.textContent="("+thaiMoneyText(i,d)+")"}
+})
+
+function thaiMoneyText(i,d){
+  const n=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"],p=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"]
+  i=(i||"0").replace(/^0+/,"")||"0"; let t="",L=i.length
+  for(let k=0;k<L;k++){ let x=parseInt(i[k]); if(x){ if(k==L-1&&x==1&&L>1)t+="เอ็ด"; else if(k==L-2&&x==2)t+="ยี่"; else if(k==L-2&&x==1)t+=""; else t+=n[x]; t+=p[L-k-1] } }
+  if(!d||d==="00")return t+"บาทถ้วน"
+  let s=""; if(d[0]!=="0") s+=(d[0]==="1"?"":d[0]==="2"?"ยี่":n[+d[0]])+"สิบ"; if(d[1]!=="0") s+=(d[1]==="1"?"เอ็ด":n[+d[1]])
+  return t+"บาท"+s+"สตางค์"
+}
+
+window.addEventListener("DOMContentLoaded",async()=>{setMode("เบิก");await loadOptions()})
 </script>
 </body>
 </html>
