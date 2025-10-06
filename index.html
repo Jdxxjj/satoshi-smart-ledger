@@ -1,4 +1,3 @@
-<!-- ======== PART 1/7: HEAD + GLOBAL STYLE (Stable UI v3) ======== -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -10,27 +9,26 @@
     body{
       font-family:"Prompt","Tahoma",sans-serif;
       margin:0;
-      background:#f5f6fa;
-      color:#2f3640;
+      background:#f6f7fa;
+      color:#1e293b;
     }
 
-    /* ---------- HEADER TABS ---------- */
+    /* ---------- HEADER ---------- */
     .tabs{
       display:flex;
-      background:#1f2937;
+      background:#1e293b;
       border-bottom:3px solid #B27A01;
       flex-wrap:wrap;
     }
     .tabs button{
       flex:1;
-      padding:14px 12px;
+      padding:16px;
       border:none;
-      background:#1f2937;
+      background:#1e293b;
       color:#d1d5db;
       font-weight:600;
       cursor:pointer;
       transition:.25s;
-      letter-spacing:.3px;
       min-width:120px;
     }
     .tabs button:hover{background:#374151;color:#fff}
@@ -40,23 +38,18 @@
     .page{display:none;padding:24px}
     .page.active{display:block}
     .card{
-      max-width:1140px;margin:24px auto;
-      background:#fff;border-radius:16px;
-      box-shadow:0 4px 16px rgba(0,0,0,.08);
-      padding:28px;
+      max-width:1140px;
+      margin:32px auto;
+      background:#fff;
+      border-radius:16px;
+      box-shadow:0 4px 18px rgba(0,0,0,.08);
+      padding:36px;
       transition:.25s;
     }
-    .card:hover{box-shadow:0 6px 20px rgba(0,0,0,.1)}
-    h2{margin:0 0 18px;color:#111827;font-size:1.5rem}
+    h2{margin:0 0 20px;color:#111827;font-size:1.5rem;font-weight:700}
 
     /* ---------- FORM ELEMENTS ---------- */
-    label{
-      display:block;
-      margin-top:10px;
-      font-weight:600;
-      font-size:.95rem;
-      color:#374151;
-    }
+    label{display:block;margin-top:10px;font-weight:600;font-size:.95rem;color:#374151}
     input,select{
       width:100%;
       padding:12px 14px;
@@ -73,23 +66,15 @@
       background:#fff;
       box-shadow:0 0 0 3px rgba(178,122,1,.18);
     }
-    .error{color:#d93025;font-size:.85rem;margin-top:4px;min-height:18px}
-    .error-input{border-color:#d93025 !important}
+    .error{color:#dc2626;font-size:.85rem;margin-top:4px;min-height:18px}
+    .error-input{border-color:#dc2626!important}
 
     /* ---------- GRID SYSTEM ---------- */
-    .row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:16px;
-      margin-top:8px;
-    }
-    .row > div{
-      flex:1;
-      min-width:260px;
-    }
+    .row{display:flex;flex-wrap:wrap;gap:28px;margin-top:16px;}
+    .row > div{flex:1;min-width:280px}
     .full{flex:100%}
     @media(max-width:780px){
-      .row{flex-direction:column;gap:12px}
+      .row{flex-direction:column;gap:18px}
       .row > div{min-width:100%}
     }
 
@@ -110,7 +95,7 @@
       display:block;
       width:100%;
       padding:16px;
-      margin-top:24px;
+      margin-top:28px;
       border:none;
       border-radius:12px;
       background:linear-gradient(135deg,#B27A01,#eab308);
@@ -129,7 +114,7 @@
     .toggle{
       display:flex;
       gap:12px;
-      margin:18px 0;
+      margin:20px 0;
       flex-wrap:wrap;
     }
     .toggle button{
@@ -152,107 +137,25 @@
     }
 
     /* ---------- TAG INPUT ---------- */
-    .tag-input{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      align-items:center;
-      border:1px solid #d1d5db;
-      border-radius:10px;
-      padding:8px;
-      background:#f9fafb;
-      cursor:text;
-      position:relative;
-      flex:1;
-      min-height:48px;
-    }
-    .tag-input input{
-      border:none;
-      outline:none;
-      flex:1;
-      min-width:120px;
-      padding:6px;
-      font-size:.95rem;
-      background:transparent;
-    }
-    .tag{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      background:#e2e8f0;
-      color:#111;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:.9rem;
-    }
-    .tag button{
-      border:none;
-      background:transparent;
-      cursor:pointer;
-      color:#555;
-      font-weight:bold;
-    }
+    .tag-input{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1px solid #d1d5db;border-radius:10px;padding:8px;background:#f9fafb;cursor:text;position:relative;flex:1;min-height:48px}
+    .tag-input input{border:none;outline:none;flex:1;min-width:120px;padding:6px;background:transparent}
+    .tag{display:inline-flex;align-items:center;gap:6px;background:#e2e8f0;color:#111;padding:6px 10px;border-radius:999px;font-size:.9rem}
+    .tag button{border:none;background:transparent;cursor:pointer;color:#555;font-weight:bold}
     .tag:hover{background:#cbd5e1}
-
-    .suggestion-list{
-      position:absolute;
-      left:0;right:0;top:100%;
-      background:#fff;
-      border:1px solid #ddd;
-      border-radius:8px;
-      box-shadow:0 4px 10px rgba(0,0,0,.1);
-      max-height:160px;
-      overflow-y:auto;
-      z-index:50;
-      margin-top:2px;
-    }
+    .suggestion-list{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.1);max-height:160px;overflow-y:auto;z-index:50;margin-top:2px}
     .suggestion-item{padding:8px 10px;cursor:pointer}
     .suggestion-item:hover{background:#f1f5f9}
 
     /* ---------- UPLOAD ---------- */
-    .upload-row{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      margin-top:8px;
-      flex-wrap:wrap;
-    }
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      background:#f1f5f9;
-      border:1px solid #e2e8f0;
-      color:#0f172a;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:.85rem;
-      cursor:pointer;
-      text-decoration:none;
-    }
+    .upload-row{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border:1px solid #e2e8f0;color:#0f172a;padding:6px 10px;border-radius:999px;font-size:.85rem;cursor:pointer;text-decoration:none}
     .chip:hover{background:#e2e8f0}
 
     /* ---------- POPUP ---------- */
-    #popup{
-      display:none;
-      position:fixed;
-      top:0;left:0;
-      width:100%;height:100%;
-      background:rgba(0,0,0,.5);
-      z-index:2000;
-      justify-content:center;
-      align-items:center;
-    }
-    #popupBox{
-      background:#fff;
-      padding:24px 28px;
-      border-radius:12px;
-      font-size:1.2rem;
-      box-shadow:0 4px 12px rgba(0,0,0,.2);
-    }
+    #popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center}
+    #popupBox{background:#fff;padding:24px 28px;border-radius:12px;font-size:1.2rem;box-shadow:0 4px 12px rgba(0,0,0,.2)}
   </style>
 </head>
-<!-- ======== PART 2/7: TABS + ADD PAGE (Form เบิก-จ่าย) ======== -->
 <body>
   <div class="tabs">
     <button class="tab active" data-id="add">เพิ่มรายการ</button>
@@ -260,141 +163,19 @@
     <button class="tab" data-id="dashboard">แดชบอร์ด</button>
   </div>
 
-  <!-- ADD PAGE -->
   <section id="add" class="page active">
     <div class="card">
       <h2>เพิ่มรายการ</h2>
 
-      <!-- Toggle -->
       <div class="toggle">
         <button type="button" id="btnIncome">เบิก</button>
         <button type="button" id="btnExpense">จ่าย</button>
       </div>
-
-      <form id="form" novalidate>
-        <input type="hidden" id="mode">
-
-        <!-- วันที่ + รายละเอียด -->
-        <div class="row">
-          <div>
-            <label>วันที่</label>
-            <input type="date" id="date" required>
-            <div class="error" id="err-date"></div>
-          </div>
-          <div id="itemWrap" class="expense-only" style="display:none">
-            <label>รายละเอียด</label>
-            <input type="text" id="item" placeholder="เช่น เหล็กเส้น SD40 Ø16 mm">
-            <div class="error" id="err-item"></div>
-          </div>
-        </div>
-
-        <!-- ร้านค้า -->
-        <div id="supplierExpenseWrap" class="full" style="display:none">
-          <label>ร้านค้า</label>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <select id="supplierExpense" style="flex:1;min-width:200px"></select>
-            <button type="button" id="addSupplierBtn" class="btn btn-ok">+ เพิ่มร้านค้าใหม่</button>
-          </div>
-          <div class="error" id="err-supplierExpense"></div>
-        </div>
-
-        <!-- โครงการ + อาคาร -->
-        <div class="row expense-only" style="display:none">
-          <div>
-            <label>ชื่อโครงการ</label>
-            <select id="project"></select>
-            <div class="error" id="err-project"></div>
-          </div>
-          <div>
-            <label>อาคาร (เลือกได้หลายรายการ)</label>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <div id="buildingTags" class="tag-input">
-                <input type="text" id="buildingInput" placeholder="พิมพ์เพื่อค้นหา...">
-                <div id="buildingSuggest" class="suggestion-list" style="display:none"></div>
-              </div>
-              <button type="button" id="addBuildingBtn" class="btn btn-ok" title="เพิ่มอาคารใหม่">+</button>
-            </div>
-            <div class="hint" style="font-size:.85rem;color:#6b7280;margin-top:4px">
-              พิมพ์ชื่ออาคารเพื่อเลือก หรือกด Enter เพื่อเพิ่มใหม่
-            </div>
-            <div class="error" id="err-building"></div>
-          </div>
-        </div>
-
-        <!-- ประเภทงาน + หมวดงาน -->
-        <div class="row expense-only" style="display:none">
-          <div>
-            <label>ประเภทงาน</label>
-            <select id="jobType"></select>
-            <div class="error" id="err-jobType"></div>
-          </div>
-          <div>
-            <label>หมวดงาน</label>
-            <select id="category"></select>
-            <div class="error" id="err-category"></div>
-          </div>
-        </div>
-
-        <!-- ประเภทรายการจ่าย -->
-        <div class="row expense-only" style="display:none">
-          <div class="full">
-            <label>ประเภทรายการจ่าย</label>
-            <select id="paymentType"></select>
-            <div class="error" id="err-paymentType"></div>
-          </div>
-        </div>
-
-        <!-- Upload Slip / Receipt -->
-        <div class="row expense-only" id="filesExpense" style="display:none">
-          <div>
-            <label>สลิป</label>
-            <input type="file" id="slipExpense" multiple accept="image/*,.pdf">
-            <div class="upload-row" id="slipStatusRow">
-              <span id="slipStatus">ยังไม่ได้อัปโหลด</span>
-              <span id="slipChips"></span>
-            </div>
-          </div>
-          <div>
-            <label>ใบเสร็จ</label>
-            <input type="file" id="receiptExpense" multiple accept="image/*,.pdf">
-            <div class="upload-row" id="receiptStatusRow">
-              <span id="receiptStatus">ยังไม่ได้อัปโหลด</span>
-              <span id="receiptChips"></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- จำนวนเงิน + ผู้ดำเนินการ -->
-        <div class="row">
-          <div>
-            <label>จำนวนเงิน</label>
-            <input type="text" id="amount" required placeholder="เช่น 1200.50">
-            <div id="amountTxt" class="amount-display" style="margin-top:4px;color:#4b5563;font-size:.9rem"></div>
-            <div class="error" id="err-amount"></div>
-          </div>
-          <div>
-            <label>ผู้ดำเนินการ</label>
-            <select id="operator" required>
-              <option value="">-- เลือกผู้ดำเนินการ --</option>
-              <option>ศุภกร เจิมจรุง</option>
-              <option>กฤษณะ ทีมีศรี</option>
-              <option>สรัญรุตม์ รอบคอบ</option>
-              <option>เจทนิพัทธ์ อนุศาสนนันท์</option>
-            </select>
-            <div class="error" id="err-operator"></div>
-          </div>
-        </div>
-
-        <button type="submit" id="submitBtn" class="submit">บันทึก</button>
-      </form>
-    </div>
-  </section>
-
-<!-- ======== PART 3/7: HISTORY PAGE + DASHBOARD + POPUP ======== -->
   <!-- HISTORY PAGE -->
   <section id="history" class="page">
     <div class="card">
       <h2>ประวัติการทำรายการ</h2>
+
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
         <input type="text" id="searchBox" placeholder="ค้นหารายการ..." style="flex:2;padding:10px;border:1px solid #ccc;border-radius:8px">
         <input type="date" id="filterStart" style="padding:10px;border:1px solid #ccc;border-radius:8px">
@@ -410,12 +191,11 @@
           <option value="date_asc">วันที่ (เก่า→ใหม่)</option>
           <option value="amount_desc">จำนวนเงิน (มาก→น้อย)</option>
           <option value="amount_asc">จำนวนเงิน (น้อย→มาก)</option>
-          <option value="operator_asc">ผู้ดำเนินการ (A→Z)</option>
-          <option value="operator_desc">ผู้ดำเนินการ (Z→A)</option>
         </select>
         <button id="applyDateFilter" class="btn btn-ok">กรอง</button>
         <button id="resetDateFilter" class="btn btn-cancel">ล้าง</button>
       </div>
+
       <div id="historyList"></div>
       <div style="text-align:center;margin-top:12px">
         <button id="loadMoreBtn" class="btn btn-ok">โหลดเพิ่ม</button>
@@ -428,218 +208,114 @@
     <div class="card">
       <h2>แดชบอร์ด</h2>
       <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center">
-        <input type="date" id="dbStart" class="mini" style="padding:10px;border:1px solid #ccc;border-radius:8px">
-        <input type="date" id="dbEnd" class="mini" style="padding:10px;border:1px solid #ccc;border-radius:8px">
-        <select id="dbPreset" class="mini" style="padding:10px;border:1px solid #ccc;border-radius:8px">
-          <option value="">ตั้งค่าช่วงเวลา</option>
-          <option value="this_month">เดือนนี้</option>
-          <option value="last_month">เดือนที่แล้ว</option>
-          <option value="this_year">ปีนี้</option>
-          <option value="last_year">ปีที่แล้ว</option>
-        </select>
+        <input type="date" id="dbStart" style="padding:10px;border:1px solid #ccc;border-radius:8px">
+        <input type="date" id="dbEnd" style="padding:10px;border:1px solid #ccc;border-radius:8px">
         <button class="btn btn-ok" id="dbApply">นำไปใช้</button>
         <button class="btn btn-cancel" id="dbReset">ล้างตัวกรอง</button>
       </div>
-      <div class="crumbs" id="dbCrumbs"></div>
-      <button class="btn btn-ok btn-back" id="dbBack" style="display:none">ย้อนกลับ</button>
-
-      <div class="dash" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-        <div id="donutWrap"><canvas id="donutChart"></canvas></div>
-        <div class="summary" id="summaryBox"></div>
-      </div>
+      <div id="donutWrap"><canvas id="donutChart"></canvas></div>
+      <div id="summaryBox" style="margin-top:16px"></div>
     </div>
   </section>
 
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
-<!-- ======== PART 4/7: SCRIPT – GLOBAL, HELPERS, TABS, MODE, TAG+SUGGESTION ======== -->
 <script>
-/* ========== GLOBAL CONFIG ========== */
 const API_URL = "https://satoshi-smart-ledger.tttta2556.workers.dev/";
 let records = [], chart = null;
 let preUploaded = { slips: [], receipts: [] };
-let selectedBuildings = [];
-let buildingList = [];
+let selectedBuildings = [], buildingList = [];
 
-/* ========== HELPERS ========== */
+/* ==== HELPERS ==== */
 function ymd(d){const dt=new Date(d);return isNaN(dt)?null:dt.toISOString().slice(0,10);}
-function formatDate(d){if(!d)return"";const dt=new Date(d);if(isNaN(dt))return d;return ("0"+dt.getDate()).slice(-2)+"/"+("0"+(dt.getMonth()+1)).slice(-2)+"/"+dt.getFullYear();}
-function todayYMD(){const t=new Date();return t.toISOString().slice(0,10);}
+function formatDate(d){if(!d)return"";const dt=new Date(d);return ("0"+dt.getDate()).slice(-2)+"/"+("0"+(dt.getMonth()+1)).slice(-2)+"/"+dt.getFullYear();}
+function todayYMD(){return new Date().toISOString().slice(0,10);}
 function showPopup(m){document.getElementById("popupBox").innerText=m;document.getElementById("popup").style.display="flex";}
 function hidePopup(){document.getElementById("popup").style.display="none";}
 
-/* ========== INIT OPTIONS / RECORDS (กัน error ถ้า API ไม่ตอบ) ========== */
+/* ==== LOAD OPTIONS & RECORDS ==== */
 async function loadOptions(){
   try{
-    const r = await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"loadOptions"})});
-    const j = await r.json();
-
-    const fill = (id,arr,placeholder="-- เลือก --")=>{
-      const el = document.getElementById(id);
-      if(!el) return;
-      el.innerHTML = `<option value="">${placeholder}</option>` + (Array.isArray(arr)?arr.map(v=>`<option>${v}</option>`).join(""):"");
-    };
-
-    fill("supplierExpense", j.suppliers || [], "-- เลือกร้านค้า --");
-    fill("project", j.projects || [], "-- เลือกโครงการ --");
-    fill("jobType", j.jobTypes || [], "-- เลือกประเภทงาน --");
-    fill("category", j.categories || [], "-- เลือกหมวดงาน --");
-    fill("paymentType", j.paymentTypes || [], "-- เลือกประเภทรายการจ่าย --");
-
-    buildingList = j.buildings || [];
-
-  }catch(e){
-    // fallback เงียบๆ พร้อม default
-    ["supplierExpense","project","jobType","category","paymentType"].forEach(id=>{
+    const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"loadOptions"})});
+    const j=await r.json();
+    const fill=(id,arr,ph="-- เลือก --")=>{
       const el=document.getElementById(id);
-      if(el && el.options.length===0){
-        el.innerHTML=`<option value="">-- เลือก --</option>`;
-      }
-    });
-    if(!Array.isArray(buildingList)) buildingList=[];
-  }
+      if(!el)return;
+      el.innerHTML=`<option value="">${ph}</option>`+(arr||[]).map(v=>`<option>${v}</option>`).join("");
+    };
+    fill("supplierExpense",j.suppliers,"-- เลือกร้านค้า --");
+    fill("project",j.projects,"-- เลือกโครงการ --");
+    fill("jobType",j.jobTypes,"-- เลือกประเภทงาน --");
+    fill("category",j.categories,"-- เลือกหมวดงาน --");
+    fill("paymentType",j.paymentTypes,"-- เลือกประเภทรายการจ่าย --");
+    buildingList=j.buildings||[];
+  }catch{buildingList=[];}
 }
-
 async function loadRecords(){
   try{
-    const r = await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"list"})});
-    const j = await r.json();
-    records = Array.isArray(j.data) ? j.data : [];
-  }catch(e){
-    records = [];
-  }
+    const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"list"})});
+    const j=await r.json();
+    records=Array.isArray(j.data)?j.data:[];
+  }catch{records=[];}
 }
 
-/* ========== TABS ========== */
+/* ==== TABS ==== */
 document.querySelectorAll(".tab").forEach(b=>{
-  b.addEventListener("click",()=>{
+  b.onclick=()=>{
     document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
     document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
     document.getElementById(b.dataset.id).classList.add("active");
-    if(b.dataset.id==="history") renderHistory();
-    if(b.dataset.id==="dashboard") renderDrill();
-  });
+    if(b.dataset.id==="history")renderHistory();
+    if(b.dataset.id==="dashboard")renderDashboard();
+  };
 });
 
-/* ========== MODE TOGGLE (เบิก / จ่าย) ========== */
+/* ==== MODE TOGGLE ==== */
 function setMode(m){
-  document.getElementById("mode").value = m;
-  document.getElementById("btnIncome").classList.toggle("selected", m === "เบิก");
-  document.getElementById("btnExpense").classList.toggle("selected", m === "จ่าย");
-
-  const isIncome = m === "เบิก";
-  // ใช้ block เพื่อกัน grid แล้วยืดเต็มคอลัมน์ สเถียรกว่า ไม่เหลื่อม
-  document.querySelectorAll(".expense-only").forEach(el => el.style.display = isIncome ? "none" : "block");
-  document.getElementById("supplierExpenseWrap").style.display = isIncome ? "none" : "block";
-  document.getElementById("filesExpense").style.display = isIncome ? "none" : "block";
-  document.getElementById("itemWrap").style.display = isIncome ? "none" : "block";
-
-  const op = document.getElementById("operator");
-  if(isIncome){
-    op.value = "ศุภกร เจิมจรุง";
-    op.disabled = true;
-  } else {
-    op.disabled = false;
-    op.value = "";
-  }
-
-  selectedBuildings = [];
-  renderBuildingTags();
+  document.getElementById("mode").value=m;
+  document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก");
+  document.getElementById("btnExpense").classList.toggle("selected",m==="จ่าย");
+  const show=(m==="จ่าย");
+  document.querySelectorAll(".expense-only").forEach(el=>el.style.display=show?"block":"none");
+  document.getElementById("supplierExpenseWrap").style.display=show?"block":"none";
+  document.getElementById("filesExpense").style.display=show?"block":"none";
+  document.getElementById("itemWrap").style.display=show?"block":"none";
 }
-document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"));
-document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"));
+document.getElementById("btnIncome").onclick=()=>setMode("เบิก");
+document.getElementById("btnExpense").onclick=()=>setMode("จ่าย");
+setMode("เบิก");
 
-/* ========== BUILDING TAG + SUGGESTION ========== */
+/* ==== TAG BUILDING ==== */
 function renderBuildingTags(){
-  const box = document.getElementById("buildingTags");
-  const input = document.getElementById("buildingInput");
-  box.querySelectorAll(".tag").forEach(el => el.remove());
-  selectedBuildings.forEach((b, idx) => {
-    const tag = document.createElement("div");
-    tag.className = "tag";
-    tag.innerHTML = `${b} <button type="button" onclick="removeBuilding(${idx})">×</button>`;
-    box.insertBefore(tag, input);
+  const box=document.getElementById("buildingTags");
+  const input=document.getElementById("buildingInput");
+  box.querySelectorAll(".tag").forEach(el=>el.remove());
+  selectedBuildings.forEach((b,i)=>{
+    const tag=document.createElement("div");
+    tag.className="tag";
+    tag.innerHTML=`${b}<button type="button" onclick="removeBuilding(${i})">×</button>`;
+    box.insertBefore(tag,input);
   });
 }
-function removeBuilding(i){ selectedBuildings.splice(i,1); renderBuildingTags(); }
-
-function renderBuildingSuggestions(filter=""){
-  const list = document.getElementById("buildingSuggest");
-  list.innerHTML = "";
-  const filtered = (buildingList||[])
-    .filter(b => b.toLowerCase().includes(filter.toLowerCase()) && !selectedBuildings.includes(b))
-    .slice(0,8);
-  if(filtered.length === 0){list.style.display="none";return;}
-  filtered.forEach(b => {
-    const item = document.createElement("div");
-    item.className = "suggestion-item";
-    item.textContent = b;
-    item.addEventListener("click",()=>{
-      selectedBuildings.push(b);
-      renderBuildingTags();
-      document.getElementById("buildingInput").value="";
-      list.style.display="none";
-    });
-    list.appendChild(item);
+function removeBuilding(i){selectedBuildings.splice(i,1);renderBuildingTags();}
+function renderBuildingSuggestions(q=""){
+  const list=document.getElementById("buildingSuggest");
+  list.innerHTML="";
+  const filtered=(buildingList||[]).filter(b=>b.toLowerCase().includes(q.toLowerCase())&&!selectedBuildings.includes(b)).slice(0,8);
+  if(!filtered.length){list.style.display="none";return;}
+  filtered.forEach(b=>{
+    const it=document.createElement("div");
+    it.className="suggestion-item";it.textContent=b;
+    it.onclick=()=>{selectedBuildings.push(b);renderBuildingTags();document.getElementById("buildingInput").value="";list.style.display="none";};
+    list.appendChild(it);
   });
   list.style.display="block";
 }
-
-document.getElementById("buildingInput").addEventListener("input",e=>{
-  renderBuildingSuggestions(e.target.value.trim());
-});
-document.getElementById("buildingInput").addEventListener("keydown",e=>{
-  if(e.key==="Enter" && e.target.value.trim()!==""){
-    e.preventDefault();
-    const v = e.target.value.trim();
-    if(!selectedBuildings.includes(v)) selectedBuildings.push(v);
-    e.target.value="";
-    renderBuildingTags();
-    document.getElementById("buildingSuggest").style.display="none";
-  }
-});
-document.addEventListener("click",e=>{
-  const box=document.getElementById("buildingTags");
-  if(!box.contains(e.target)) document.getElementById("buildingSuggest").style.display="none";
-});
-document.getElementById("addBuildingBtn").addEventListener("click",async()=>{
-  const val = prompt("กรอกชื่ออาคารใหม่");
-  if(val){
-    try{
-      await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})});
-      await loadOptions();
-    }catch(e){}
-    if(!selectedBuildings.includes(val)){selectedBuildings.push(val);renderBuildingTags();}
-  }
-});
-
-/* ========== DASHBOARD DUMMY (กัน error) ========== */
-function renderDrill(){
-  // ฟังก์ชัน placeholder ป้องกัน error ถ้ายังไม่ได้ทำแดชบอร์ดจริง
-  try{
-    const ctx = document.getElementById("donutChart");
-    if(!ctx) return;
-    if(chart){ chart.destroy(); }
-    const totalIncome = records.filter(r=>r.mode==="เบิก").reduce((s,r)=>s+Math.abs(+r.amount||0),0);
-    const totalExpense = records.filter(r=>r.mode==="จ่าย").reduce((s,r)=>s+Math.abs(+r.amount||0),0);
-    chart = new Chart(ctx,{type:"doughnut",data:{labels:["เบิก","จ่าย"],datasets:[{data:[totalIncome,totalExpense]}]}}); // ใช้สี default ของ Chart.js
-    document.getElementById("summaryBox").innerHTML =
-      `<div><b>รวมเบิก:</b> ${totalIncome.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท</div>
-       <div><b>รวมจ่าย:</b> ${totalExpense.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท</div>`;
-  }catch(e){}
-}
-
-/* ========== FIRST LOAD ========== */
-document.addEventListener("DOMContentLoaded", async ()=>{
-  // กันเหลื่อม: ใส่ค่าเริ่มต้นและโหลดออปชันก่อน
-  setMode("เบิก");
-  const dateEl = document.getElementById("date");
-  if(dateEl && !dateEl.value) dateEl.value = todayYMD();
-  await loadOptions();
-  await loadRecords();
-});
-</script>
-<!-- ======== PART 5/7: VALIDATION + UPLOAD + SUBMIT (Split per building, decimal safe) ======== -->
+document.getElementById("buildingInput").oninput=e=>renderBuildingSuggestions(e.target.value.trim());
+document.getElementById("buildingInput").onkeydown=e=>{
+  if(e.key==="Enter"&&e.target.value.trim()!==""){e.preventDefault();const v=e.target.value.trim();if(!selectedBuildings.includes(v))selectedBuildings.push(v);e.target.value="";renderBuildingTags();document.getElementById("buildingSuggest").style.display="none";}
+};
+document.addEventListener("click",e=>{const box=document.getElementById("buildingTags");if(!box.contains(e.target))document.getElementById("buildingSuggest").style.display="none";});
 <script>
 /* ========== VALIDATION ========== */
 function clearErrors(){
@@ -651,7 +327,6 @@ function showError(inputId,msg){
   const err=document.getElementById("err-"+inputId);
   if(err) err.textContent=msg||"กรอกข้อมูลให้ครบ";
   if(el) el.classList.add("error-input");
-  // เลื่อนเฉพาะในหน้าปัจจุบัน ลดการสั่นของ layout
   if(el && el.scrollIntoView) el.scrollIntoView({behavior:"smooth",block:"center"});
 }
 function validateForm(){
@@ -664,7 +339,7 @@ function validateForm(){
   const operator=document.getElementById("operator").value;
 
   if(!date){showError("date","กรุณาเลือกวันที่");ok=false;}
-  if(isNaN(amount)){showError("amount","กรุณากรอกจำนวนเงิน");ok=false;}
+  if(isNaN(amount)){showError("amount","กรุณากรอกจำนวนเงินให้ถูกต้อง");ok=false;}
   if(!operator){showError("operator","กรุณาเลือกผู้ดำเนินการ");ok=false;}
 
   if(mode==="จ่าย"){
@@ -730,7 +405,6 @@ async function preUpload(inputEl,type){
   statusEl.textContent="อัปโหลดเสร็จสิ้น";
   return urls;
 }
-
 document.getElementById("slipExpense").addEventListener("change",async e=>{
   try{preUploaded.slips=await preUpload(e.target,"slip");}
   catch{document.getElementById("slipStatus").textContent="อัปโหลดล้มเหลว";}
@@ -740,7 +414,7 @@ document.getElementById("receiptExpense").addEventListener("change",async e=>{
   catch{document.getElementById("receiptStatus").textContent="อัปโหลดล้มเหลว";}
 });
 
-/* ========== SUBMIT (แยกบันทึกตามอาคาร, ไม่ปัดทศนิยมก่อนส่ง) ========== */
+/* ========== SUBMIT (แยกต่ออาคาร, ไม่ปัดทศนิยมก่อนส่ง) ========== */
 document.getElementById("form").addEventListener("submit",async e=>{
   e.preventDefault();
   if(!validateForm()) return;
@@ -771,7 +445,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
         operator,slips,receipts
       });
     }
-  } else {
+  }else{
     payloads.push({
       mode,date,
       item:(mode==="จ่าย")?document.getElementById("item").value:"",
@@ -799,12 +473,11 @@ document.getElementById("form").addEventListener("submit",async e=>{
     // Reset form
     document.getElementById("form").reset();
     preUploaded={slips:[],receipts:[]};
-    document.getElementById("slipStatus").textContent="ยังไม่ได้อัปโหลด";
-    document.getElementById("receiptStatus").textContent="ยังไม่ได้อัปโหลด";
-    document.getElementById("slipChips").innerHTML="";
-    document.getElementById("receiptChips").innerHTML="";
+    ["slipStatus","receiptStatus"].forEach(id=>document.getElementById(id).textContent="ยังไม่ได้อัปโหลด");
+    ["slipChips","receiptChips"].forEach(id=>document.getElementById(id).innerHTML="");
     selectedBuildings=[]; renderBuildingTags();
     setMode("เบิก");
+
     await loadOptions();
     await loadRecords();
   }catch(err){
@@ -813,86 +486,91 @@ document.getElementById("form").addEventListener("submit",async e=>{
     setTimeout(hidePopup,1500);
   }
 });
+
+/* ========== FIRST LOAD ========== */
+document.addEventListener("DOMContentLoaded", async ()=>{
+  const dateEl=document.getElementById("date");
+  if(dateEl && !dateEl.value) dateEl.value=todayYMD();
+  await loadOptions();
+  await loadRecords();
+});
 </script>
-<!-- ======== PART 6/7: HISTORY LOGIC (Filter + Sort + Date Range) ======== -->
 <script>
-let historyPage = { page: 1, perPage: 12, filtered: [] };
+let historyPage={page:1,perPage:12,filtered:[]};
 
-function applyFilters() {
-  const q = (document.getElementById("searchBox").value||"").toLowerCase();
-  const mode = document.getElementById("filterMode").value;
-  const sort = document.getElementById("sortBy").value;
-  const startDate = document.getElementById("filterStart").value;
-  const endDate = document.getElementById("filterEnd").value;
+/* ===== FILTER ===== */
+function applyFilters(){
+  const q=(document.getElementById("searchBox").value||"").toLowerCase();
+  const mode=document.getElementById("filterMode").value;
+  const sort=document.getElementById("sortBy").value;
+  const startDate=document.getElementById("filterStart").value;
+  const endDate=document.getElementById("filterEnd").value;
 
-  let arr = records.filter(r => {
-    const s = [r.id, r.item, r.supplier, r.project, r.building, r.operator].join(" ").toLowerCase();
-    if (q && !s.includes(q)) return false;
-    if (mode && r.mode !== mode) return false;
-
-    const d = ymd(r.date);
-    if (startDate && (!d || d < startDate)) return false;
-    if (endDate && (!d || d > endDate)) return false;
-
+  let arr=(records||[]).filter(r=>{
+    const s=[r.id,r.item,r.supplier,r.project,r.building,r.operator].join(" ").toLowerCase();
+    if(q && !s.includes(q)) return false;
+    if(mode && r.mode!==mode) return false;
+    const d=ymd(r.date);
+    if(startDate && (!d || d<startDate)) return false;
+    if(endDate && (!d || d>endDate)) return false;
     return true;
   });
 
-  if (sort === "date_desc") arr.sort((a,b)=>new Date(b.date)-new Date(a.date));
-  if (sort === "date_asc") arr.sort((a,b)=>new Date(a.date)-new Date(b.date));
-  if (sort === "amount_desc") arr.sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount));
-  if (sort === "amount_asc") arr.sort((a,b)=>Math.abs(a.amount)-Math.abs(b.amount));
-  if (sort === "operator_asc") arr.sort((a,b)=>String(a.operator).localeCompare(String(b.operator)));
-  if (sort === "operator_desc") arr.sort((a,b)=>String(b.operator).localeCompare(String(a.operator)));
+  if(sort==="date_desc") arr.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(sort==="date_asc") arr.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(sort==="amount_desc") arr.sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount));
+  if(sort==="amount_asc") arr.sort((a,b)=>Math.abs(a.amount)-Math.abs(b.amount));
 
-  historyPage.filtered = arr;
-  historyPage.page = 1;
+  historyPage.filtered=arr;
+  historyPage.page=1;
   renderHistoryStatement();
 }
 
-function renderHistoryStatement() {
-  const list = document.getElementById("historyList");
-  list.innerHTML = "";
-  const end = historyPage.page * historyPage.perPage;
-  const show = historyPage.filtered.slice(0, end);
+/* ===== RENDER HISTORY ===== */
+function renderHistoryStatement(){
+  const list=document.getElementById("historyList");
+  list.innerHTML="";
+  const end=historyPage.page*historyPage.perPage;
+  const show=historyPage.filtered.slice(0,end);
 
-  const groups = {};
-  show.forEach(r => {
-    const k = ymd(r.date) || "";
-    if (!groups[k]) groups[k] = [];
+  const groups={};
+  show.forEach(r=>{
+    const k=ymd(r.date)||"";
+    if(!groups[k]) groups[k]=[];
     groups[k].push(r);
   });
 
-  Object.keys(groups).sort((a,b)=>new Date(b)-new Date(a)).forEach(d => {
-    const header = document.createElement("div");
-    header.className = "date-header";
-    header.textContent = formatDate(d);
-    header.style.fontWeight = "600";
-    header.style.marginTop = "16px";
+  Object.keys(groups).sort((a,b)=>new Date(b)-new Date(a)).forEach(d=>{
+    const header=document.createElement("div");
+    header.className="date-header";
+    header.textContent=formatDate(d);
+    header.style.fontWeight="600";
+    header.style.marginTop="16px";
     list.appendChild(header);
 
-    groups[d].forEach(r => {
-      const isIncome = r.mode === "เบิก";
-      const sign = isIncome ? "+" : "-";
-      const money = `${sign}${Math.abs(Number(r.amount)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
+    groups[d].forEach(r=>{
+      const isIncome=r.mode==="เบิก";
+      const sign=isIncome?"+":"-";
+      const money=`${sign}${Math.abs(Number(r.amount)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
 
-      const card = document.createElement("div");
-      card.className = "history-card";
-      card.style.borderLeft = `6px solid ${isIncome ? "#06c755" : "#d93025"}`;
-      card.style.background = "#fff";
-      card.style.margin = "8px 0";
-      card.style.borderRadius = "10px";
-      card.style.padding = "12px 16px";
-      card.style.boxShadow = "0 2px 6px rgba(0,0,0,0.05)";
-      card.style.transition = "0.2s";
+      const card=document.createElement("div");
+      card.className="history-card";
+      card.style.borderLeft=`6px solid ${isIncome?"#06c755":"#d93025"}`;
+      card.style.background="#fff";
+      card.style.margin="8px 0";
+      card.style.borderRadius="10px";
+      card.style.padding="12px 16px";
+      card.style.boxShadow="0 2px 6px rgba(0,0,0,0.05)";
+      card.style.transition="0.2s";
 
-      const slipsArr = (r.slips ? String(r.slips).split(",").filter(Boolean) : []);
-      const receiptsArr = (r.receipts ? String(r.receipts).split(",").filter(Boolean) : []);
-      const attChips = [
+      const slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[]);
+      const receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[]);
+      const attChips=[
         ...slipsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank">สลิป${slipsArr.length>1?(" "+(i+1)):""}</a>`),
         ...receiptsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank">ใบเสร็จ${receiptsArr.length>1?(" "+(i+1)):""}</a>`)
       ].join(" ");
 
-      card.innerHTML = `
+      card.innerHTML=`
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
           <div class="history-id" style="font-weight:600;color:#111">${r.id||"-"}</div>
           <div class="history-amount" style="font-weight:700;color:${isIncome?'#16a34a':'#dc2626'}">${money}</div>
@@ -903,19 +581,18 @@ function renderHistoryStatement() {
           <div><b>โครงการ:</b> ${r.project||"-"} | <b>อาคาร:</b> ${r.building||"-"}</div>
           <div><b>ประเภทงาน:</b> ${r.jobType||"-"} | <b>หมวดงาน:</b> ${r.category||"-"}</div>
           <div><b>ประเภทรายการจ่าย:</b> ${r.paymentType||"-"}</div>
-          ${attChips ? `<div class="history-files" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${attChips}</div>` : ""}
+          ${attChips?`<div class="history-files" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">${attChips}</div>`:""}
         </div>
       `;
-
-      const detail = card.querySelector(".history-detail");
-      card.addEventListener("click",()=>{ detail.style.display = (detail.style.display==="block"?"none":"block"); });
+      const detail=card.querySelector(".history-detail");
+      card.addEventListener("click",()=>{detail.style.display=(detail.style.display==="block"?"none":"block");});
       card.addEventListener("mouseover",()=>card.style.background="#f9fafb");
       card.addEventListener("mouseout",()=>card.style.background="#fff");
       list.appendChild(card);
     });
   });
 
-  document.getElementById("loadMoreBtn").style.display = (historyPage.filtered.length > end) ? "inline-block" : "none";
+  document.getElementById("loadMoreBtn").style.display=(historyPage.filtered.length> end)?"inline-block":"none";
 }
 
 /* ===== BUTTONS ===== */
@@ -928,80 +605,112 @@ document.getElementById("resetDateFilter").addEventListener("click",()=>{
 document.getElementById("searchBox").addEventListener("input",applyFilters);
 document.getElementById("filterMode").addEventListener("change",applyFilters);
 document.getElementById("sortBy").addEventListener("change",applyFilters);
-document.getElementById("loadMoreBtn").addEventListener("click",()=>{ historyPage.page++; renderHistoryStatement(); });
-function renderHistory(){ applyFilters(); }
-</script>
-<!-- ======== PART 7/7: AMOUNT INPUT HANDLER (Auto comma + dot allowed + always 2 decimals) ======== -->
-<script>
-const amountEl = document.getElementById("amount");
-const amountTxt = document.getElementById("amountTxt");
+document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage.page++;renderHistoryStatement();});
+function renderHistory(){applyFilters();}
 
-/* ===== แปลงตัวเลขเป็นข้อความไทย ===== */
-function thaiMoneyText(intPart, decPart){
-  const t = ["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"];
-  const u = ["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"];
+/* ===== DASHBOARD (Donut + Summary) ===== */
+function renderDashboard(){
+  try{
+    const ctx=document.getElementById("donutChart");
+    if(!ctx) return;
+    if(chart) chart.destroy();
+
+    const start=document.getElementById("dbStart").value;
+    const end=document.getElementById("dbEnd").value;
+
+    const inRange = (r)=>{
+      const d=ymd(r.date);
+      if(start && (!d||d<start)) return false;
+      if(end && (!d||d>end)) return false;
+      return true;
+    };
+    const rows=records.filter(inRange);
+
+    const totalIncome=rows.filter(r=>r.mode==="เบิก").reduce((s,r)=>s+Math.abs(+r.amount||0),0);
+    const totalExpense=rows.filter(r=>r.mode==="จ่าย").reduce((s,r)=>s+Math.abs(+r.amount||0),0);
+
+    chart=new Chart(ctx,{
+      type:"doughnut",
+      data:{labels:["เบิก","จ่าย"],datasets:[{data:[totalIncome,totalExpense]}]},
+      options:{responsive:true,maintainAspectRatio:false}
+    });
+
+    document.getElementById("summaryBox").innerHTML=
+      `<div><b>รวมเบิก:</b> ${totalIncome.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท</div>
+       <div><b>รวมจ่าย:</b> ${totalExpense.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท</div>`;
+  }catch(e){}
+}
+document.getElementById("dbApply").addEventListener("click",renderDashboard);
+document.getElementById("dbReset").addEventListener("click",()=>{
+  document.getElementById("dbStart").value="";
+  document.getElementById("dbEnd").value="";
+  renderDashboard();
+});
+</script>
+<script>
+const amountEl=document.getElementById("amount");
+const amountTxt=document.getElementById("amountTxt");
+
+/* ===== THAI MONEY TEXT ===== */
+function thaiMoneyText(intPart,decPart){
+  const t=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"];
+  const u=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"];
   function readNum(num){
     if(!num || +num===0) return "";
-    let s = "", arr = String(+num).split("").reverse();
+    let s="",arr=String(+num).split("").reverse();
     for(let i=arr.length-1;i>=0;i--){
-      const n = +arr[i];
-      if(n !== 0){
-        if(i === 1 && n === 1) s += "สิบ";
-        else if(i === 1 && n === 2) s += "ยี่สิบ";
-        else if(i === 0 && n === 1 && arr.length > 1) s += "เอ็ด";
-        else s += t[n] + u[i];
+      const n=+arr[i];
+      if(n!==0){
+        if(i===1 && n===1) s+="สิบ";
+        else if(i===1 && n===2) s+="ยี่สิบ";
+        else if(i===0 && n===1 && arr.length>1) s+="เอ็ด";
+        else s+=t[n]+u[i];
       }
     }
     return s;
   }
-  let bahtPart = (intPart && +intPart>0) ? readNum(intPart) + "บาท" : "ศูนย์บาท";
-  let satangPart = (decPart && parseInt(decPart)>0) ? readNum(decPart) + "สตางค์" : "ถ้วน";
-  return bahtPart + satangPart;
+  const baht=(intPart && +intPart>0)?readNum(intPart)+"บาท":"ศูนย์บาท";
+  const st=(decPart && parseInt(decPart)>0)?readNum(decPart)+"สตางค์":"ถ้วน";
+  return baht+st;
 }
 
-/* ===== จัดรูปแบบขณะพิมพ์ (รับ . ได้, ใส่คอมมาอัตโนมัติ) ===== */
-amountEl.addEventListener("input", () => {
-  // เก็บตำแหน่งเคอร์เซอร์ก่อนปรับรูปแบบ เพื่อให้เคอร์เซอร์ไม่กระโดด
-  const start = amountEl.selectionStart;
-  const end = amountEl.selectionEnd;
+/* ===== FORMAT ON INPUT (allow dot, auto comma) ===== */
+amountEl.addEventListener("input",()=>{
+  const start=amountEl.selectionStart;
+  const end=amountEl.selectionEnd;
 
-  // รับเฉพาะตัวเลขและจุดทศนิยม
-  let raw = amountEl.value.replace(/[^\d.]/g, "");
-  const parts = raw.split(".");
-  if (parts.length > 2) raw = parts[0] + "." + parts.slice(1).join(""); // กันหลายจุด
+  let raw=amountEl.value.replace(/[^\d.]/g,"");
+  const parts=raw.split(".");
+  if(parts.length>2) raw=parts[0]+"."+parts.slice(1).join("");
 
-  let [intPart, decPart=""] = raw.split(".");
-  // ตัด 0 นำหน้าที่เกิน (ยกเว้น "0")
-  if(intPart.length>1) intPart = intPart.replace(/^0+(?=\d)/, "");
-  const intWithComma = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  let [intPart,decPart=""]=raw.split(".");
+  if(intPart.length>1) intPart=intPart.replace(/^0+(?=\d)/,"");
+  const intWithComma=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,",");
 
-  amountEl.value = decPart !== "" ? `${intWithComma}.${decPart}` : intWithComma;
+  amountEl.value = decPart!=="" ? `${intWithComma}.${decPart}` : intWithComma;
 
-  // อัปเดตคำอ่านไทยแบบตามค่าที่มี
-  const num = parseFloat(raw);
+  const num=parseFloat(raw);
   if(!isNaN(num)){
-    const [i, d] = num.toFixed(2).split(".");
-    amountTxt.textContent = "(" + thaiMoneyText(i, d) + ")";
+    const [i,d]=num.toFixed(2).split(".");
+    amountTxt.textContent="("+thaiMoneyText(i,d)+")";
   }else{
-    amountTxt.textContent = "";
+    amountTxt.textContent="";
   }
 
-  // พยายามคืนตำแหน่งเคอร์เซอร์เดิมเท่าที่ทำได้
-  try{ amountEl.setSelectionRange(start, end); }catch(_){}
+  try{amountEl.setSelectionRange(start,end);}catch(_){}
 });
 
-/* ===== เมื่อออกจากช่อง (blur) => บังคับ 2 ตำแหน่งเสมอ ===== */
-amountEl.addEventListener("blur", () => {
-  const raw = amountEl.value.replace(/,/g, "");
-  const num = parseFloat(raw);
-  if (!isNaN(num)) {
-    const formatted = num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-    amountEl.value = formatted;
-    const [i, d] = num.toFixed(2).split(".");
-    amountTxt.textContent = "(" + thaiMoneyText(i, d) + ")";
-  } else {
-    amountEl.value = "";
-    amountTxt.textContent = "";
+/* ===== ON BLUR => ALWAYS 2 DECIMALS ===== */
+amountEl.addEventListener("blur",()=>{
+  const raw=amountEl.value.replace(/,/g,"");
+  const num=parseFloat(raw);
+  if(!isNaN(num)){
+    amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+    const [i,d]=num.toFixed(2).split(".");
+    amountTxt.textContent="("+thaiMoneyText(i,d)+")";
+  }else{
+    amountEl.value="";
+    amountTxt.textContent="";
   }
 });
 </script>
