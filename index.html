@@ -226,252 +226,174 @@
     </div>
   </section>
 <!-- ======== END PART 2/7 ======== -->
-<!-- ======== PART 3/7 (UPDATED HISTORY + DASHBOARD UI) ======== -->
+<!-- ======== PART 3 (UPDATED HISTORY UI + DATE FILTER + CLEAN TEXT) ======== -->
 
-  <!-- HISTORY PAGE -->
-  <section id="history" class="page">
-    <div class="card">
-      <h2>ประวัติการทำรายการ</h2>
+<section id="history" class="page">
+  <div class="card">
+    <h2>ประวัติการทำรายการ</h2>
 
-      <!-- Filters bar -->
-      <div class="filter-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center;">
-        <input 
-          type="text" 
-          id="searchBox" 
-          placeholder="🔍 ค้นหารายการ..." 
-          style="flex:2;padding:10px 14px;border:1px solid #ccc;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,0.05);transition:.2s"
-        >
-        <select id="filterMode" style="flex:1;padding:10px 14px;border:1px solid #ccc;border-radius:10px;cursor:pointer;">
-          <option value="">ทั้งหมด</option>
-          <option value="เบิก">เบิก</option>
-          <option value="จ่าย">จ่าย</option>
-        </select>
-        <select id="sortBy" style="flex:1;padding:10px 14px;border:1px solid #ccc;border-radius:10px;cursor:pointer;">
-          <option value="date_desc">วันที่ (ใหม่ → เก่า)</option>
-          <option value="date_asc">วันที่ (เก่า → ใหม่)</option>
-          <option value="amount_desc">จำนวนเงิน (มาก → น้อย)</option>
-          <option value="amount_asc">จำนวนเงิน (น้อย → มาก)</option>
-          <option value="operator_asc">ผู้ดำเนินการ (A → Z)</option>
-          <option value="operator_desc">ผู้ดำเนินการ (Z → A)</option>
-        </select>
-      </div>
-
-      <!-- History list -->
-      <div id="historyList" style="margin-top:10px"></div>
-
-      <!-- Load more -->
-      <div style="text-align:center;margin-top:20px">
-        <button id="loadMoreBtn" class="btn-ok" style="padding:12px 22px;font-size:1rem;border-radius:10px;box-shadow:0 3px 8px rgba(0,0,0,.12);">
-          ⬇ โหลดเพิ่ม
-        </button>
-      </div>
+    <!-- Filters bar -->
+    <div class="filter-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center;">
+      <input type="text" id="searchBox" placeholder="ค้นหารายการ..." 
+             style="flex:2;padding:10px 14px;border:1px solid #ccc;border-radius:10px;">
+      <select id="filterMode" style="flex:1;padding:10px 14px;border:1px solid #ccc;border-radius:10px;cursor:pointer;">
+        <option value="">ทั้งหมด</option>
+        <option value="เบิก">เบิก</option>
+        <option value="จ่าย">จ่าย</option>
+      </select>
+      <select id="sortBy" style="flex:1;padding:10px 14px;border:1px solid #ccc;border-radius:10px;cursor:pointer;">
+        <option value="date_desc">วันที่ (ใหม่ → เก่า)</option>
+        <option value="date_asc">วันที่ (เก่า → ใหม่)</option>
+        <option value="amount_desc">จำนวนเงิน (มาก → น้อย)</option>
+        <option value="amount_asc">จำนวนเงิน (น้อย → มาก)</option>
+        <option value="operator_asc">ผู้ดำเนินการ (A → Z)</option>
+        <option value="operator_desc">ผู้ดำเนินการ (Z → A)</option>
+      </select>
     </div>
-  </section>
 
-  <!-- DASHBOARD PAGE -->
-  <section id="dashboard" class="page">
-    <div class="card">
-      <h2>แดชบอร์ด</h2>
-
-      <!-- Filters -->
-      <div class="filter-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center;">
-        <input type="date" id="dbStart" class="mini" style="padding:9px 12px;border-radius:10px;border:1px solid #ccc;">
-        <input type="date" id="dbEnd" class="mini" style="padding:9px 12px;border-radius:10px;border:1px solid #ccc;">
-        <select id="dbPreset" class="mini" style="padding:9px 12px;border-radius:10px;border:1px solid #ccc;">
-          <option value="">ตั้งค่าช่วงเวลา</option>
-          <option value="this_month">เดือนนี้</option>
-          <option value="last_month">เดือนที่แล้ว</option>
-          <option value="this_year">ปีนี้</option>
-          <option value="last_year">ปีที่แล้ว</option>
-        </select>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn-apply" id="dbApply">✅ นำไปใช้</button>
-          <button class="btn" id="dbReset">🔄 ล้างตัวกรอง</button>
-        </div>
-      </div>
-
-      <!-- Breadcrumbs -->
-      <div class="crumbs" id="dbCrumbs" style="margin-bottom:12px;"></div>
-      <button class="btn-back" id="dbBack" style="display:none;margin-bottom:12px;">← ย้อนกลับ</button>
-
-      <!-- Dashboard Layout -->
-      <div class="dash" style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;justify-content:center;">
-        <div id="donutWrap">
-          <canvas id="donutChart" style="max-width:420px;max-height:420px;"></canvas>
-        </div>
-        <div class="summary" id="summaryBox" 
-          style="min-width:300px;max-width:520px;flex:1;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:20px;">
-        </div>
-      </div>
+    <!-- New: Date Range Filter -->
+    <div class="filter-date" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+      <input type="date" id="filterDateStart" style="padding:10px 14px;border-radius:10px;border:1px solid #ccc;">
+      <input type="date" id="filterDateEnd" style="padding:10px 14px;border-radius:10px;border:1px solid #ccc;">
+      <button id="applyDateFilter" class="btn-ok" style="padding:10px 16px;border-radius:10px;border:none;cursor:pointer;">
+        กรองช่วงวันที่
+      </button>
+      <button id="clearDateFilter" class="btn" style="padding:10px 16px;border-radius:10px;border:none;cursor:pointer;">
+        ล้างตัวกรองวันที่
+      </button>
     </div>
-  </section>
-<!-- ======== END PART 3/7 ======== -->
-<!-- ======== PART 4/7 (JS INTERACTION FOR HISTORY & DASHBOARD) ======== -->
+
+    <!-- History list -->
+    <div id="historyList" style="margin-top:10px"></div>
+
+    <div style="text-align:center;margin-top:20px">
+      <button id="loadMoreBtn" class="btn-ok" style="padding:12px 22px;font-size:1rem;border-radius:10px;">
+        โหลดเพิ่ม
+      </button>
+    </div>
+  </div>
+</section>
+<!-- ======== PART 4 (UPDATED HISTORY LOGIC: NO ID LABEL, DATE FILTER) ======== -->
 
 <script>
-/* ========== HISTORY PAGE INTERACTION ========== */
-let historyPage = { page: 1, perPage: 12, filtered: [] }
+let historyPage = { page: 1, perPage: 12, filtered: [] };
+let filterStart = null, filterEnd = null;
 
 function applyFilters() {
-  const q = document.getElementById("searchBox").value.toLowerCase()
-  const mode = document.getElementById("filterMode").value
-  const sort = document.getElementById("sortBy").value
+  const q = document.getElementById("searchBox").value.toLowerCase();
+  const mode = document.getElementById("filterMode").value;
+  const sort = document.getElementById("sortBy").value;
 
   let arr = records.filter(r => {
-    const s = [r.id, r.item, r.supplier, r.project, r.building, r.operator].join(" ").toLowerCase()
-    if (q && !s.includes(q)) return false
-    if (mode && r.mode !== mode) return false
-    return true
-  })
+    const s = [r.id, r.item, r.supplier, r.project, r.building, r.operator].join(" ").toLowerCase();
+    if (q && !s.includes(q)) return false;
+    if (mode && r.mode !== mode) return false;
 
-  if (sort === "date_desc") arr.sort((a, b) => new Date(b.date) - new Date(a.date))
-  if (sort === "date_asc") arr.sort((a, b) => new Date(a.date) - new Date(b.date))
-  if (sort === "amount_desc") arr.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount))
-  if (sort === "amount_asc") arr.sort((a, b) => Math.abs(a.amount) - Math.abs(b.amount))
-  if (sort === "operator_asc") arr.sort((a, b) => String(a.operator).localeCompare(String(b.operator)))
-  if (sort === "operator_desc") arr.sort((a, b) => String(b.operator).localeCompare(String(a.operator)))
+    // กรองตามช่วงวัน
+    const recDate = new Date(r.date);
+    if (filterStart && recDate < new Date(filterStart)) return false;
+    if (filterEnd && recDate > new Date(filterEnd)) return false;
 
-  historyPage.filtered = arr
-  historyPage.page = 1
-  renderHistoryStatement(true)
+    return true;
+  });
+
+  if (sort === "date_desc") arr.sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (sort === "date_asc") arr.sort((a, b) => new Date(a.date) - new Date(b.date));
+  if (sort === "amount_desc") arr.sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
+  if (sort === "amount_asc") arr.sort((a, b) => Math.abs(a.amount) - Math.abs(b.amount));
+  if (sort === "operator_asc") arr.sort((a, b) => String(a.operator).localeCompare(String(b.operator)));
+  if (sort === "operator_desc") arr.sort((a, b) => String(b.operator).localeCompare(String(a.operator)));
+
+  historyPage.filtered = arr;
+  historyPage.page = 1;
+  renderHistoryStatement(true);
 }
 
 function renderHistoryStatement(smooth = false) {
-  const list = document.getElementById("historyList")
-  list.style.opacity = "0"
-  setTimeout(() => {
-    list.innerHTML = ""
-    const end = historyPage.page * historyPage.perPage
-    const show = historyPage.filtered.slice(0, end)
-    const groups = {}
-    show.forEach(r => {
-      const k = ymd(r.date) || ""
-      if (!groups[k]) groups[k] = []
-      groups[k].push(r)
-    })
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+  const end = historyPage.page * historyPage.perPage;
+  const show = historyPage.filtered.slice(0, end);
+  const groups = {};
 
-    const today = todayYMD()
-    Object.keys(groups).sort((a, b) => new Date(b) - new Date(a)).forEach(d => {
-      const title = (d === today) ? "วันนี้" : formatDate(d)
-      const header = document.createElement("div")
-      header.className = "date-header"
-      header.textContent = title
-      header.style = "margin:16px 0 8px;font-weight:700;font-size:1.05rem;color:#333;"
-      list.appendChild(header)
+  show.forEach(r => {
+    const k = ymd(r.date) || "";
+    if (!groups[k]) groups[k] = [];
+    groups[k].push(r);
+  });
 
-      groups[d].forEach(r => {
-        const isIncome = r.mode === "เบิก"
-        const sign = isIncome ? "+" : "-"
-        const money = `${sign}${Math.abs(Number(r.amount) || 0).toLocaleString()} บาท`
-        const card = document.createElement("div")
-        card.className = "history-card"
-        card.style = `
-          background:#fff;
-          border-left:6px solid ${isIncome ? "#06c755" : "#d93025"};
-          border-radius:10px;
-          box-shadow:0 2px 8px rgba(0,0,0,0.05);
-          padding:12px 16px;
-          margin-bottom:10px;
-          transition:.2s;
-          cursor:pointer;
-        `
-        card.addEventListener("mouseenter", () => card.style.transform = "scale(1.01)")
-        card.addEventListener("mouseleave", () => card.style.transform = "scale(1)")
+  const today = todayYMD();
+  Object.keys(groups).sort((a, b) => new Date(b) - new Date(a)).forEach(d => {
+    const title = (d === today) ? "วันนี้" : formatDate(d);
+    const header = document.createElement("div");
+    header.className = "date-header";
+    header.textContent = title;
+    header.style = "margin:16px 0 8px;font-weight:700;font-size:1.05rem;color:#333;";
+    list.appendChild(header);
 
-        const slipsArr = (r.slips ? String(r.slips).split(",").filter(Boolean) : [])
-        const receiptsArr = (r.receipts ? String(r.receipts).split(",").filter(Boolean) : [])
-        const attChips = [
-          ...slipsArr.map((u, i) => `<a class="chip" href="${u}" target="_blank"><i>🔗</i>สลิป${slipsArr.length > 1 ? (" " + (i + 1)) : ""}</a>`),
-          ...receiptsArr.map((u, i) => `<a class="chip" href="${u}" target="_blank"><i>📄</i>ใบเสร็จ${receiptsArr.length > 1 ? (" " + (i + 1)) : ""}</a>`)
-        ].join(" ")
+    groups[d].forEach(r => {
+      const isIncome = r.mode === "เบิก";
+      const money = `${(isIncome ? "" : "-")}${Math.abs(Number(r.amount) || 0).toLocaleString()} บาท`;
 
-        card.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <div><b>ID:</b> ${r.id || "-"} • ${formatDate(r.date)} (${r.mode})</div>
-            <div style="font-weight:700;color:${isIncome ? "#06c755" : "#d93025"};">${money}</div>
-          </div>
-          <div>${r.item || "-"}</div>
-          <div style="color:#666;font-size:.9rem;margin-top:4px;">ผู้ดำเนินการ: ${r.operator || "-"}</div>
-          <div style="margin-top:6px;color:#555;font-size:.9rem;">
-            <b>โครงการ:</b> ${r.project || "-"} | <b>อาคาร:</b> ${r.building || "-"}<br>
-            <b>ประเภทงาน:</b> ${r.jobType || "-"} | <b>หมวดงาน:</b> ${r.category || "-"}<br>
-            <b>ประเภทรายการจ่าย:</b> ${r.paymentType || "-"}
-            ${attChips ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${attChips}</div>` : ""}
-          </div>
-        `
-        list.appendChild(card)
-      })
-    })
-    document.getElementById("loadMoreBtn").style.display = (historyPage.filtered.length > end) ? "inline-block" : "none"
-    list.style.opacity = "1"
-    if (smooth) list.scrollIntoView({ behavior: "smooth", block: "start" })
-  }, 100)
-}
+      const card = document.createElement("div");
+      card.className = "history-card";
+      card.style = `
+        background:#fff;
+        border-left:6px solid ${isIncome ? "#06c755" : "#d93025"};
+        border-radius:10px;
+        box-shadow:0 2px 8px rgba(0,0,0,0.05);
+        padding:12px 16px;
+        margin-bottom:10px;
+        transition:.2s;
+        cursor:pointer;
+      `;
 
-document.getElementById("searchBox").addEventListener("input", applyFilters)
-document.getElementById("filterMode").addEventListener("change", applyFilters)
-document.getElementById("sortBy").addEventListener("change", applyFilters)
-document.getElementById("loadMoreBtn").addEventListener("click", () => {
-  historyPage.page++
-  renderHistoryStatement(true)
-})
+      const slipsArr = (r.slips ? String(r.slips).split(",").filter(Boolean) : []);
+      const receiptsArr = (r.receipts ? String(r.receipts).split(",").filter(Boolean) : []);
+      const attChips = [
+        ...slipsArr.map((u, i) => `<a class="chip" href="${u}" target="_blank">ดูสลิป${slipsArr.length > 1 ? (" " + (i + 1)) : ""}</a>`),
+        ...receiptsArr.map((u, i) => `<a class="chip" href="${u}" target="_blank">ดูใบเสร็จ${receiptsArr.length > 1 ? (" " + (i + 1)) : ""}</a>`)
+      ].join(" ");
 
-function renderHistory() { applyFilters() }
-
-/* ========== DASHBOARD PAGE INTERACTION ========== */
-function renderDrill() {
-  const data = filteredData()
-  const totalFunds = sumIncome(data)
-  const expensesOnly = data.filter(r => r.mode === "จ่าย")
-
-  const ctx = document.getElementById("donutChart").getContext("2d")
-  if (chart) chart.destroy()
-
-  const byProject = groupExpense(expensesOnly, "project")
-  const spentSum = Object.values(byProject).reduce((a, b) => a + b, 0)
-  const remaining = Math.max(totalFunds - spentSum, 0)
-  const labels = ["เงินคงเหลือ", ...Object.keys(byProject)]
-  const values = [remaining, ...Object.values(byProject)]
-  const colors = ["#cbd5e1", ...labels.slice(1).map((_, i) => rndColor(i))]
-
-  chart = new Chart(ctx, {
-    type: "doughnut",
-    data: { labels, datasets: [{ data: values, backgroundColor: colors }] },
-    options: {
-      responsive: true,
-      cutout: "65%",
-      animation: { animateScale: true, animateRotate: true },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => `${ctx.label}: ${Number(ctx.parsed).toLocaleString()} บาท`
-          }
-        }
-      }
-    }
-  })
-
-  // Smooth render for summary
-  const box = document.getElementById("summaryBox")
-  box.style.opacity = "0"
-  setTimeout(() => {
-    box.innerHTML = `
-      <h3 style="margin-bottom:12px;">ภาพรวม (100% = เงินเบิกรวม)</h3>
-      ${labels.map((label, i) => `
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          <div style="width:14px;height:14px;background:${colors[i]};border-radius:4px;"></div>
-          <span>${label}</span>
-          <b style="margin-left:auto">${Number(values[i]).toLocaleString()} บาท</b>
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div>${r.id || "-"}</div>
+          <div style="font-weight:700;color:${isIncome ? "#06c755" : "#d93025"};">${money}</div>
         </div>
-      `).join("")}
-    `
-    box.style.opacity = "1"
-  }, 150)
+        <div>${r.item || "-"}</div>
+        <div style="color:#666;font-size:.9rem;margin-top:4px;">ผู้ดำเนินการ: ${r.operator || "-"}</div>
+        <div style="margin-top:6px;color:#555;font-size:.9rem;">
+          <b>โครงการ:</b> ${r.project || "-"} | <b>อาคาร:</b> ${r.building || "-"}<br>
+          <b>ประเภทงาน:</b> ${r.jobType || "-"} | <b>หมวดงาน:</b> ${r.category || "-"}<br>
+          <b>ประเภทรายการจ่าย:</b> ${r.paymentType || "-"}
+          ${attChips ? `<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">${attChips}</div>` : ""}
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  });
+
+  document.getElementById("loadMoreBtn").style.display = (historyPage.filtered.length > end) ? "inline-block" : "none";
+  if (smooth) list.scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+/* ========== EVENT LISTENERS ========== */
+document.getElementById("searchBox").addEventListener("input", applyFilters);
+document.getElementById("filterMode").addEventListener("change", applyFilters);
+document.getElementById("sortBy").addEventListener("change", applyFilters);
+document.getElementById("loadMoreBtn").addEventListener("click", () => { historyPage.page++; renderHistoryStatement(true); });
+document.getElementById("applyDateFilter").addEventListener("click", () => {
+  filterStart = document.getElementById("filterDateStart").value || null;
+  filterEnd = document.getElementById("filterDateEnd").value || null;
+  applyFilters();
+});
+document.getElementById("clearDateFilter").addEventListener("click", () => {
+  document.getElementById("filterDateStart").value = "";
+  document.getElementById("filterDateEnd").value = "";
+  filterStart = null; filterEnd = null;
+  applyFilters();
+});
 </script>
-<!-- ======== END PART 4/7 ======== -->
 <!-- ======== PART 5/7 (JS SUBMIT WITH AUTO SPLIT PER BUILDING) ======== -->
 
 <script>
@@ -873,3 +795,4 @@ window.addEventListener("DOMContentLoaded", async () => {
 </script>
 
 <!-- ======== END PART 7/7 ======== -->
+
