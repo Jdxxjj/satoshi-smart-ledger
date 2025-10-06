@@ -17,6 +17,7 @@
     label{display:block;margin-top:14px;font-weight:600;font-size:.95rem;color:#444}
     input,select{width:100%;padding:12px 14px;margin-top:6px;border:1px solid #ddd;border-radius:10px;font-size:1rem;box-sizing:border-box;background:#fafafa;transition:.2s}
     input:focus,select:focus{outline:none;border-color:#B27A01;background:#fff;box-shadow:0 0 0 2px rgba(178,122,1,.15)}
+    .hint{font-size:.85rem;color:#64748b;margin-top:6px}
     .error{color:#d93025;font-size:.85rem;margin-top:4px;min-height:18px}
     .error-input{border-color:#d93025 !important}
     .toggle{display:flex;gap:12px;margin:18px 0}
@@ -131,9 +132,11 @@
           <div>
             <label>อาคาร</label>
             <div style="display:flex;gap:8px;align-items:center">
-              <select id="building" style="flex:1"></select>
+              <!-- เปลี่ยนเป็น multiple -->
+              <select id="building" multiple style="flex:1; min-height:120px"></select>
               <button type="button" id="addBuildingBtn" class="btn btn-ok">+ เพิ่มอาคารใหม่</button>
             </div>
+            <div class="hint">กด Ctrl/Command ค้างไว้เพื่อเลือกหลายอาคาร</div>
             <div class="error" id="err-building"></div>
           </div>
         </div>
@@ -324,6 +327,10 @@ document.querySelectorAll(".tab").forEach(b=>{
 })
 
 /* ========== MODE ========== */
+function clearMultiSelect(sel){
+  if(!sel) return
+  Array.from(sel.options).forEach(o=>o.selected=false)
+}
 function setMode(m){
   document.getElementById("mode").value=m
   document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก")
@@ -335,6 +342,8 @@ function setMode(m){
   document.getElementById("itemWrap").style.display=isIncome?"none":"block"
   const op=document.getElementById("operator")
   if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
+  // เคลียร์ multi-select อาคารเมื่อสลับโหมด
+  clearMultiSelect(document.getElementById("building"))
   clearErrors(); resetProgress()
 }
 document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"))
@@ -346,6 +355,7 @@ function linkChips(arr,label){
 }
 function buildSummary(p){
   const absAmt=Math.abs(Number(p.amount||0))
+  const buildingText = Array.isArray(p.building) ? p.building.join(", ") : (p.building||"")
   return `
     <div><b>โหมด:</b> ${p.mode}</div>
     <div><b>วันที่:</b> ${formatDate(p.date)}</div>
@@ -353,7 +363,7 @@ function buildSummary(p){
     ${p.item?`<div><b>รายละเอียด:</b> ${p.item}</div>`:""}
     ${p.supplier?`<div><b>ร้านค้า:</b> ${p.supplier}</div>`:""}
     ${p.project?`<div><b>โครงการ:</b> ${p.project}</div>`:""}
-    ${p.building?`<div><b>อาคาร:</b> ${p.building}</div>`:""}
+    ${buildingText?`<div><b>อาคาร:</b> ${buildingText}</div>`:""}
     ${p.jobType?`<div><b>ประเภทงาน:</b> ${p.jobType}</div>`:""}
     ${p.category?`<div><b>หมวดงาน:</b> ${p.category}</div>`:""}
     ${p.paymentType?`<div><b>ประเภทรายการจ่าย:</b> ${p.paymentType}</div>`:""}
@@ -423,8 +433,12 @@ function validateForm(){
   if(!operator){showError("operator","กรุณาเลือกผู้ดำเนินการ");ok=false}
 
   if(mode==="จ่าย"){
-    const need=[["item","กรุณากรอกรายละเอียด"],["supplierExpense","กรุณาเลือกร้านค้า"],["project","กรุณาเลือกโครงการ"],["building","กรุณาเลือกอาคาร"],["jobType","กรุณาเลือกประเภทงาน"],["category","กรุณาเลือกหมวดงาน"],["paymentType","กรุณาเลือกประเภทรายการจ่าย"]]
+    const need=[["item","กรุณากรอกรายละเอียด"],["supplierExpense","กรุณาเลือกร้านค้า"],["project","กรุณาเลือกโครงการ"],["jobType","กรุณาเลือกประเภทงาน"],["category","กรุณาเลือกหมวดงาน"],["paymentType","กรุณาเลือกประเภทรายการจ่าย"]]
     need.forEach(([id,msg])=>{const v=document.getElementById(id).value;if(!v){showError(id,msg);ok=false}})
+    // เช็คหลายอาคาร
+    const bsel=document.getElementById("building")
+    const selectedCount=Array.from(bsel?.selectedOptions||[]).length
+    if(selectedCount===0){showError("building","กรุณาเลือกอาคารอย่างน้อย 1 รายการ");ok=false}
   }
   return ok
 }
@@ -438,6 +452,9 @@ document.getElementById("form").addEventListener("submit",async e=>{
   const date=document.getElementById("date").value
   const amount=parseFloat((document.getElementById("amount").value||"").replace(/,/g,""))
   const operator=document.getElementById("operator").value
+
+  // buildings -> array
+  const buildingSelected = Array.from(document.getElementById("building").selectedOptions||[]).map(o=>o.value)
 
   // ใช้ URL ที่อัปไว้แล้ว ถ้าไม่มีจะอัปตอนนี้
   slips=preUploaded.slips.slice()
@@ -466,7 +483,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
     item:mode==="จ่าย"?document.getElementById("item").value:"",
     supplier:mode==="จ่าย"?document.getElementById("supplierExpense").value:"",
     project:mode==="จ่าย"?document.getElementById("project").value:"",
-    building:mode==="จ่าย"?document.getElementById("building").value:"",
+    building:mode==="จ่าย"?buildingSelected:[],
     jobType:mode==="จ่าย"?document.getElementById("jobType").value:"",
     category:mode==="จ่าย"?document.getElementById("category").value:"",
     paymentType:mode==="จ่าย"?document.getElementById("paymentType").value:"",
@@ -535,7 +552,6 @@ function renderHistoryStatement(){
   const end=historyPage.page*historyPage.perPage
   const show=historyPage.filtered.slice(0,end)
 
-  // group by date
   const groups={}
   show.forEach(r=>{
     const k=ymd(r.date)||""
@@ -559,7 +575,6 @@ function renderHistoryStatement(){
       card.className="history-card"
       card.style.borderLeftColor=isIncome?"#06c755":"#d93025"
 
-      // attachments chips
       const slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[])
       const receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[])
       const attChips=[...slipsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>ดูสลิป${slipsArr.length>1?(" "+(i+1)):""}</a>`),
@@ -594,22 +609,7 @@ document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage
 function renderHistory(){ applyFilters() }
 
 /* ========== DASHBOARD: Drilldown donut ========== */
-/*
-  แนวคิด:
-  - เงินทั้งหมด = ผลรวม "เบิก" (mode="เบิก") => totalFunds
-  - รายจ่าย = ผลรวม "จ่าย" (mode="จ่าย") เป็นค่าติดลบในข้อมูลเดิม ใช้ Math.abs เพื่อนับยอดจ่าย
-  - ชั้นเริ่มต้น (level 0): โดนัท = [เงินคงเหลือ, รายจ่ายตามโครงการ]
-      labels = ["เงินคงเหลือ", ...projects]
-      values = [totalFunds - totalExpenseSum, expenseByProject...]
-  - คลิก slice ของโครงการ => level 1 (Building)
-    คลิก slice ของอาคาร => level 2 (JobType)
-    คลิกต่อ => level 3 (Category)
-    คลิกต่อ => level 4 (PaymentType)
-  - ในชั้นลึก คำนวณสัดส่วนจาก 100% ของยอดรวมของ "parent slice" นั้น
-*/
-let drill={ level:0, path:[], // path: [{dim:'project', value:'P1'}, ...]
-            dims:['project','building','jobType','category','paymentType'],
-            preset:null, start:null, end:null }
+let drill={ level:0, path:[], dims:['project','building','jobType','category','paymentType'], preset:null, start:null, end:null }
 
 function withinRange(dateStr){
   const y=ymd(dateStr); if(!y) return false
@@ -617,16 +617,13 @@ function withinRange(dateStr){
   if(drill.end && y > drill.end) return false
   return true
 }
-
 function filteredData(){
   return records.filter(r=>{
     if(!withinRange(r.date)) return false
     return true
   })
 }
-
 function sumIncome(arr){return arr.filter(r=>r.mode==="เบิก").reduce((s,r)=>s+Math.abs(Number(r.amount)||0),0)}
-function sumExpense(arr){return arr.filter(r=>r.mode==="จ่าย").reduce((s,r)=>s+Math.abs(Number(r.amount)||0),0)}
 function groupExpense(arr, key){
   const m={}
   arr.filter(r=>r.mode==="จ่าย").forEach(r=>{
@@ -642,12 +639,10 @@ function applyPath(arr){
   })
   return out
 }
-
-function rndColor(i){ // deterministic-ish palette
+function rndColor(i){
   const base=[ "#0ea5e9","#22c55e","#f97316","#a855f7","#eab308","#ef4444","#06b6d4","#84cc16","#f43f5e","#14b8a6" ]
   return base[i%base.length]
 }
-
 function renderDonut(labels, values, colors, title, legend){
   const ctx=document.getElementById("donutChart").getContext("2d")
   if(chart) chart.destroy()
@@ -664,27 +659,22 @@ function renderDonut(labels, values, colors, title, legend){
         if(!points.length) return
         const idx=points[0].index
         const label=labels[idx]
-        // ห้าม drill ที่ "เงินคงเหลือ"
         if(drill.level===0 && label==="เงินคงเหลือ") return
         goDeeper(label)
       }
     }
   })
-
-  // summary + legend
   const box=document.getElementById("summaryBox")
   box.innerHTML=`<h3>${title}</h3>` + legend.map(x=>`
     <div class="legend-item"><span class="legend-dot" style="background:${x.color}"></span>
     <span>${x.label}</span><b style="margin-left:auto">${x.value.toLocaleString()} บาท</b></div>`).join("")
 }
-
 function renderDrill(){
   const data=filteredData()
   const totalFunds=sumIncome(data)
   const expensesOnly=data.filter(r=>r.mode==="จ่าย")
 
   if(drill.level===0){
-    // group by project
     const byProject=groupExpense(expensesOnly,'project')
     const spentSum=Object.values(byProject).reduce((a,b)=>a+b,0)
     const remaining=Math.max(totalFunds - spentSum, 0)
@@ -695,21 +685,18 @@ function renderDrill(){
       .concat(Object.keys(byProject).map((k,i)=>({label:k,value:byProject[k],color:colors[i+1]})))
     renderDonut(labels,values,colors,"ภาพรวม (100% = เงินเบิกรวม)",legend)
   }else{
-    // deeper levels use only expenses
-    let scoped=applyPath(data) // already filtered to path & mode=จ่าย
-    const dim=drill.dims[drill.level] // current dimension
+    let scoped=applyPath(data)
+    const dim=drill.dims[drill.level]
     const parentDim=drill.dims[drill.level-1]
     const parentName=drill.path[drill.path.length-1]?.value || ""
     const by=groupExpense(scoped, dim)
     const labels=Object.keys(by)
     const vals=Object.values(by)
     const colors=labels.map((_,i)=>rndColor(i))
-    // legend
     const legend=labels.map((k,i)=>({label:k,value:by[k],color:colors[i]}))
     renderDonut(labels, vals, colors, `${parentDim?parentDim:""} ${parentName} → ${dim}`, legend)
   }
 
-  // breadcrumbs + back visibility
   const crumbs=document.getElementById("dbCrumbs")
   const back=document.getElementById("dbBack")
   const items=[{dim:"ภาพรวม",value:"ทั้งหมด"}].concat(drill.path)
@@ -719,13 +706,11 @@ function renderDrill(){
   }).join("")
   back.style.display = drill.level>0 ? "inline-block" : "none"
 }
-
 function goDeeper(clickedLabel){
-  // go to next level if exists
   if(drill.level===0){
     drill.path.push({dim:'project',value:clickedLabel})
     drill.level=1
-  }else if(drill.level<drill.dims.length-0){ // stop after paymentType
+  }else if(drill.level<drill.dims.length-0){
     const dim=drill.dims[drill.level]
     drill.path.push({dim,value:clickedLabel})
     if(drill.level<drill.dims.length-1) drill.level++
@@ -738,8 +723,6 @@ document.getElementById("dbBack").addEventListener("click",()=>{
   drill.level=Math.max(0, drill.level-1)
   renderDrill()
 })
-
-/* Dashboard date presets */
 document.getElementById("dbPreset").addEventListener("change",(e)=>{
   const v=e.target.value
   const t=new Date()
@@ -784,7 +767,13 @@ document.getElementById("dbReset").addEventListener("click",()=>{
 /* ========== OPTIONS/DATA LOAD ========== */
 function fillSelect(id,arr){
   const sel=document.getElementById(id)
-  sel.innerHTML=`<option value="">-- เลือก --</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("")
+  if(id==="building"){
+    // สำหรับ multi-select: ไม่มี placeholder และกำหนด size ตามจำนวน (สูงสุด 8)
+    sel.innerHTML=(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("")
+    sel.size = Math.min(Math.max((arr||[]).length, 4), 8)
+  }else{
+    sel.innerHTML=`<option value="">-- เลือก --</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("")
+  }
 }
 async function loadOptions(){
   const d=await fetch(API_URL).then(r=>r.json())
@@ -808,7 +797,11 @@ document.getElementById("addBuildingBtn").addEventListener("click",async()=>{
   const val=prompt("กรอกชื่ออาคารใหม่")
   if(val){
     await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})})
-    await loadOptions(); document.getElementById("building").value=val
+    await loadOptions()
+    // auto-select อาคารใหม่ใน multi-select
+    const bsel=document.getElementById("building")
+    const opt=[...bsel.options].find(o=>o.value===val)
+    if(opt){ opt.selected=true }
   }
 })
 
