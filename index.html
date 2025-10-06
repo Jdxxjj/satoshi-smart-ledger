@@ -1,4 +1,4 @@
-<!-- ======== PART 1/7: HEAD + GLOBAL STYLE (ERP UI) ======== -->
+<!-- ======== PART 1/7: HEAD + GLOBAL STYLE (Stable UI v3) ======== -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -13,15 +13,17 @@
       background:#f5f6fa;
       color:#2f3640;
     }
-    /* ---------- TABS HEADER ---------- */
+
+    /* ---------- HEADER TABS ---------- */
     .tabs{
       display:flex;
       background:#1f2937;
       border-bottom:3px solid #B27A01;
+      flex-wrap:wrap;
     }
     .tabs button{
       flex:1;
-      padding:16px;
+      padding:14px 12px;
       border:none;
       background:#1f2937;
       color:#d1d5db;
@@ -29,107 +31,229 @@
       cursor:pointer;
       transition:.25s;
       letter-spacing:.3px;
+      min-width:120px;
     }
     .tabs button:hover{background:#374151;color:#fff}
     .tabs button.active{background:#B27A01;color:#fff;font-weight:700}
 
-    /* ---------- CARD & PAGE ---------- */
+    /* ---------- PAGE & CARD ---------- */
     .page{display:none;padding:24px}
     .page.active{display:block}
     .card{
       max-width:1140px;margin:24px auto;
       background:#fff;border-radius:16px;
       box-shadow:0 4px 16px rgba(0,0,0,.08);
-      padding:28px;transition:.25s;
+      padding:28px;
+      transition:.25s;
     }
     .card:hover{box-shadow:0 6px 20px rgba(0,0,0,.1)}
     h2{margin:0 0 18px;color:#111827;font-size:1.5rem}
 
     /* ---------- FORM ELEMENTS ---------- */
-    label{display:block;margin-top:12px;font-weight:600;font-size:.95rem;color:#374151}
+    label{
+      display:block;
+      margin-top:10px;
+      font-weight:600;
+      font-size:.95rem;
+      color:#374151;
+    }
     input,select{
-      width:100%;padding:12px 14px;margin-top:6px;
-      border:1px solid #d1d5db;border-radius:10px;
-      font-size:1rem;background:#fafafa;transition:.2s;
+      width:100%;
+      padding:12px 14px;
+      margin-top:6px;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      font-size:1rem;
+      background:#fafafa;
+      transition:.2s;
     }
     input:focus,select:focus{
-      outline:none;border-color:#B27A01;background:#fff;
+      outline:none;
+      border-color:#B27A01;
+      background:#fff;
       box-shadow:0 0 0 3px rgba(178,122,1,.18);
     }
     .error{color:#d93025;font-size:.85rem;margin-top:4px;min-height:18px}
     .error-input{border-color:#d93025 !important}
 
-    /* ---------- TOGGLE ---------- */
-    .toggle{display:flex;gap:12px;margin:18px 0}
-    .toggle button{
-      flex:1;padding:14px;border:none;border-radius:12px;
-      font-size:1rem;font-weight:600;
-      background:#e5e7eb;color:#374151;
-      cursor:pointer;transition:.25s;
+    /* ---------- GRID SYSTEM ---------- */
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:16px;
+      margin-top:8px;
     }
-    .toggle button.selected{
-      background:linear-gradient(135deg,#B27A01,#d4a017);
-      color:#fff;box-shadow:0 3px 8px rgba(178,122,1,.3);
+    .row > div{
+      flex:1;
+      min-width:260px;
+    }
+    .full{flex:100%}
+    @media(max-width:780px){
+      .row{flex-direction:column;gap:12px}
+      .row > div{min-width:100%}
     }
 
     /* ---------- BUTTONS ---------- */
-    .btn{padding:10px 16px;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:.25s}
+    .btn{
+      padding:10px 16px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      transition:.25s;
+    }
     .btn-ok{background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff}
     .btn-cancel{background:#ef4444;color:#fff}
     .btn-ok:hover,.btn-cancel:hover{filter:brightness(1.1)}
 
     .submit{
-      margin-top:26px;width:100%;padding:16px;border:none;border-radius:12px;
+      display:block;
+      width:100%;
+      padding:16px;
+      margin-top:24px;
+      border:none;
+      border-radius:12px;
       background:linear-gradient(135deg,#B27A01,#eab308);
-      color:#fff;font-weight:700;font-size:1.05rem;cursor:pointer;transition:.25s;
+      color:#fff;
+      font-weight:700;
+      font-size:1.05rem;
+      cursor:pointer;
+      transition:.25s;
     }
-    .submit:hover{box-shadow:0 4px 14px rgba(178,122,1,.3);transform:translateY(-1px)}
-
-    /* ---------- GRID ---------- */
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .full{grid-column:1/-1}
-    @media(max-width:780px){.row{grid-template-columns:1fr}}
-
-    /* ---------- UPLOAD ---------- */
-    .upload-row{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
-    .chip{
-      display:inline-flex;align-items:center;gap:6px;
-      background:#f1f5f9;border:1px solid #e2e8f0;color:#0f172a;
-      padding:6px 10px;border-radius:999px;font-size:.85rem;cursor:pointer;text-decoration:none;
+    .submit:hover{
+      box-shadow:0 4px 14px rgba(178,122,1,.3);
+      transform:translateY(-1px);
     }
-    .chip:hover{background:#e2e8f0}
+
+    /* ---------- TOGGLE ---------- */
+    .toggle{
+      display:flex;
+      gap:12px;
+      margin:18px 0;
+      flex-wrap:wrap;
+    }
+    .toggle button{
+      flex:1;
+      padding:14px;
+      border:none;
+      border-radius:12px;
+      font-size:1rem;
+      font-weight:600;
+      background:#e5e7eb;
+      color:#374151;
+      cursor:pointer;
+      transition:.25s;
+      min-width:120px;
+    }
+    .toggle button.selected{
+      background:linear-gradient(135deg,#B27A01,#d4a017);
+      color:#fff;
+      box-shadow:0 3px 8px rgba(178,122,1,.3);
+    }
 
     /* ---------- TAG INPUT ---------- */
     .tag-input{
-      display:flex;flex-wrap:wrap;gap:6px;align-items:center;
-      border:1px solid #d1d5db;border-radius:10px;padding:8px;
-      background:#f9fafb;cursor:text;position:relative;flex:1;min-height:48px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      align-items:center;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      padding:8px;
+      background:#f9fafb;
+      cursor:text;
+      position:relative;
+      flex:1;
+      min-height:48px;
     }
     .tag-input input{
-      border:none;outline:none;flex:1;min-width:120px;padding:6px;font-size:.95rem;background:transparent;
+      border:none;
+      outline:none;
+      flex:1;
+      min-width:120px;
+      padding:6px;
+      font-size:.95rem;
+      background:transparent;
     }
-    .tag{display:inline-flex;align-items:center;gap:6px;background:#e2e8f0;color:#111;
-      padding:6px 10px;border-radius:999px;font-size:.9rem}
-    .tag button{border:none;background:transparent;cursor:pointer;color:#555;font-weight:bold}
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:#e2e8f0;
+      color:#111;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.9rem;
+    }
+    .tag button{
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      color:#555;
+      font-weight:bold;
+    }
     .tag:hover{background:#cbd5e1}
 
     .suggestion-list{
-      position:absolute;left:0;right:0;top:100%;background:#fff;
-      border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.1);
-      max-height:160px;overflow-y:auto;z-index:50;margin-top:2px;
+      position:absolute;
+      left:0;right:0;top:100%;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:8px;
+      box-shadow:0 4px 10px rgba(0,0,0,.1);
+      max-height:160px;
+      overflow-y:auto;
+      z-index:50;
+      margin-top:2px;
     }
     .suggestion-item{padding:8px 10px;cursor:pointer}
     .suggestion-item:hover{background:#f1f5f9}
 
+    /* ---------- UPLOAD ---------- */
+    .upload-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:8px;
+      flex-wrap:wrap;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      background:#f1f5f9;
+      border:1px solid #e2e8f0;
+      color:#0f172a;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.85rem;
+      cursor:pointer;
+      text-decoration:none;
+    }
+    .chip:hover{background:#e2e8f0}
+
     /* ---------- POPUP ---------- */
-    #popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-      background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center}
-    #popupBox{background:#fff;padding:24px 28px;border-radius:12px;font-size:1.2rem;
-      box-shadow:0 4px 12px rgba(0,0,0,.2)}
+    #popup{
+      display:none;
+      position:fixed;
+      top:0;left:0;
+      width:100%;height:100%;
+      background:rgba(0,0,0,.5);
+      z-index:2000;
+      justify-content:center;
+      align-items:center;
+    }
+    #popupBox{
+      background:#fff;
+      padding:24px 28px;
+      border-radius:12px;
+      font-size:1.2rem;
+      box-shadow:0 4px 12px rgba(0,0,0,.2);
+    }
   </style>
 </head>
-<body>
 <!-- ======== PART 2/7: TABS + ADD PAGE (Form เบิก-จ่าย) ======== -->
+<body>
   <div class="tabs">
     <button class="tab active" data-id="add">เพิ่มรายการ</button>
     <button class="tab" data-id="history">ประวัติ</button>
@@ -167,8 +291,8 @@
         <!-- ร้านค้า -->
         <div id="supplierExpenseWrap" class="full" style="display:none">
           <label>ร้านค้า</label>
-          <div style="display:flex;gap:8px;align-items:center">
-            <select id="supplierExpense" style="flex:1"></select>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="supplierExpense" style="flex:1;min-width:200px"></select>
             <button type="button" id="addSupplierBtn" class="btn btn-ok">+ เพิ่มร้านค้าใหม่</button>
           </div>
           <div class="error" id="err-supplierExpense"></div>
@@ -181,17 +305,18 @@
             <select id="project"></select>
             <div class="error" id="err-project"></div>
           </div>
-
           <div>
             <label>อาคาร (เลือกได้หลายรายการ)</label>
-            <div style="display:flex;gap:8px;align-items:center">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               <div id="buildingTags" class="tag-input">
                 <input type="text" id="buildingInput" placeholder="พิมพ์เพื่อค้นหา...">
                 <div id="buildingSuggest" class="suggestion-list" style="display:none"></div>
               </div>
               <button type="button" id="addBuildingBtn" class="btn btn-ok" title="เพิ่มอาคารใหม่">+</button>
             </div>
-            <div class="hint">พิมพ์ชื่ออาคารเพื่อเลือก หรือกด Enter เพื่อเพิ่มใหม่</div>
+            <div class="hint" style="font-size:.85rem;color:#6b7280;margin-top:4px">
+              พิมพ์ชื่ออาคารเพื่อเลือก หรือกด Enter เพื่อเพิ่มใหม่
+            </div>
             <div class="error" id="err-building"></div>
           </div>
         </div>
@@ -244,7 +369,7 @@
           <div>
             <label>จำนวนเงิน</label>
             <input type="text" id="amount" required placeholder="เช่น 1200.50">
-            <div id="amountTxt" class="amount-display"></div>
+            <div id="amountTxt" class="amount-display" style="margin-top:4px;color:#4b5563;font-size:.9rem"></div>
             <div class="error" id="err-amount"></div>
           </div>
           <div>
@@ -264,14 +389,12 @@
       </form>
     </div>
   </section>
-<!-- ======== PART 3/7: HISTORY PAGE + DASHBOARD + POPUP ======== -->
 
+<!-- ======== PART 3/7: HISTORY PAGE + DASHBOARD + POPUP ======== -->
   <!-- HISTORY PAGE -->
   <section id="history" class="page">
     <div class="card">
       <h2>ประวัติการทำรายการ</h2>
-
-      <!-- Filters -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
         <input type="text" id="searchBox" placeholder="ค้นหารายการ..." style="flex:2;padding:10px;border:1px solid #ccc;border-radius:8px">
         <input type="date" id="filterStart" style="padding:10px;border:1px solid #ccc;border-radius:8px">
@@ -293,9 +416,7 @@
         <button id="applyDateFilter" class="btn btn-ok">กรอง</button>
         <button id="resetDateFilter" class="btn btn-cancel">ล้าง</button>
       </div>
-
       <div id="historyList"></div>
-
       <div style="text-align:center;margin-top:12px">
         <button id="loadMoreBtn" class="btn btn-ok">โหลดเพิ่ม</button>
       </div>
@@ -306,8 +427,6 @@
   <section id="dashboard" class="page">
     <div class="card">
       <h2>แดชบอร์ด</h2>
-
-      <!-- Filters -->
       <div class="filter-row" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center">
         <input type="date" id="dbStart" class="mini" style="padding:10px;border:1px solid #ccc;border-radius:8px">
         <input type="date" id="dbEnd" class="mini" style="padding:10px;border:1px solid #ccc;border-radius:8px">
@@ -321,7 +440,6 @@
         <button class="btn btn-ok" id="dbApply">นำไปใช้</button>
         <button class="btn btn-cancel" id="dbReset">ล้างตัวกรอง</button>
       </div>
-
       <div class="crumbs" id="dbCrumbs"></div>
       <button class="btn btn-ok btn-back" id="dbBack" style="display:none">ย้อนกลับ</button>
 
@@ -332,7 +450,6 @@
     </div>
   </section>
 
-  <!-- POPUP -->
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
 <!-- ======== PART 4/7: SCRIPT – GLOBAL, HELPERS, TABS, MODE, TAG+SUGGESTION ======== -->
 <script>
@@ -349,6 +466,48 @@ function formatDate(d){if(!d)return"";const dt=new Date(d);if(isNaN(dt))return d
 function todayYMD(){const t=new Date();return t.toISOString().slice(0,10);}
 function showPopup(m){document.getElementById("popupBox").innerText=m;document.getElementById("popup").style.display="flex";}
 function hidePopup(){document.getElementById("popup").style.display="none";}
+
+/* ========== INIT OPTIONS / RECORDS (กัน error ถ้า API ไม่ตอบ) ========== */
+async function loadOptions(){
+  try{
+    const r = await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"loadOptions"})});
+    const j = await r.json();
+
+    const fill = (id,arr,placeholder="-- เลือก --")=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = `<option value="">${placeholder}</option>` + (Array.isArray(arr)?arr.map(v=>`<option>${v}</option>`).join(""):"");
+    };
+
+    fill("supplierExpense", j.suppliers || [], "-- เลือกร้านค้า --");
+    fill("project", j.projects || [], "-- เลือกโครงการ --");
+    fill("jobType", j.jobTypes || [], "-- เลือกประเภทงาน --");
+    fill("category", j.categories || [], "-- เลือกหมวดงาน --");
+    fill("paymentType", j.paymentTypes || [], "-- เลือกประเภทรายการจ่าย --");
+
+    buildingList = j.buildings || [];
+
+  }catch(e){
+    // fallback เงียบๆ พร้อม default
+    ["supplierExpense","project","jobType","category","paymentType"].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && el.options.length===0){
+        el.innerHTML=`<option value="">-- เลือก --</option>`;
+      }
+    });
+    if(!Array.isArray(buildingList)) buildingList=[];
+  }
+}
+
+async function loadRecords(){
+  try{
+    const r = await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"list"})});
+    const j = await r.json();
+    records = Array.isArray(j.data) ? j.data : [];
+  }catch(e){
+    records = [];
+  }
+}
 
 /* ========== TABS ========== */
 document.querySelectorAll(".tab").forEach(b=>{
@@ -369,9 +528,10 @@ function setMode(m){
   document.getElementById("btnExpense").classList.toggle("selected", m === "จ่าย");
 
   const isIncome = m === "เบิก";
-  document.querySelectorAll(".expense-only").forEach(el => el.style.display = isIncome ? "none" : "grid");
+  // ใช้ block เพื่อกัน grid แล้วยืดเต็มคอลัมน์ สเถียรกว่า ไม่เหลื่อม
+  document.querySelectorAll(".expense-only").forEach(el => el.style.display = isIncome ? "none" : "block");
   document.getElementById("supplierExpenseWrap").style.display = isIncome ? "none" : "block";
-  document.getElementById("filesExpense").style.display = isIncome ? "none" : "grid";
+  document.getElementById("filesExpense").style.display = isIncome ? "none" : "block";
   document.getElementById("itemWrap").style.display = isIncome ? "none" : "block";
 
   const op = document.getElementById("operator");
@@ -389,7 +549,7 @@ function setMode(m){
 document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"));
 document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"));
 
-/* ========== BUILDING TAG + SUGGESTION (ดึงจาก sheet ผ่าน loadOptions) ========== */
+/* ========== BUILDING TAG + SUGGESTION ========== */
 function renderBuildingTags(){
   const box = document.getElementById("buildingTags");
   const input = document.getElementById("buildingInput");
@@ -401,16 +561,12 @@ function renderBuildingTags(){
     box.insertBefore(tag, input);
   });
 }
-
-function removeBuilding(i){
-  selectedBuildings.splice(i,1);
-  renderBuildingTags();
-}
+function removeBuilding(i){ selectedBuildings.splice(i,1); renderBuildingTags(); }
 
 function renderBuildingSuggestions(filter=""){
   const list = document.getElementById("buildingSuggest");
   list.innerHTML = "";
-  const filtered = buildingList
+  const filtered = (buildingList||[])
     .filter(b => b.toLowerCase().includes(filter.toLowerCase()) && !selectedBuildings.includes(b))
     .slice(0,8);
   if(filtered.length === 0){list.style.display="none";return;}
@@ -432,7 +588,6 @@ function renderBuildingSuggestions(filter=""){
 document.getElementById("buildingInput").addEventListener("input",e=>{
   renderBuildingSuggestions(e.target.value.trim());
 });
-
 document.getElementById("buildingInput").addEventListener("keydown",e=>{
   if(e.key==="Enter" && e.target.value.trim()!==""){
     e.preventDefault();
@@ -443,29 +598,48 @@ document.getElementById("buildingInput").addEventListener("keydown",e=>{
     document.getElementById("buildingSuggest").style.display="none";
   }
 });
-
 document.addEventListener("click",e=>{
   const box=document.getElementById("buildingTags");
   if(!box.contains(e.target)) document.getElementById("buildingSuggest").style.display="none";
 });
-
 document.getElementById("addBuildingBtn").addEventListener("click",async()=>{
   const val = prompt("กรอกชื่ออาคารใหม่");
   if(val){
-    await fetch(API_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({addOption:{type:"Buildings",value:val}})
-    });
-    await loadOptions();
-    if(!selectedBuildings.includes(val)){
-      selectedBuildings.push(val);
-      renderBuildingTags();
-    }
+    try{
+      await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})});
+      await loadOptions();
+    }catch(e){}
+    if(!selectedBuildings.includes(val)){selectedBuildings.push(val);renderBuildingTags();}
   }
 });
+
+/* ========== DASHBOARD DUMMY (กัน error) ========== */
+function renderDrill(){
+  // ฟังก์ชัน placeholder ป้องกัน error ถ้ายังไม่ได้ทำแดชบอร์ดจริง
+  try{
+    const ctx = document.getElementById("donutChart");
+    if(!ctx) return;
+    if(chart){ chart.destroy(); }
+    const totalIncome = records.filter(r=>r.mode==="เบิก").reduce((s,r)=>s+Math.abs(+r.amount||0),0);
+    const totalExpense = records.filter(r=>r.mode==="จ่าย").reduce((s,r)=>s+Math.abs(+r.amount||0),0);
+    chart = new Chart(ctx,{type:"doughnut",data:{labels:["เบิก","จ่าย"],datasets:[{data:[totalIncome,totalExpense]}]}}); // ใช้สี default ของ Chart.js
+    document.getElementById("summaryBox").innerHTML =
+      `<div><b>รวมเบิก:</b> ${totalIncome.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท</div>
+       <div><b>รวมจ่าย:</b> ${totalExpense.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท</div>`;
+  }catch(e){}
+}
+
+/* ========== FIRST LOAD ========== */
+document.addEventListener("DOMContentLoaded", async ()=>{
+  // กันเหลื่อม: ใส่ค่าเริ่มต้นและโหลดออปชันก่อน
+  setMode("เบิก");
+  const dateEl = document.getElementById("date");
+  if(dateEl && !dateEl.value) dateEl.value = todayYMD();
+  await loadOptions();
+  await loadRecords();
+});
 </script>
-<!-- ======== PART 5/7: VALIDATION + UPLOAD + SUBMIT (Auto-split per building, decimal fix) ======== -->
+<!-- ======== PART 5/7: VALIDATION + UPLOAD + SUBMIT (Split per building, decimal safe) ======== -->
 <script>
 /* ========== VALIDATION ========== */
 function clearErrors(){
@@ -477,6 +651,7 @@ function showError(inputId,msg){
   const err=document.getElementById("err-"+inputId);
   if(err) err.textContent=msg||"กรอกข้อมูลให้ครบ";
   if(el) el.classList.add("error-input");
+  // เลื่อนเฉพาะในหน้าปัจจุบัน ลดการสั่นของ layout
   if(el && el.scrollIntoView) el.scrollIntoView({behavior:"smooth",block:"center"});
 }
 function validateForm(){
@@ -565,7 +740,7 @@ document.getElementById("receiptExpense").addEventListener("change",async e=>{
   catch{document.getElementById("receiptStatus").textContent="อัปโหลดล้มเหลว";}
 });
 
-/* ========== SUBMIT (บันทึกจริงแบบแยกอาคาร, ไม่ปัดทศนิยม) ========== */
+/* ========== SUBMIT (แยกบันทึกตามอาคาร, ไม่ปัดทศนิยมก่อนส่ง) ========== */
 document.getElementById("form").addEventListener("submit",async e=>{
   e.preventDefault();
   if(!validateForm()) return;
@@ -614,11 +789,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
   showPopup(`กำลังบันทึก (${payloads.length} รายการ)...`);
   try{
     for(const p of payloads){
-      const res=await fetch(API_URL,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(p)
-      });
+      const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
       const j=await res.json();
       if(!j.ok) throw new Error("fail");
     }
@@ -632,10 +803,10 @@ document.getElementById("form").addEventListener("submit",async e=>{
     document.getElementById("receiptStatus").textContent="ยังไม่ได้อัปโหลด";
     document.getElementById("slipChips").innerHTML="";
     document.getElementById("receiptChips").innerHTML="";
-    selectedBuildings=[];
-    renderBuildingTags();
+    selectedBuildings=[]; renderBuildingTags();
     setMode("เบิก");
     await loadOptions();
+    await loadRecords();
   }catch(err){
     console.error(err);
     showPopup("บันทึกล้มเหลว");
@@ -647,9 +818,8 @@ document.getElementById("form").addEventListener("submit",async e=>{
 <script>
 let historyPage = { page: 1, perPage: 12, filtered: [] };
 
-/* ===== APPLY FILTER ===== */
 function applyFilters() {
-  const q = document.getElementById("searchBox").value.toLowerCase();
+  const q = (document.getElementById("searchBox").value||"").toLowerCase();
   const mode = document.getElementById("filterMode").value;
   const sort = document.getElementById("sortBy").value;
   const startDate = document.getElementById("filterStart").value;
@@ -667,7 +837,6 @@ function applyFilters() {
     return true;
   });
 
-  // ===== SORT OPTIONS =====
   if (sort === "date_desc") arr.sort((a,b)=>new Date(b.date)-new Date(a.date));
   if (sort === "date_asc") arr.sort((a,b)=>new Date(a.date)-new Date(b.date));
   if (sort === "amount_desc") arr.sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount));
@@ -680,7 +849,6 @@ function applyFilters() {
   renderHistoryStatement();
 }
 
-/* ===== RENDER HISTORY ===== */
 function renderHistoryStatement() {
   const list = document.getElementById("historyList");
   list.innerHTML = "";
@@ -705,7 +873,7 @@ function renderHistoryStatement() {
     groups[d].forEach(r => {
       const isIncome = r.mode === "เบิก";
       const sign = isIncome ? "+" : "-";
-      const money = `${sign}${Math.abs(Number(r.amount) || 0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
+      const money = `${sign}${Math.abs(Number(r.amount)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
 
       const card = document.createElement("div");
       card.className = "history-card";
@@ -740,13 +908,9 @@ function renderHistoryStatement() {
       `;
 
       const detail = card.querySelector(".history-detail");
-      card.addEventListener("click",()=>{
-        detail.style.display = (detail.style.display==="block"?"none":"block");
-      });
-
+      card.addEventListener("click",()=>{ detail.style.display = (detail.style.display==="block"?"none":"block"); });
       card.addEventListener("mouseover",()=>card.style.background="#f9fafb");
       card.addEventListener("mouseout",()=>card.style.background="#fff");
-
       list.appendChild(card);
     });
   });
@@ -764,13 +928,10 @@ document.getElementById("resetDateFilter").addEventListener("click",()=>{
 document.getElementById("searchBox").addEventListener("input",applyFilters);
 document.getElementById("filterMode").addEventListener("change",applyFilters);
 document.getElementById("sortBy").addEventListener("change",applyFilters);
-document.getElementById("loadMoreBtn").addEventListener("click",()=>{
-  historyPage.page++;
-  renderHistoryStatement();
-});
+document.getElementById("loadMoreBtn").addEventListener("click",()=>{ historyPage.page++; renderHistoryStatement(); });
 function renderHistory(){ applyFilters(); }
 </script>
-<!-- ======== PART 7/7: AMOUNT INPUT HANDLER (Auto comma + always 2 decimals + Thai Text) ======== -->
+<!-- ======== PART 7/7: AMOUNT INPUT HANDLER (Auto comma + dot allowed + always 2 decimals) ======== -->
 <script>
 const amountEl = document.getElementById("amount");
 const amountTxt = document.getElementById("amountTxt");
@@ -780,7 +941,8 @@ function thaiMoneyText(intPart, decPart){
   const t = ["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"];
   const u = ["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"];
   function readNum(num){
-    let s = "", arr = num.split("").reverse();
+    if(!num || +num===0) return "";
+    let s = "", arr = String(+num).split("").reverse();
     for(let i=arr.length-1;i>=0;i--){
       const n = +arr[i];
       if(n !== 0){
@@ -792,45 +954,48 @@ function thaiMoneyText(intPart, decPart){
     }
     return s;
   }
-  let baht = readNum(intPart) + "บาท";
-  let satang = "";
-  if(decPart && parseInt(decPart) > 0){
-    satang = readNum(decPart) + "สตางค์";
-  } else {
-    satang = "ถ้วน";
-  }
-  return baht + satang;
+  let bahtPart = (intPart && +intPart>0) ? readNum(intPart) + "บาท" : "ศูนย์บาท";
+  let satangPart = (decPart && parseInt(decPart)>0) ? readNum(decPart) + "สตางค์" : "ถ้วน";
+  return bahtPart + satangPart;
 }
 
-/* ===== จัดรูปแบบขณะพิมพ์ ===== */
+/* ===== จัดรูปแบบขณะพิมพ์ (รับ . ได้, ใส่คอมมาอัตโนมัติ) ===== */
 amountEl.addEventListener("input", () => {
-  let value = amountEl.value.replace(/[^\d.]/g, ""); // รับเฉพาะตัวเลขกับ .
-  const parts = value.split(".");
-  if (parts.length > 2) value = parts[0] + "." + parts.slice(1).join(""); // กันพิมพ์หลายจุด
+  // เก็บตำแหน่งเคอร์เซอร์ก่อนปรับรูปแบบ เพื่อให้เคอร์เซอร์ไม่กระโดด
+  const start = amountEl.selectionStart;
+  const end = amountEl.selectionEnd;
 
-  const [intPart, decPart = ""] = value.split(".");
-  const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  amountEl.value = decPart ? `${formattedInt}.${decPart}` : formattedInt;
+  // รับเฉพาะตัวเลขและจุดทศนิยม
+  let raw = amountEl.value.replace(/[^\d.]/g, "");
+  const parts = raw.split(".");
+  if (parts.length > 2) raw = parts[0] + "." + parts.slice(1).join(""); // กันหลายจุด
 
-  const num = parseFloat(value);
-  if (!isNaN(num)) {
+  let [intPart, decPart=""] = raw.split(".");
+  // ตัด 0 นำหน้าที่เกิน (ยกเว้น "0")
+  if(intPart.length>1) intPart = intPart.replace(/^0+(?=\d)/, "");
+  const intWithComma = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  amountEl.value = decPart !== "" ? `${intWithComma}.${decPart}` : intWithComma;
+
+  // อัปเดตคำอ่านไทยแบบตามค่าที่มี
+  const num = parseFloat(raw);
+  if(!isNaN(num)){
     const [i, d] = num.toFixed(2).split(".");
     amountTxt.textContent = "(" + thaiMoneyText(i, d) + ")";
-  } else {
+  }else{
     amountTxt.textContent = "";
   }
+
+  // พยายามคืนตำแหน่งเคอร์เซอร์เดิมเท่าที่ทำได้
+  try{ amountEl.setSelectionRange(start, end); }catch(_){}
 });
 
-/* ===== เมื่อออกจากช่อง (blur) ===== */
+/* ===== เมื่อออกจากช่อง (blur) => บังคับ 2 ตำแหน่งเสมอ ===== */
 amountEl.addEventListener("blur", () => {
   const raw = amountEl.value.replace(/,/g, "");
   const num = parseFloat(raw);
   if (!isNaN(num)) {
-    // บังคับให้แสดงทศนิยม 2 ตำแหน่งเสมอ
-    const formatted = num.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    const formatted = num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
     amountEl.value = formatted;
     const [i, d] = num.toFixed(2).split(".");
     amountTxt.textContent = "(" + thaiMoneyText(i, d) + ")";
@@ -840,6 +1005,3 @@ amountEl.addEventListener("blur", () => {
   }
 });
 </script>
-<!-- ======== END PART 7/7 ======== -->
-
-
