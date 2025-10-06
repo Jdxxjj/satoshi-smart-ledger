@@ -770,13 +770,12 @@ document.getElementById("loadMoreBtn").addEventListener("click",()=>{
 });
 function renderHistory(){ applyFilters(); }
 </script>
-<!-- ======== PART 7/7: AMOUNT INPUT HANDLER (Decimal + Thai Text Display) ======== -->
+<!-- ======== PART 7/7: AMOUNT INPUT HANDLER (Auto comma + always 2 decimals + Thai Text) ======== -->
 <script>
-/* ========== AMOUNT FORMAT & THAI MONEY TEXT ========== */
 const amountEl = document.getElementById("amount");
 const amountTxt = document.getElementById("amountTxt");
 
-/* แปลงตัวเลขเป็นข้อความไทย */
+/* ===== แปลงตัวเลขเป็นข้อความไทย ===== */
 function thaiMoneyText(intPart, decPart){
   const t = ["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"];
   const u = ["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"];
@@ -803,16 +802,17 @@ function thaiMoneyText(intPart, decPart){
   return baht + satang;
 }
 
-/* อัปเดตขณะพิมพ์ */
+/* ===== จัดรูปแบบขณะพิมพ์ ===== */
 amountEl.addEventListener("input", () => {
-  let s = amountEl.value.replace(/[^\d.,]/g, ""); // อนุญาตเฉพาะตัวเลข , .
-  const parts = s.split(".");
-  if (parts.length > 2) s = parts[0] + "." + parts.slice(1).join(""); // กันหลายจุด
-  const [intPart, decPart = ""] = s.split(".");
-  const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  amountEl.value = decPart ? withCommas + "." + decPart : withCommas;
+  let value = amountEl.value.replace(/[^\d.]/g, ""); // รับเฉพาะตัวเลขกับ .
+  const parts = value.split(".");
+  if (parts.length > 2) value = parts[0] + "." + parts.slice(1).join(""); // กันพิมพ์หลายจุด
 
-  const num = parseFloat(s);
+  const [intPart, decPart = ""] = value.split(".");
+  const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  amountEl.value = decPart ? `${formattedInt}.${decPart}` : formattedInt;
+
+  const num = parseFloat(value);
   if (!isNaN(num)) {
     const [i, d] = num.toFixed(2).split(".");
     amountTxt.textContent = "(" + thaiMoneyText(i, d) + ")";
@@ -821,19 +821,25 @@ amountEl.addEventListener("input", () => {
   }
 });
 
-/* อัปเดตตอน blur */
+/* ===== เมื่อออกจากช่อง (blur) ===== */
 amountEl.addEventListener("blur", () => {
   const raw = amountEl.value.replace(/,/g, "");
   const num = parseFloat(raw);
   if (!isNaN(num)) {
-    amountEl.value = num.toLocaleString("en-US", {
+    // บังคับให้แสดงทศนิยม 2 ตำแหน่งเสมอ
+    const formatted = num.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
+    amountEl.value = formatted;
     const [i, d] = num.toFixed(2).split(".");
     amountTxt.textContent = "(" + thaiMoneyText(i, d) + ")";
+  } else {
+    amountEl.value = "";
+    amountTxt.textContent = "";
   }
 });
 </script>
 <!-- ======== END PART 7/7 ======== -->
+
 
