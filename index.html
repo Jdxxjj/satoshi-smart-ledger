@@ -1,4 +1,4 @@
-<!-- ======== PART 1/7: DOCTYPE + HEAD (Chart.js + Global Styles) ======== -->
+<!-- ======== PART 1/3: DOCTYPE + HEAD (Chart.js + Global Styles) ======== -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -32,7 +32,13 @@
     .amount-display{margin-top:6px;color:#777;font-style:italic}
     @media (max-width:780px){.row{grid-template-columns:1fr}}
 
-    /* Popup */
+    /* Buttons */
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
+    .btn-ok{border-color:#cbd5e1}
+    .btn-success{border:none;background:#16a34a;color:#fff;font-weight:700;box-shadow:0 2px 6px rgba(22,163,74,.25)}
+    .btn-success:hover{background:#15803d}
+
+    /* Global popup (saving) */
     #popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center}
     #popupBox{background:#fff;padding:24px 28px;border-radius:12px;font-size:1.2rem;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 
@@ -81,11 +87,18 @@
     .suggestion-list{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.1);max-height:180px;overflow-y:auto;z-index:50;margin-top:2px}
     .suggestion-item{padding:8px 10px;cursor:pointer}
     .suggestion-item:hover{background:#f1f5f9}
+
+    /* Input Modals (Supplier & Building) */
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2100;align-items:center;justify-content:center}
+    .modal-box{width:92%;max-width:480px;background:#fff;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:20px}
+    .modal-title{font-size:1.1rem;font-weight:800;margin:2px 0 10px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+    .btn-cancel{background:#e5e7eb;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+    .btn-cancel:hover{background:#d1d5db}
   </style>
 </head>
 <body>
-<!-- ======== END PART 1/7 ======== -->
-<!-- ======== PART 2/7: TABS + ADD PAGE (Form) ======== -->
+  <!-- TABS -->
   <div class="tabs">
     <button class="tab active" data-id="add">เพิ่มรายการ</button>
     <button class="tab" data-id="history">ประวัติ</button>
@@ -121,7 +134,7 @@
           <label>ร้านค้า</label>
           <div style="display:flex;gap:8px;align-items:center">
             <select id="supplierExpense" style="flex:1"></select>
-            <button type="button" id="addSupplierBtn" class="btn btn-ok">+ เพิ่มร้านค้าใหม่</button>
+            <button type="button" id="addSupplierBtn" class="btn btn-success">+ เพิ่มร้านค้าใหม่</button>
           </div>
           <div class="error" id="err-supplierExpense"></div>
         </div>
@@ -135,13 +148,12 @@
 
           <div>
             <label>อาคาร</label>
-            <!-- จัดปุ่มไว้ 'ท้ายช่อง' แนวนอนเหมือนเดิม -->
             <div style="display:flex;gap:8px;align-items:flex-start">
               <div id="buildingTags" class="tag-input">
                 <input type="text" id="buildingInput" placeholder="พิมพ์ชื่ออาคาร...">
                 <div id="buildingSuggest" class="suggestion-list" style="display:none"></div>
               </div>
-              <button type="button" id="addBuildingBtn" class="btn btn-ok" title="เพิ่มอาคารใหม่">+ เพิ่มอาคารใหม่</button>
+              <button type="button" id="addBuildingBtn" class="btn btn-success" title="เพิ่มอาคารใหม่">+ เพิ่มอาคารใหม่</button>
             </div>
             <div class="hint">พิมพ์เพื่อค้นหา/เลือกจากรายการ หรือกด Enter เพื่อเพิ่ม</div>
             <div class="error" id="err-building"></div>
@@ -169,7 +181,6 @@
           </div>
         </div>
 
-        <!-- Upload slip/receipt -->
         <div class="row expense-only" id="filesExpense" style="display:none">
           <div>
             <label>สลิป</label>
@@ -213,13 +224,11 @@
       </form>
     </div>
   </section>
-<!-- ======== END PART 2/7 ======== -->
-<!-- ======== PART 3/7: HISTORY PAGE + DASHBOARD PAGE + POPUP ======== -->
+
   <!-- HISTORY PAGE -->
   <section id="history" class="page">
     <div class="card">
       <h2>ประวัติการทำรายการ</h2>
-
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
         <input type="text" id="searchBox" placeholder="ค้นหารายการ..." style="flex:2;padding:10px;border:1px solid #ccc;border-radius:8px">
         <select id="filterMode" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px">
@@ -236,9 +245,7 @@
           <option value="operator_desc">ผู้ดำเนินการ (Z→A)</option>
         </select>
       </div>
-
       <div id="historyList"></div>
-
       <div style="text-align:center;margin-top:12px">
         <button id="loadMoreBtn" class="btn btn-ok">โหลดเพิ่ม</button>
       </div>
@@ -249,8 +256,6 @@
   <section id="dashboard" class="page">
     <div class="card">
       <h2>แดชบอร์ด</h2>
-
-      <!-- Filters -->
       <div class="filter-row">
         <input type="date" id="dbStart" class="mini">
         <input type="date" id="dbEnd" class="mini">
@@ -264,10 +269,8 @@
         <button class="btn-apply" id="dbApply">นำไปใช้</button>
         <button class="btn" id="dbReset">ล้างตัวกรอง</button>
       </div>
-
       <div class="crumbs" id="dbCrumbs"></div>
       <button class="btn btn-ok btn-back" id="dbBack" style="display:none">ย้อนกลับ</button>
-
       <div class="dash">
         <div id="donutWrap"><canvas id="donutChart"></canvas></div>
         <div class="summary" id="summaryBox"></div>
@@ -275,10 +278,34 @@
     </div>
   </section>
 
-  <!-- POPUP -->
+  <!-- Saving Popup -->
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
-<!-- ======== END PART 3/7 ======== -->
-<!-- ======== PART 4/7: SCRIPT – GLOBAL, HELPERS, TABS, MODE, TAG+SUGGESTION ======== -->
+
+  <!-- Input Modals -->
+  <div id="supplierModal" class="modal" aria-hidden="true">
+    <div class="modal-box">
+      <div class="modal-title">เพิ่มร้านค้าใหม่</div>
+      <label>ชื่อร้านค้าใหม่</label>
+      <input type="text" id="supplierNewName" placeholder="เช่น หจก. ตัวอย่างการค้า">
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" data-close="#supplierModal">ยกเลิก</button>
+        <button type="button" id="supplierSaveBtn" class="btn btn-success">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="buildingModal" class="modal" aria-hidden="true">
+    <div class="modal-box">
+      <div class="modal-title">เพิ่มอาคารใหม่</div>
+      <label>ชื่ออาคารใหม่</label>
+      <input type="text" id="buildingNewName" placeholder="เช่น อาคาร A">
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" data-close="#buildingModal">ยกเลิก</button>
+        <button type="button" id="buildingSaveBtn" class="btn btn-success">บันทึก</button>
+      </div>
+    </div>
+  </div>
+<!-- ======== PART 2/3: SCRIPT – GLOBAL, HELPERS, TABS, MODE, TAG+SUGGESTION, VALIDATION, UPLOAD, SUBMIT ======== -->
 <script>
 /* ========== GLOBAL CONFIG ========== */
 const API_URL="https://satoshi-smart-ledger.tttta2556.workers.dev/";
@@ -293,6 +320,12 @@ function formatDate(d){if(!d)return"";const dt=new Date(d);if(isNaN(dt))return d
 function todayYMD(){const t=new Date();return t.toISOString().slice(0,10)}
 function showPopup(m){document.getElementById("popupBox").innerText=m;document.getElementById("popup").style.display="flex"}
 function hidePopup(){document.getElementById("popup").style.display="none"}
+
+/* Simple modal control */
+function openModal(sel){const el=document.querySelector(sel); if(el){el.style.display="flex"; const inp=el.querySelector("input"); if(inp){inp.value=""; setTimeout(()=>inp.focus(),50)}}}
+function closeModal(sel){const el=document.querySelector(sel); if(el){el.style.display="none"}}
+document.querySelectorAll(".btn-cancel").forEach(b=>b.addEventListener("click",e=>{const sel=b.getAttribute("data-close"); closeModal(sel)}));
+window.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeModal("#supplierModal"); closeModal("#buildingModal"); }});
 
 /* ========== TABS ========== */
 document.querySelectorAll(".tab").forEach(b=>{
@@ -342,7 +375,7 @@ function renderBuildingSuggestions(filter=""){
   list.innerHTML="";
   const filtered=buildingList
     .filter(b=>b.toLowerCase().includes(filter.toLowerCase()) && !selectedBuildings.includes(b))
-    .slice(0,8); // จำกัด 8 รายการ (ปรับได้)
+    .slice(0,8);
   if(filtered.length===0){list.style.display="none";return}
   filtered.forEach(b=>{
     const item=document.createElement("div");
@@ -375,16 +408,42 @@ document.addEventListener("click",e=>{
   const box=document.getElementById("buildingTags");
   if(!box.contains(e.target)) document.getElementById("buildingSuggest").style.display="none";
 });
-document.getElementById("addBuildingBtn").addEventListener("click",async()=>{
-  const val=prompt("กรอกชื่ออาคารใหม่");
-  if(val){
+
+/* ===== popup-based add buttons (green) ===== */
+document.getElementById("addBuildingBtn").addEventListener("click",()=>openModal("#buildingModal"));
+document.getElementById("buildingSaveBtn").addEventListener("click",async()=>{
+  const val=(document.getElementById("buildingNewName").value||"").trim();
+  if(!val) return;
+  showPopup("กำลังเพิ่มอาคาร...");
+  try{
     await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})});
     await loadOptions();
     if(!selectedBuildings.includes(val)){selectedBuildings.push(val);renderBuildingTags()}
+    hidePopup();
+    closeModal("#buildingModal");
+  }catch(e){
+    hidePopup();
+    alert("เพิ่มอาคารไม่สำเร็จ");
   }
 });
-<!-- ======== END PART 4/7 ======== -->
-<!-- ======== PART 5/7: VALIDATION + UPLOAD + SUBMIT (Auto-split per building, no rounding) ======== -->
+
+document.getElementById("addSupplierBtn").addEventListener("click",()=>openModal("#supplierModal"));
+document.getElementById("supplierSaveBtn").addEventListener("click",async()=>{
+  const val=(document.getElementById("supplierNewName").value||"").trim();
+  if(!val) return;
+  showPopup("กำลังเพิ่มร้านค้า...");
+  try{
+    await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})});
+    await loadOptions();
+    document.getElementById("supplierExpense").value=val;
+    hidePopup();
+    closeModal("#supplierModal");
+  }catch(e){
+    hidePopup();
+    alert("เพิ่มร้านค้าไม่สำเร็จ");
+  }
+});
+
 /* ========== VALIDATION ========== */
 function clearErrors(){
   document.querySelectorAll(".error").forEach(e=>e.textContent="");
@@ -448,7 +507,7 @@ async function preUpload(inputEl,type){
 document.getElementById("slipExpense").addEventListener("change",async(e)=>{try{preUploaded.slips=await preUpload(e.target,"slip")}catch{document.getElementById("slipStatus").textContent="อัปโหลดล้มเหลว"}});
 document.getElementById("receiptExpense").addEventListener("change",async(e)=>{try{preUploaded.receipts=await preUpload(e.target,"receipt")}catch{document.getElementById("receiptStatus").textContent="อัปโหลดล้มเหลว"}});
 
-/* ========== SUBMIT (แยกบันทึกจริงต่ออาคาร, ไม่ปัดทศนิยม) ========== */
+/* ========== SUBMIT (แยกบันทึกต่ออาคาร, ไม่ปัดทศนิยม) ========== */
 document.getElementById("form").addEventListener("submit",async e=>{
   e.preventDefault();
   if(!validateForm()) return;
@@ -500,7 +559,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
       const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
       const j=await res.json(); if(!j.ok) throw new Error("fail");
     }
-    showPopup("บันทึกสำเร็จ ✅"); setTimeout(hidePopup,1000);
+    showPopup("บันทึกสำเร็จ ✅"); setTimeout(hidePopup,800);
 
     // reset
     document.getElementById("form").reset();
@@ -514,15 +573,16 @@ document.getElementById("form").addEventListener("submit",async e=>{
     await loadOptions();
   }catch(err){
     console.error(err);
-    showPopup("บันทึกล้มเหลว ❌"); setTimeout(hidePopup,1500);
+    showPopup("บันทึกล้มเหลว ❌"); setTimeout(hidePopup,1200);
   }
 });
-<!-- ======== END PART 5/7 ======== -->
-<!-- ======== PART 6/7: HISTORY LOGIC ======== -->
+</script>
+<!-- ======== PART 3/3: HISTORY, DASHBOARD, LOAD OPTIONS, AMOUNT FORMAT, INIT ======== -->
+<script>
 /* ========== HISTORY (group by date) ========== */
 let historyPage={page:1,perPage:12,filtered:[]};
 function applyFilters(){
-  const q=document.getElementById("searchBox").value.toLowerCase();
+  const q=(document.getElementById("searchBox").value||"").toLowerCase();
   const mode=document.getElementById("filterMode").value;
   const sort=document.getElementById("sortBy").value;
 
@@ -605,8 +665,7 @@ document.getElementById("filterMode").addEventListener("change",applyFilters);
 document.getElementById("sortBy").addEventListener("change",applyFilters);
 document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage.page++;renderHistoryStatement()});
 function renderHistory(){ applyFilters() }
-<!-- ======== END PART 6/7 ======== -->
-<!-- ======== PART 7/7: DASHBOARD + LOAD OPTIONS + AMOUNT FORMAT + INIT (END) ======== -->
+
 /* ========== DASHBOARD: Donut + Drilldown ========== */
 let drill={ level:0, path:[], dims:['project','building','jobType','category','paymentType'], start:null, end:null };
 function withinRange(dateStr){const y=ymd(dateStr); if(!y) return false; if(drill.start&&y<drill.start) return false; if(drill.end&&y>drill.end) return false; return true}
@@ -714,35 +773,51 @@ async function loadOptions(){
   fillSelect("category",d.options.categories||[]);
   fillSelect("paymentType",d.options.paymentTypes||[]);
 }
-document.getElementById("addSupplierBtn").addEventListener("click",async()=>{
-  const val=prompt("กรอกชื่อร้านค้าใหม่");
-  if(val){
-    await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})});
-    await loadOptions(); document.getElementById("supplierExpense").value=val;
-  }
-});
 
-/* ========== AMOUNT FORMAT (ทศนิยม) + THAI MONEY TEXT ========== */
+/* ========== AMOUNT FORMAT (รองรับ '.' และเติม .00 อัตโนมัติ) ========== */
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt");
 amountEl.addEventListener("input",()=>{
-  let s=amountEl.value.replace(/,/g,"").replace(/[^\d.]/g,"");
-  const parts=s.split("."); if(parts.length>2) s=parts[0]+"."+parts.slice(1).join("");
-  const [intPart,decPart=""]=s.split(".");
+  let raw=amountEl.value;
+
+  // อนุญาตเริ่มด้วย '.' -> แปลงเป็น '0.'
+  if(raw.startsWith(".")) raw="0"+raw;
+
+  // กรองเป็นตัวเลขและจุด
+  let s=raw.replace(/,/g,"").replace(/[^\d.]/g,"");
+
+  // กันหลายจุด: เหลือเฉพาะจุดแรก
+  const firstDot=s.indexOf(".");
+  if(firstDot!==-1){
+    const before=s.slice(0,firstDot+1);
+    const after=s.slice(firstDot+1).replace(/\./g,"");
+    s=before+after;
+  }
+
+  // แยกส่วนเพื่อใส่คอมมาในส่วนจำนวนเต็ม
+  let endsWithDot = s.endsWith(".");
+  const [intPartRaw,decPartRaw=""] = s.split(".");
+  const intPart = (intPartRaw||"0").replace(/^0+(?=\d)/,"");
   const withCommas=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,",");
-  amountEl.value=decPart?withCommas+"."+decPart:withCommas;
+
+  // รักษา '.' ระหว่างพิมพ์หากผู้ใช้เพิ่งพิมพ์จุด
+  amountEl.value = firstDot!==-1 ? (withCommas + (endsWithDot?".":("." + decPartRaw))) : withCommas;
+
   const num=parseFloat(s);
   if(!isNaN(num)){
     const [i,d]=num.toFixed(2).split(".");
     amountTxt.textContent="("+thaiMoneyText(i,d)+")";
-  }else amountTxt.textContent="";
+  }else{
+    amountTxt.textContent="";
+  }
 });
 amountEl.addEventListener("blur",()=>{
-  const raw=amountEl.value.replace(/,/g,""), num=parseFloat(raw);
-  if(!isNaN(num)){
-    amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-    const [i,d]=num.toFixed(2).split(".");
-    amountTxt.textContent="("+thaiMoneyText(i,d)+")";
-  }
+  const raw=(amountEl.value||"").replace(/,/g,"");
+  if(!raw){amountTxt.textContent=""; return;}
+  let num=parseFloat(raw);
+  if(isNaN(num)){amountTxt.textContent=""; return;}
+  amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const [i,d]=num.toFixed(2).split(".");
+  amountTxt.textContent="("+thaiMoneyText(i,d)+")";
 });
 function thaiMoneyText(i,d){
   const n=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"],p=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"];
@@ -758,4 +833,4 @@ window.addEventListener("DOMContentLoaded",async()=>{ setMode("เบิก"); a
 </script>
 </body>
 </html>
-<!-- ======== END PART 7/7 ======== -->
+<!-- ======== END PART 3/3 ======== -->
