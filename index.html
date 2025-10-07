@@ -1,4 +1,4 @@
-<!-- ======== PART 1/4: DOCTYPE + HEAD (Chart.js + Global Styles + Loader Spin only) ======== -->
+<!-- ======== PART 1/4: DOCTYPE + HEAD (Chart.js + Global Styles + Loader%) ======== -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -40,21 +40,77 @@
     .btn-apply{padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;font-weight:700;cursor:pointer}
     .btn-secondary{padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
 
-    /* Loader (Spin only, no %) */
+    /* Popup Saving */
+    #popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center}
+    #popupBox{background:#fff;padding:24px 28px;border-radius:12px;font-size:1.2rem;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+
+    /* Loader (New % Spinner) */
     #loaderOverlay{position:fixed;inset:0;background:rgba(0,0,0,.65);color:#fff;display:none;align-items:center;justify-content:center;z-index:3000;flex-direction:column;font-size:1.3rem;font-weight:600}
     #loaderSpinner{border:5px solid rgba(255,255,255,.2);border-top:5px solid #facc15;border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite;margin-bottom:16px}
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* Dashboard analytics */
-    .analytics-wrap{margin-top:40px;display:grid;gap:30px}
-    canvas{max-width:100%;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.05);padding:12px}
+    /* Upload chips */
+    .upload-row{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+    .upload-status{font-size:.9rem;color:#555}
+    .chip{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border:1px solid #e2e8f0;color:#0f172a;padding:6px 10px;border-radius:999px;font-size:.85rem;cursor:pointer;text-decoration:none}
+    .chip:hover{background:#e2e8f0}
+
+    /* History */
+    .date-header{font-weight:700;color:#0f172a;margin:18px 0 10px}
+    .history-card{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:.2s;cursor:pointer;border-left:6px solid transparent}
+    .history-card:hover{box-shadow:0 3px 10px rgba(0,0,0,0.08)}
+    .history-top{display:flex;justify-content:space-between;align-items:center}
+    .history-id{font-size:.92rem;color:#475569}
+    .history-amount{font-size:1.12rem;font-weight:800}
+    .pos{color:#06c755}
+    .neg{color:#d93025}
+    .history-one{font-size:.95rem;color:#1f2937;margin-top:4px}
+    .history-operator{font-size:.85rem;color:#64748b;margin-top:2px}
+    .history-detail{display:none;padding-top:10px;border-top:1px dashed #e2e8f0;margin-top:10px}
+    .history-files{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px}
+
+    /* Dashboard */
+    .dash{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;justify-content:center}
+    #donutWrap{width:420px;min-height:420px;display:flex;align-items:center;justify-content:center;position:relative}
+    #donutChart{max-width:420px}
+    .center-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+    .center-text .big{font-weight:800;font-size:1.4rem;color:#111}
+    .center-text .sub{font-size:.9rem;color:#64748b}
+    .summary{min-width:300px;max-width:520px;flex:1;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:18px}
+    .summary h3{margin:0 0 12px}
+    .crumbs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+    .crumb{background:#f1f5f9;border:1px solid #e2e8f0;padding:6px 10px;border-radius:999px;font-size:.85rem}
+    .btn-back{margin-bottom:10px}
+    .filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .mini{padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff}
+    .legend-item{display:flex;align-items:center;gap:8px;margin:6px 0}
+    .legend-dot{width:12px;height:12px;border-radius:50%}
+    .legend-empty{padding:12px;border:1px dashed #e5e7eb;border-radius:10px;background:#f8fafc;color:#64748b}
+
+    /* Tag Input */
+    .tag-input{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1px solid #ddd;border-radius:10px;padding:8px;background:#fafafa;cursor:text;position:relative;flex:1}
+    .tag-input input{border:none;outline:none;flex:1;min-width:120px;padding:6px;font-size:.95rem;background:transparent}
+    .tag{display:inline-flex;align-items:center;gap:6px;background:#e2e8f0;color:#111;padding:6px 10px;border-radius:999px;font-size:.9rem}
+    .tag button{border:none;background:transparent;cursor:pointer;color:#555;font-weight:bold}
+    .tag button:hover{color:#d93025}
+    .suggestion-list{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.1);max-height:180px;overflow-y:auto;z-index:50;margin-top:2px}
+    .suggestion-item{padding:8px 10px;cursor:pointer}
+    .suggestion-item:hover{background:#f1f5f9}
+
+    /* Modal */
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2100;align-items:center;justify-content:center}
+    .modal-box{width:92%;max-width:480px;background:#fff;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:20px}
+    .modal-title{font-size:1.1rem;font-weight:800;margin:2px 0 10px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+    .btn-cancel{background:#e5e7eb;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
+    .btn-cancel:hover{background:#d1d5db}
   </style>
 </head>
 <body>
-  <!-- Loader -->
+  <!-- Loader Overlay -->
   <div id="loaderOverlay">
     <div id="loaderSpinner"></div>
-    <div>กำลังโหลด...</div>
+    <div>กำลังโหลด... <span id="loaderPercent">0%</span></div>
   </div>
 
   <!-- Tabs -->
@@ -103,6 +159,7 @@
             <select id="project"></select>
             <div class="error" id="err-project"></div>
           </div>
+
           <div>
             <label>อาคาร</label>
             <div style="display:flex;gap:8px;align-items:flex-start">
@@ -110,7 +167,7 @@
                 <input type="text" id="buildingInput" placeholder="พิมพ์ชื่ออาคาร...">
                 <div id="buildingSuggest" class="suggestion-list" style="display:none"></div>
               </div>
-              <button type="button" id="addBuildingBtn" class="btn btn-success">+ เพิ่มอาคารใหม่</button>
+              <button type="button" id="addBuildingBtn" class="btn btn-success" title="เพิ่มอาคารใหม่">+ เพิ่มอาคารใหม่</button>
             </div>
             <div class="hint">พิมพ์เพื่อค้นหา/เลือกจากรายการ หรือกด Enter เพื่อเพิ่ม</div>
             <div class="error" id="err-building"></div>
@@ -187,10 +244,12 @@
     <div class="card">
       <h2>ประวัติการทำรายการ</h2>
 
+      <!-- Date range filters -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-        <input type="date" id="historyStart" class="mini">
-        <input type="date" id="historyEnd" class="mini">
+        <input type="date" id="historyStart" class="mini" placeholder="ตั้งแต่วันที่">
+        <input type="date" id="historyEnd" class="mini" placeholder="ถึงวันที่">
         <button id="historyApply" class="btn-apply">กรองวันที่</button>
+        <!-- ลบปุ่ม Export CSV ตามบรีฟข้อ 2 -->
         <button id="exportPdf" class="btn-secondary">Export PDF</button>
       </div>
 
@@ -206,10 +265,13 @@
           <option value="date_asc">วันที่ (เก่า→ใหม่)</option>
           <option value="amount_desc">จำนวนเงิน (มาก→น้อย)</option>
           <option value="amount_asc">จำนวนเงิน (น้อย→มาก)</option>
+          <option value="operator_asc">ผู้ดำเนินการ (A→Z)</option>
+          <option value="operator_desc">ผู้ดำเนินการ (Z→A)</option>
         </select>
       </div>
 
       <div id="historyList"></div>
+
       <div style="text-align:center;margin-top:12px">
         <button id="loadMoreBtn" class="btn btn-ok">โหลดเพิ่ม</button>
       </div>
@@ -230,8 +292,12 @@
           <option value="this_year">ปีนี้</option>
           <option value="last_year">ปีที่แล้ว</option>
         </select>
-        <button id="dbReset" class="btn">ล้างตัวกรอง</button>
-        <button id="exportChartPdf" class="btn">Export PDF</button>
+        <button class="btn-apply" id="dbApply">นำไปใช้</button>
+        <button class="btn" id="dbReset">ล้างตัวกรอง</button>
+
+        <!-- ปรับตามบรีฟข้อ 3: ตัดดาวน์โหลด PNG และเพิ่ม Export PDF -->
+        <button class="btn" id="toggleUnit" title="สลับมุมมอง จำนวนเงิน/เปอร์เซ็นต์">ดูเป็น %</button>
+        <button class="btn" id="exportChartPdf" title="ส่งออกเป็น PDF">Export PDF</button>
       </div>
 
       <div class="crumbs" id="dbCrumbs"></div>
@@ -247,20 +313,17 @@
         </div>
         <div class="summary" id="summaryBox"></div>
       </div>
-
-      <div class="analytics-wrap">
-        <canvas id="barChart" height="200"></canvas>
-        <canvas id="forecastChart" height="200"></canvas>
-      </div>
     </div>
   </section>
 
-  <!-- Popup + Modals -->
+  <!-- Saving Popup -->
   <div id="popup"><div id="popupBox">กำลังบันทึก...</div></div>
 
+  <!-- Input Modals -->
   <div id="supplierModal" class="modal" aria-hidden="true">
     <div class="modal-box">
       <div class="modal-title">เพิ่มร้านค้าใหม่</div>
+      <label>ชื่อร้านค้าใหม่</label>
       <input type="text" id="supplierNewName" placeholder="เช่น หจก. ตัวอย่างการค้า">
       <div class="modal-actions">
         <button type="button" class="btn-cancel" data-close="#supplierModal">ยกเลิก</button>
@@ -272,6 +335,7 @@
   <div id="buildingModal" class="modal" aria-hidden="true">
     <div class="modal-box">
       <div class="modal-title">เพิ่มอาคารใหม่</div>
+      <label>ชื่ออาคารใหม่</label>
       <input type="text" id="buildingNewName" placeholder="เช่น อาคาร A">
       <div class="modal-actions">
         <button type="button" class="btn-cancel" data-close="#buildingModal">ยกเลิก</button>
@@ -279,82 +343,105 @@
       </div>
     </div>
   </div>
-<!-- ======== PART 3/4: SCRIPT – GLOBAL, TABS, VALIDATION, UPLOAD, HISTORY, DASHBOARD BASE ======== -->
+
+<!-- ======== PART 2/4: SCRIPT – GLOBAL, HELPERS, TABS, MODE, TAG+SUGGESTION, VALIDATION, UPLOAD QUEUE ======== -->
 <script>
-const API_URL = "https://satoshi-smart-ledger.tttta2556.workers.dev/";
-let records = [];
-let chart = null;
-let barChart = null;
-let forecastChart = null;
-let queuedUploads = { slips: [], receipts: [] };
-let selectedBuildings = [];
-let buildingList = [];
+/* ========== GLOBAL CONFIG ========== */
+const API_URL="https://satoshi-smart-ledger.tttta2556.workers.dev/";
+let records=[], chart=null;
+let queuedUploads={slips:[], receipts:[]}; // เปลี่ยนเป็นคิวไฟล์จริง ยังไม่อัปโหลด
+let selectedBuildings=[];
+let buildingList=[];
 
-/* ===== Loader (no %) ===== */
-const loader = document.getElementById("loaderOverlay");
-function showLoader(){loader.style.display="flex"}
-function hideLoader(){loader.style.display="none"}
-
-/* ===== Popup ===== */
-function showPopup(msg){document.getElementById("popupBox").textContent=msg;document.getElementById("popup").style.display="flex"}
+/* ========== HELPERS ========== */
+function ymd(d){const dt=new Date(d);return isNaN(dt)?null:dt.toISOString().slice(0,10)}
+function formatDate(d){if(!d)return"";const dt=new Date(d);if(isNaN(dt))return d;return ("0"+dt.getDate()).slice(-2)+"/"+("0"+(dt.getMonth()+1)).slice(-2)+"/"+dt.getFullYear()}
+function todayYMD(){const t=new Date();return t.toISOString().slice(0,10)}
+function showPopup(m){document.getElementById("popupBox").innerText=m;document.getElementById("popup").style.display="flex"}
 function hidePopup(){document.getElementById("popup").style.display="none"}
 
-/* ===== Tabs ===== */
-document.querySelectorAll(".tab").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById(btn.dataset.id).classList.add("active");
-    if(btn.dataset.id==="history") renderHistory();
-    if(btn.dataset.id==="dashboard") renderDashboard();
+/* Loader% */
+const loaderEl=document.getElementById("loaderOverlay");
+const loaderPct=document.getElementById("loaderPercent");
+function showLoader(pct=0){loaderEl.style.display="flex";loaderPct.textContent=`${pct}%`;}
+function setLoader(pct){loaderPct.textContent=`${pct}%`;}
+function hideLoader(){loaderEl.style.display="none";}
+
+/* Debounce */
+function debounce(fn, ms){let t;return (...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),ms)}}
+
+/* Simple modal control */
+function openModal(sel){const el=document.querySelector(sel); if(el){el.style.display="flex"; const inp=el.querySelector("input"); if(inp){inp.value=""; setTimeout(()=>inp.focus(),50)}}}
+function closeModal(sel){const el=document.querySelector(sel); if(el){el.style.display="none"}}
+document.querySelectorAll(".btn-cancel").forEach(b=>b.addEventListener("click",()=>{const sel=b.getAttribute("data-close"); closeModal(sel)}));
+window.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeModal("#supplierModal"); closeModal("#buildingModal"); }});
+
+/* ========== TABS ========== */
+document.querySelectorAll(".tab").forEach(b=>{
+  b.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    document.getElementById(b.dataset.id).classList.add("active");
+    if(b.dataset.id==="history") renderHistory();
+    if(b.dataset.id==="dashboard") renderDrill();
   });
 });
 
-/* ===== Mode toggle ===== */
-function setMode(mode){
-  document.getElementById("mode").value=mode;
-  document.getElementById("btnIncome").classList.toggle("selected",mode==="เบิก");
-  document.getElementById("btnExpense").classList.toggle("selected",mode==="จ่าย");
-  const isIncome = mode==="เบิก";
+/* ========== MODE TOGGLE (เบิก / จ่าย) ========== */
+function setMode(m){
+  document.getElementById("mode").value=m;
+  document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก");
+  document.getElementById("btnExpense").classList.toggle("selected",m==="จ่าย");
+  const isIncome=m==="เบิก";
   document.querySelectorAll(".expense-only").forEach(el=>el.style.display=isIncome?"none":"grid");
   document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block";
   document.getElementById("filesExpense").style.display=isIncome?"none":"grid";
   document.getElementById("itemWrap").style.display=isIncome?"none":"block";
+  const op=document.getElementById("operator");
+  if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
+  selectedBuildings=[]; renderBuildingTags();
 }
 document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"));
 document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"));
 
-/* ===== Building tags ===== */
+/* ========== BUILDING TAG + SUGGESTION ========== */
 function renderBuildingTags(){
   const box=document.getElementById("buildingTags");
   const input=document.getElementById("buildingInput");
-  box.querySelectorAll(".tag").forEach(t=>t.remove());
-  selectedBuildings.forEach((b,i)=>{
+  box.querySelectorAll(".tag").forEach(el=>el.remove());
+  selectedBuildings.forEach((b,idx)=>{
     const tag=document.createElement("div");
     tag.className="tag";
-    tag.innerHTML=`${b} <button type="button" onclick="removeBuilding(${i})">×</button>`;
+    tag.innerHTML=`${b} <button type="button" onclick="removeBuilding(${idx})">×</button>`;
     box.insertBefore(tag,input);
   });
 }
-function removeBuilding(i){selectedBuildings.splice(i,1);renderBuildingTags();}
-
-/* ===== Suggestions ===== */
+function removeBuilding(i){selectedBuildings.splice(i,1);renderBuildingTags()}
 function renderBuildingSuggestions(filter=""){
   const list=document.getElementById("buildingSuggest");
   list.innerHTML="";
-  const filtered=buildingList.filter(b=>b.toLowerCase().includes(filter.toLowerCase())&&!selectedBuildings.includes(b)).slice(0,8);
-  if(!filtered.length){list.style.display="none";return}
+  const filtered=buildingList
+    .filter(b=>b.toLowerCase().includes(filter.toLowerCase()) && !selectedBuildings.includes(b))
+    .slice(0,8);
+  if(filtered.length===0){list.style.display="none";return}
   filtered.forEach(b=>{
-    const it=document.createElement("div");
-    it.className="suggestion-item";
-    it.textContent=b;
-    it.onclick=()=>{selectedBuildings.push(b);renderBuildingTags();document.getElementById("buildingInput").value="";list.style.display="none";};
-    list.appendChild(it);
+    const item=document.createElement("div");
+    item.className="suggestion-item";
+    item.textContent=b;
+    item.addEventListener("click",()=>{
+      selectedBuildings.push(b);
+      renderBuildingTags();
+      document.getElementById("buildingInput").value="";
+      list.style.display="none";
+    });
+    list.appendChild(item);
   });
   list.style.display="block";
 }
-document.getElementById("buildingInput").addEventListener("input",e=>renderBuildingSuggestions(e.target.value.trim()));
+document.getElementById("buildingInput").addEventListener("input",e=>{
+  renderBuildingSuggestions(e.target.value.trim());
+});
 document.getElementById("buildingInput").addEventListener("keydown",e=>{
   if(e.key==="Enter"&&e.target.value.trim()!==""){
     e.preventDefault();
@@ -370,648 +457,9 @@ document.addEventListener("click",e=>{
   if(!box.contains(e.target)) document.getElementById("buildingSuggest").style.display="none";
 });
 
-/* ===== Add supplier/building modal ===== */
-function openModal(id){document.querySelector(id).style.display="flex";}
-function closeModal(id){document.querySelector(id).style.display="none";}
-document.querySelectorAll(".btn-cancel").forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
-document.getElementById("addSupplierBtn").onclick=()=>openModal("#supplierModal");
-document.getElementById("addBuildingBtn").onclick=()=>openModal("#buildingModal");
-
-/* ===== Upload queue ===== */
-function renderChips(type){
-  const list=document.getElementById(type+"Chips");
-  const arr = type==="slip"?queuedUploads.slips:queuedUploads.receipts;
-  list.innerHTML="";
-  arr.forEach(f=>{
-    const c=document.createElement("span");
-    c.className="chip";
-    c.textContent=f.name;
-    list.appendChild(c);
-  });
-}
-document.getElementById("slipExpense").addEventListener("change",e=>{
-  queuedUploads.slips=Array.from(e.target.files);
-  renderChips("slip");
-});
-document.getElementById("receiptExpense").addEventListener("change",e=>{
-  queuedUploads.receipts=Array.from(e.target.files);
-  renderChips("receipt");
-});
-
-/* ===== Validation ===== */
-function validateForm(){
-  let ok=true;
-  const m=document.getElementById("mode").value;
-  const date=document.getElementById("date").value;
-  const amount=parseFloat((document.getElementById("amount").value||"").replace(/,/g,""));
-  const operator=document.getElementById("operator").value;
-  if(!date){ok=false;document.getElementById("err-date").textContent="กรุณาเลือกวันที่";}
-  if(!amount||isNaN(amount)){ok=false;document.getElementById("err-amount").textContent="กรอกจำนวนเงิน";}
-  if(!operator){ok=false;document.getElementById("err-operator").textContent="เลือกผู้ดำเนินการ";}
-  if(m==="จ่าย"){
-    const need=["item","supplierExpense","project","jobType","category","paymentType"];
-    need.forEach(id=>{const el=document.getElementById(id);if(!el.value){ok=false;document.getElementById("err-"+id).textContent="กรุณากรอกข้อมูล";}});
-    if(selectedBuildings.length===0){ok=false;document.getElementById("err-building").textContent="เพิ่มอาคารอย่างน้อย 1 รายการ";}
-  }
-  return ok;
-}
-
-/* ===== History render ===== */
-function formatDate(d){if(!d)return"";const dt=new Date(d);return dt.toLocaleDateString("th-TH",{year:"numeric",month:"2-digit",day:"2-digit"})}
-function ymd(d){if(!d)return null;const dt=new Date(d);return dt.toISOString().slice(0,10);}
-function renderHistory(){
-  const list=document.getElementById("historyList");
-  list.innerHTML="";
-  const grouped={};
-  records.forEach(r=>{
-    const k=ymd(r.date)||"";
-    if(!grouped[k]) grouped[k]=[];
-    grouped[k].push(r);
-  });
-  Object.keys(grouped).sort((a,b)=>new Date(b)-new Date(a)).forEach(d=>{
-    const header=document.createElement("div");
-    header.className="date-header";
-    header.textContent=formatDate(d);
-    list.appendChild(header);
-    grouped[d].forEach(r=>{
-      const c=document.createElement("div");
-      c.className="history-card";
-      const sign=r.mode==="เบิก"?"+":"-";
-      c.style.borderLeftColor=r.mode==="เบิก"?"#06c755":"#d93025";
-      const money=`${sign}${Math.abs(r.amount||0).toLocaleString(undefined,{minimumFractionDigits:2})} บาท`;
-      const slip=r.slips?'<a href="'+r.slips+'" target="_blank">ดูสลิป</a>':"-";
-      const rec=r.receipts?'<a href="'+r.receipts+'" target="_blank">ดูใบเสร็จ</a>':"-";
-      c.innerHTML=`
-        <div class="history-top"><div>${r.id||"-"}</div><div class="history-amount ${r.mode==="เบิก"?"pos":"neg"}">${money}</div></div>
-        <div class="history-one">${r.item||"-"}</div>
-        <div class="history-operator">ผู้ดำเนินการ: ${r.operator||"-"}</div>
-        <div class="history-detail">
-          <div>โครงการ: ${r.project||"-"} | อาคาร: ${r.building||"-"}</div>
-          <div>ประเภทงาน: ${r.jobType||"-"} | หมวดงาน: ${r.category||"-"}</div>
-          <div>ประเภทรายการจ่าย: ${r.paymentType||"-"}</div>
-          <div>สลิป: ${slip} | ใบเสร็จ: ${rec}</div>
-        </div>`;
-      c.onclick=()=>{const det=c.querySelector(".history-detail");det.style.display=det.style.display==="block"?"none":"block";};
-      list.appendChild(c);
-    });
-  });
-}
-
-/* ===== Load & Refresh ===== */
-async function loadOptions(){
-  try{
-    showLoader();
-    const r=await fetch(API_URL);
-    const d=await r.json();
-    records=d.items||[];
-    buildingList=d.options?.buildings||[];
-    hideLoader();
-    renderDashboard(); // auto-refresh dashboard
-  }catch(err){
-    console.error(err);
-    hideLoader();
-  }
-}
-<!-- ======== PART 4/4: DASHBOARD (Auto), Forecast/Analytics, Export PDF, Submit, Init ======== -->
-<script>
-/* ---------------------------------------
-   🟠 Utilities for dashboard calculations
-----------------------------------------*/
-const THB = (v,fd=2)=>Number(v||0).toLocaleString(undefined,{minimumFractionDigits:fd,maximumFractionDigits:fd});
-const ABS = n => Math.abs(Number(n)||0);
-
-/* Parse within date range from dashboard inputs (auto-applied) */
-function getDbRange(){
-  const s = document.getElementById("dbStart")?.value || null;
-  const e = document.getElementById("dbEnd")?.value || null;
-  return {start:s, end:e};
-}
-function withinDbRange(d){
-  const {start,end} = getDbRange();
-  const y = ymd(d);
-  if(!y) return false;
-  if(start && y < start) return false;
-  if(end   && y > end)   return false;
-  return true;
-}
-function filteredForDashboard(){
-  return records.filter(r=>withinDbRange(r.date));
-}
-
-/* ---------------------------------------
-   🟣 Donut (Overview/Drill) — simplified
-   - Fixed “เงินคงเหลือ” first
-   - Center shows total withdrawn (เบิก) as THB
-   - Legend shows % next to label (เหมือนเดิม)
-   - Removed unit toggle
-----------------------------------------*/
-const drill = { level:0, path:[], dims:['project','building','jobType','category','paymentType'] };
-let chart; // donut
-function sumIncome(items){return items.filter(r=>r.mode==="เบิก").reduce((s,r)=>s+ABS(r.amount),0)}
-function groupExpense(items,key){
-  const m={};
-  items.filter(r=>r.mode==="จ่าย").forEach(r=>{
-    const k = (r[key]||"ไม่ระบุ").trim();
-    m[k]=(m[k]||0)+ABS(r.amount);
-  });
-  return m;
-}
-function hashColorFromName(name){
-  if(name==="เงินคงเหลือ") return "#4b5563";
-  let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))>>>0;
-  return `hsl(${h%360} 60% 55%)`;
-}
-function topNWithOthers(labels,values,N=6){
-  const arr=labels.map((l,i)=>({l, v:values[i]})).sort((a,b)=>b.v-a.v);
-  if(arr.length<=N) return {labels:arr.map(x=>x.l), values:arr.map(x=>x.v)};
-  const top=arr.slice(0,N-1), others=arr.slice(N-1).reduce((s,x)=>s+x.v,0);
-  return {labels:[...top.map(x=>x.l),"อื่นๆ"], values:[...top.map(x=>x.v), others]};
-}
-function setCenter(title,sub){
-  const w=document.getElementById("centerText");
-  document.getElementById("centerBig").textContent=title;
-  document.getElementById("centerSub").textContent=sub||"";
-  w.style.display="flex";
-}
-function renderDonut(labels,values,title){
-  // เงินคงเหลือเป็นลำดับแรกเสมอ
-  const idx = labels.indexOf("เงินคงเหลือ");
-  if(idx>0){
-    const [L]=labels.splice(idx,1);
-    const [V]=values.splice(idx,1);
-    labels=[L,...labels]; values=[V,...values];
-  }
-  // TopN
-  const {labels:LL, values:VV} = topNWithOthers(labels,values,6);
-  const total = VV.reduce((a,b)=>a+b,0);
-  const colors = LL.map(l=>hashColorFromName(l));
-  // Destroy old
-  if(chart){ chart.destroy(); }
-  const ctx=document.getElementById("donutChart").getContext("2d");
-  chart=new Chart(ctx,{
-    type:"doughnut",
-    data:{labels:LL,datasets:[{data:VV,backgroundColor:colors}]},
-    options:{
-      responsive:true, cutout:"65%",
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          callbacks:{
-            label:(c)=>{
-              const val=Number(c.parsed)||0;
-              const pct = total? (val/total*100):0;
-              return `${c.label}: ${pct.toFixed(2)}%`;
-            }
-          }
-        }
-      },
-      onClick:(evt)=>{
-        const p=chart.getElementsAtEventForMode(evt,'nearest',{intersect:true},false);
-        if(!p.length) return;
-        const i=p[0].index; const label=LL[i];
-        if(drill.level===0 && label==="เงินคงเหลือ") return;
-        goDeeper(label);
-      }
-    }
-  });
-
-  // Summary (legend) — add (%) suffix on overview
-  const box=document.getElementById("summaryBox");
-  if(total<=0||LL.length===0){
-    box.innerHTML=`<h3>${title}</h3><div class="legend-empty">ไม่มีข้อมูลในช่วงที่เลือก</div>`;
-  }else{
-    const isOverview = drill.level===0;
-    const html = LL.map((l,i)=>{
-      const v=VV[i]||0, pct= total? (v/total*100):0;
-      const name = isOverview? `${l} (${pct.toFixed(2)}%)` : l;
-      return `<div class="legend-item"><span class="legend-dot" style="background:${colors[i]}"></span><span>${name}</span><b style="margin-left:auto">${pct.toFixed(2)}%</b></div>`;
-    }).join("");
-    box.innerHTML=`<h3>${title}</h3>${html}`;
-  }
-
-  // Center text → total withdrawn (ภาพรวม)
-  const all = filteredForDashboard();
-  const totalIncome = sumIncome(all);
-  setCenter(`${THB(totalIncome,0)}฿`,"ยอดเบิกรวมทั้งหมด");
-}
-function applyPath(items){
-  let out=items.slice();
-  drill.path.forEach(p=>{ out=out.filter(r=>(r[p.dim]||"ไม่ระบุ")===p.value && r.mode==="จ่าย");});
-  return out;
-}
-function renderOverview(){
-  const data=filteredForDashboard();
-  const funds=sumIncome(data);
-  const expenses=data.filter(r=>r.mode==="จ่าย");
-  const byProject=groupExpense(expenses,"project");
-  const spent=Object.values(byProject).reduce((s,v)=>s+v,0);
-  const remain=Math.max(funds - spent, 0);
-  const labels=["เงินคงเหลือ", ...Object.keys(byProject)];
-  const values=[remain, ...Object.values(byProject)];
-  renderDonut(labels,values,"ภาพรวม");
-  renderCrumbs();
-}
-function renderDrill(){
-  const data=filteredForDashboard();
-  if(drill.level===0) return renderOverview();
-  const scoped=applyPath(data);
-  const dim=drill.dims[drill.level];
-  const parentDim=drill.dims[drill.level-1];
-  const parentVal=drill.path[drill.path.length-1]?.value || "";
-  const by=groupExpense(scoped,dim);
-  const labels=Object.keys(by), values=Object.values(by);
-  renderDonut(labels,values,`${parentDim} ${parentVal} → ${dim}`);
-  renderCrumbs();
-}
-function renderCrumbs(){
-  const crumbs=document.getElementById("dbCrumbs");
-  const back=document.getElementById("dbBack");
-  const items=[{dim:"ภาพรวม",value:"ทั้งหมด"}].concat(drill.path);
-  crumbs.innerHTML = items.map((p,i)=> i===0?`<span class="crumb">ภาพรวม</span>`:`<span class="crumb">${p.dim}: ${p.value}</span>`).join("");
-  back.style.display = drill.level>0? "inline-block":"none";
-}
-function goDeeper(label){
-  if(drill.level===0){drill.path.push({dim:'project', value:label});drill.level=1;}
-  else{
-    const dim=drill.dims[drill.level];
-    drill.path.push({dim, value:label});
-    if(drill.level<drill.dims.length-1) drill.level++;
-  }
-  renderDrill();
-}
-document.getElementById("dbBack").addEventListener("click",()=>{
-  if(drill.level===0) return;
-  drill.path.pop();
-  drill.level=Math.max(0,drill.level-1);
-  renderDrill();
-});
-
-/* ---------------------------------------
-   🟡 Extra Analytics Charts:
-   1) Cashflow (รายเดือน) — Line
-   2) Top Spending (หมวดงาน) — Bar
-   3) Forecast ค่าใช้จ่าย 3 เดือนถัดไป — Line (regression)
-----------------------------------------*/
-function monthKey(d){const dt=new Date(d);return `${dt.getFullYear()}-${("0"+(dt.getMonth()+1)).slice(-2)}`;}
-function rangeMonthsAsc(allDates){ // unique sorted asc "YYYY-MM"
-  const s=[...new Set(allDates)].sort((a,b)=>a.localeCompare(b));
-  return s;
-}
-function monthlyRollup(items){
-  const m={}; // {YYYY-MM: {in, out}}
-  items.forEach(r=>{
-    const k=monthKey(r.date);
-    if(!m[k]) m[k]={in:0,out:0};
-    if(r.mode==="เบิก") m[k].in += ABS(r.amount);
-    else m[k].out += ABS(r.amount);
-  });
-  const keys=rangeMonthsAsc(Object.keys(m));
-  return {keys, dataIn:keys.map(k=>m[k].in), dataOut:keys.map(k=>m[k].out)};
-}
-function ensureChartsDom(){
-  // สร้าง canvas เพิ่มใต้ summary ถ้ายังไม่มี
-  const container = document.querySelector(".dash");
-  if(!document.getElementById("chartsColumn")){
-    const col=document.createElement("div");
-    col.id="chartsColumn";
-    col.style.minWidth="300px";
-    col.style.maxWidth="560px";
-    col.style.flex="1";
-    col.innerHTML=`
-      <div class="summary" style="margin-top:0">
-        <h3>Cashflow รายเดือน</h3>
-        <canvas id="cashflowLine"></canvas>
-      </div>
-      <div class="summary" style="margin-top:16px">
-        <h3>Top หมวดงานที่ใช้จ่าย</h3>
-        <canvas id="topCategoryBar"></canvas>
-      </div>
-      <div class="summary" style="margin-top:16px">
-        <h3>Forecast ค่าใช้จ่าย 3 เดือนถัดไป</h3>
-        <canvas id="forecastLine"></canvas>
-      </div>
-    `;
-    container.appendChild(col);
-  }
-}
-function destroyChart(c){ if(c && typeof c.destroy==="function"){ try{c.destroy()}catch(_){}} }
-function renderCashflowLine(){
-  ensureChartsDom();
-  const data=filteredForDashboard();
-  const {keys, dataIn, dataOut} = monthlyRollup(data);
-  const ctx=document.getElementById("cashflowLine").getContext("2d");
-  destroyChart(window._cashflowLine);
-  window._cashflowLine = new Chart(ctx,{
-    type:"line",
-    data:{labels:keys, datasets:[
-      {label:"เบิกรวม/เดือน", data:dataIn, tension:0.25, fill:false},
-      {label:"จ่ายรวม/เดือน", data:dataOut, tension:0.25, fill:false}
-    ]},
-    options:{responsive:true, plugins:{legend:{position:"bottom"}}}
-  });
-}
-function renderTopCategoryBar(){
-  ensureChartsDom();
-  const data=filteredForDashboard();
-  const by=groupExpense(data,"category");
-  const labels=Object.keys(by);
-  const values=Object.values(by);
-  const combined = labels.map((l,i)=>({l,v:values[i]})).sort((a,b)=>b.v-a.v).slice(0,8);
-  const L=combined.map(x=>x.l), V=combined.map(x=>x.v);
-  const ctx=document.getElementById("topCategoryBar").getContext("2d");
-  destroyChart(window._topCategoryBar);
-  window._topCategoryBar = new Chart(ctx,{
-    type:"bar",
-    data:{labels:L, datasets:[{label:"ยอดใช้จ่าย", data:V}]},
-    options:{responsive:true, plugins:{legend:{display:false}}, scales:{x:{ticks:{autoSkip:false}}}}
-  });
-}
-
-/* --- Simple Linear Regression (least squares) for forecast --- */
-function linRegForecast(x, y, steps=3){
-  // x: [0..n-1], y: actual
-  const n=x.length;
-  if(n<2) return Array(steps).fill(y[n-1]||0);
-  const sumX=x.reduce((a,b)=>a+b,0);
-  const sumY=y.reduce((a,b)=>a+b,0);
-  const sumXX=x.reduce((s,v)=>s+v*v,0);
-  const sumXY=x.reduce((s,v,i)=>s+v*y[i],0);
-  const denom = (n*sumXX - sumX*sumX) || 1;
-  const a = (n*sumXY - sumX*sumY)/denom; // slope
-  const b = (sumY - a*sumX)/n;          // intercept
-  const out=[];
-  for(let i=0;i<steps;i++){
-    const xi = n+i;
-    out.push(a*xi + b);
-  }
-  return out.map(v=>Math.max(0, v)); // ไม่ให้ติดลบ
-}
-function nextMonthStr(ym){ // "YYYY-MM" -> next "YYYY-MM"
-  const [Y,M]=ym.split("-").map(Number);
-  let y=Y, m=M+1; if(m>12){m=1;y++}
-  return `${y}-${("0"+m).slice(-2)}`;
-}
-function forecast3MonthsLabels(lastYM){
-  const a = nextMonthStr(lastYM);
-  const b = nextMonthStr(a);
-  const c = nextMonthStr(b);
-  return [a,b,c];
-}
-function renderForecast(){
-  ensureChartsDom();
-  const data=filteredForDashboard().filter(r=>r.mode==="จ่าย");
-  // monthly expense totals
-  const m={}; data.forEach(r=>{const k=monthKey(r.date); m[k]=(m[k]||0)+ABS(r.amount);});
-  const keys = rangeMonthsAsc(Object.keys(m));
-  if(!keys.length){
-    const ctx=document.getElementById("forecastLine").getContext("2d");
-    destroyChart(window._forecastLine);
-    window._forecastLine = new Chart(ctx,{type:"line",data:{labels:[],datasets:[{label:"Forecast",data:[]}]},options:{plugins:{legend:{display:false}}}});
-    return;
-  }
-  const y = keys.map(k=>m[k]);
-  const x = keys.map((_,i)=>i);
-  const f3 = linRegForecast(x,y,3);
-  const fLabels = forecast3MonthsLabels(keys[keys.length-1]);
-  const ctx=document.getElementById("forecastLine").getContext("2d");
-  destroyChart(window._forecastLine);
-  window._forecastLine = new Chart(ctx,{
-    type:"line",
-    data:{
-      labels:[...keys, ...fLabels],
-      datasets:[
-        {label:"จ่ายจริง (ต่อเดือน)", data:y, tension:0.25, fill:false},
-        {label:"คาดการณ์ 3 เดือนถัดไป", data:[...Array(y.length).fill(null), ...f3], tension:0.25, borderDash:[6,6], fill:false}
-      ]
-    },
-    options:{responsive:true, plugins:{legend:{position:"bottom"}}}
-  });
-}
-
-/* ---------------------------------------
-   🟢 Dashboard orchestrator (Auto-refresh)
-   - No more “นำไปใช้”
-   - Updates on date/preset change automatically
-----------------------------------------*/
-function renderDashboard(){
-  // ลบปุ่ม “นำไปใช้” และ “ดูเป็น % / ดูเป็น บาท” ถ้ามีอยู่ใน DOM เดิม
-  const applyBtn=document.getElementById("dbApply"); if(applyBtn) applyBtn.style.display="none";
-  const toggleBtn=document.getElementById("toggleUnit"); if(toggleBtn) toggleBtn.style.display="none";
-
-  // รักษาสภาพ drill เดิมเมื่อ refresh
-  if(drill.level===0) renderOverview(); else renderDrill();
-
-  // กราฟเสริม
-  renderCashflowLine();
-  renderTopCategoryBar();
-  renderForecast();
-}
-
-/* Auto-apply on date / preset changes */
-function hookDashboardFilters(){
-  const startEl=document.getElementById("dbStart");
-  const endEl=document.getElementById("dbEnd");
-  const preset=document.getElementById("dbPreset");
-  if(preset){
-    preset.addEventListener("change",()=>{
-      const t=new Date();
-      let s=null,e=null;
-      if(preset.value==="this_month"){
-        s=new Date(t.getFullYear(),t.getMonth(),1);
-        e=new Date(t.getFullYear(),t.getMonth()+1,0);
-      }else if(preset.value==="last_month"){
-        s=new Date(t.getFullYear(),t.getMonth()-1,1);
-        e=new Date(t.getFullYear(),t.getMonth(),0);
-      }else if(preset.value==="this_year"){
-        s=new Date(t.getFullYear(),0,1); e=new Date(t.getFullYear(),11,31);
-      }else if(preset.value==="last_year"){
-        const y=t.getFullYear()-1; s=new Date(y,0,1); e=new Date(y,11,31);
-      }
-      if(s){startEl.value=s.toISOString().slice(0,10)}
-      if(e){endEl.value=e.toISOString().slice(0,10)}
-      // reset drill when preset changed
-      drill.level=0; drill.path=[];
-      renderDashboard();
-    });
-  }
-  const onDateChange = ()=>{ drill.level=0; drill.path=[]; renderDashboard(); };
-  startEl && startEl.addEventListener("change", onDateChange);
-  endEl && endEl.addEventListener("change", onDateChange);
-
-  // Reset filters
-  const resetBtn=document.getElementById("dbReset");
-  if(resetBtn){
-    resetBtn.addEventListener("click",()=>{
-      startEl.value=""; endEl.value=""; preset.value="";
-      drill.level=0; drill.path=[];
-      renderDashboard();
-    });
-  }
-}
-
-/* ---------------------------------------
-   📄 Export Dashboard to PDF window
-   - รวมภาพ Donut + Cashflow + TopCategory + Forecast
-----------------------------------------*/
-function exportDashboardPdf(){
-  const win=window.open("","_blank");
-  const donut = document.getElementById("donutChart").toDataURL("image/png");
-  const cash  = document.getElementById("cashflowLine")?.toDataURL("image/png") || "";
-  const bar   = document.getElementById("topCategoryBar")?.toDataURL("image/png") || "";
-  const fore  = document.getElementById("forecastLine")?.toDataURL("image/png") || "";
-  const {start,end}=getDbRange();
-  const startTxt = start? formatDate(start) : "-";
-  const endTxt   = end? formatDate(end)     : "-";
-  const legendHtml = document.getElementById("summaryBox").innerHTML;
-
-  const html = `
-  <html><head><meta charset="utf-8"><title>Dashboard Export</title>
-  <style>
-    body{font-family:Tahoma,Arial,sans-serif;margin:22px}
-    h2{margin:0 0 8px}
-    h3{margin:18px 0 8px}
-    .meta{color:#475569;margin-bottom:10px}
-    img{max-width:780px;display:block;margin:8px 0}
-    .legend .legend-item{display:flex;align-items:center;gap:8px;margin:6px 0}
-    .legend .legend-dot{width:12px;height:12px;border-radius:50%}
-  </style></head><body>
-    <h2>แดชบอร์ด</h2>
-    <div class="meta">ช่วงวันที่: ${startTxt} - ${endTxt}</div>
-    <h3>สัดส่วนค่าใช้จ่าย (Donut)</h3>
-    <img src="${donut}" alt="donut">
-    <div class="legend">${legendHtml}</div>
-    ${cash?`<h3>Cashflow รายเดือน</h3><img src="${cash}" alt="cashflow">`:``}
-    ${bar?`<h3>Top หมวดงานที่ใช้จ่าย</h3><img src="${bar}" alt="top-category">`:``}
-    ${fore?`<h3>Forecast 3 เดือนข้างหน้า</h3><img src="${fore}" alt="forecast">`:``}
-  </body></html>`;
-  win.document.write(html); win.document.close(); win.focus(); win.print();
-}
-/* bind export button (if exists in DOM) */
-(function bindExport(){
-  const btn=document.getElementById("exportChartPdf");
-  if(btn){
-    btn.addEventListener("click",exportDashboardPdf);
-  }
-})();
-
-/* ---------------------------------------
-   💾 Submit + Upload (ชื่อไฟล์ = ID กลาง)
-----------------------------------------*/
-function uuid(){
-  const t=Date.now().toString(36);
-  const r=Math.random().toString(36).slice(2,8);
-  return `LEDGER-${t}-${r}`.toUpperCase();
-}
-function fileToBase64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result.split(",")[1]);fr.onerror=rej;fr.readAsDataURL(file)})}
-async function uploadFixed(action, base64, mimeType, filename){
-  const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,data:base64,mimeType,filename})});
-  const j=await r.json(); if(!j.ok) throw new Error("upload failed"); return j.url;
-}
-document.getElementById("form").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  if(!validateForm()) return;
-  showPopup("กำลังบันทึกไฟล์...");
-  try{
-    const mode=document.getElementById("mode").value;
-    const date=document.getElementById("date").value;
-    const amount=parseFloat((document.getElementById("amount").value||"").replace(/,/g,""));
-    const operator=document.getElementById("operator").value;
-    const buildings=selectedBuildings.slice();
-    const sharedId = uuid();
-
-    // Upload files (ชื่อไฟล์ = sharedId, ถ้ามีหลายไฟล์ เติม -S1 / -R1)
-    const slipUrls=[], receiptUrls=[];
-    for(let i=0;i<queuedUploads.slips.length;i++){
-      const f=queuedUploads.slips[i];
-      const b64=await fileToBase64(f);
-      const name = (queuedUploads.slips.length===1)? sharedId : `${sharedId}-S${i+1}`;
-      slipUrls.push(await uploadFixed("uploadSlip", b64, f.type, name));
-    }
-    for(let i=0;i<queuedUploads.receipts.length;i++){
-      const f=queuedUploads.receipts[i];
-      const b64=await fileToBase64(f);
-      const name = (queuedUploads.receipts.length===1)? sharedId : `${sharedId}-R${i+1}`;
-      receiptUrls.push(await uploadFixed("uploadReceipt", b64, f.type, name));
-    }
-
-    // Payloads (แชร์ลิงก์เดียวกันทุกอาคาร)
-    const split = (mode==="จ่าย" && buildings.length>0) ? (amount/buildings.length) : amount;
-    const payloads=[];
-    if(mode==="จ่าย" && buildings.length>0){
-      for(const b of buildings){
-        payloads.push({
-          id:sharedId, mode, date,
-          item:document.getElementById("item").value,
-          supplier:document.getElementById("supplierExpense").value,
-          project:document.getElementById("project").value,
-          building:[b],
-          jobType:document.getElementById("jobType").value,
-          category:document.getElementById("category").value,
-          paymentType:document.getElementById("paymentType").value,
-          amount:-Math.abs(split),
-          operator,
-          slips:slipUrls.join(","),
-          receipts:receiptUrls.join(",")
-        });
-      }
-    }else{
-      payloads.push({
-        id:sharedId, mode, date,
-        item:(mode==="จ่าย")?document.getElementById("item").value:"",
-        supplier:(mode==="จ่าย")?document.getElementById("supplierExpense").value:"",
-        project:(mode==="จ่าย")?document.getElementById("project").value:"",
-        building:(mode==="จ่าย")?buildings:[],
-        jobType:(mode==="จ่าย")?document.getElementById("jobType").value:"",
-        category:(mode==="จ่าย")?document.getElementById("category").value:"",
-        paymentType:(mode==="จ่าย")?document.getElementById("paymentType").value:"",
-        amount:(mode==="จ่าย")?-Math.abs(amount):Math.abs(amount),
-        operator,
-        slips:slipUrls.join(","),
-        receipts:receiptUrls.join(",")
-      });
-    }
-
-    showPopup(`กำลังบันทึกข้อมูล (${payloads.length} รายการ)...`);
-    for(const p of payloads){
-      const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
-      const j=await r.json(); if(!j.ok) throw new Error("save failed");
-    }
-    showPopup("บันทึกสำเร็จ");
-
-    // Reset form
-    setTimeout(hidePopup,900);
-    document.getElementById("form").reset();
-    queuedUploads={slips:[],receipts:[]};
-    document.getElementById("slipChips").innerHTML="";
-    document.getElementById("receiptChips").innerHTML="";
-    selectedBuildings=[]; renderBuildingTags();
-    setMode("เบิก");
-
-    // Reload data + auto refresh dashboard/history
-    await loadOptions();
-    renderHistory();
-    renderDashboard();
-  }catch(err){
-    console.error(err);
-    showPopup("เกิดข้อผิดพลาดในการบันทึก"); setTimeout(hidePopup,1400);
-  }
-});
-
-/* ---------------------------------------
-   ⏫ Save new Supplier / Building
-----------------------------------------*/
-document.getElementById("supplierSaveBtn").addEventListener("click", async ()=>{
-  const val=(document.getElementById("supplierNewName").value||"").trim();
-  if(!val) return;
-  showPopup("กำลังเพิ่มร้านค้า...");
-  try{
-    await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})});
-    await loadOptions();
-    document.getElementById("supplierExpense").value=val;
-    hidePopup(); closeModal("#supplierModal");
-  }catch(e){ hidePopup(); alert("เพิ่มร้านค้าไม่สำเร็จ"); }
-});
-document.getElementById("buildingSaveBtn").addEventListener("click", async ()=>{
+/* ===== Add buttons (green) ===== */
+document.getElementById("addBuildingBtn").addEventListener("click",()=>openModal("#buildingModal"));
+document.getElementById("buildingSaveBtn").addEventListener("click",async()=>{
   const val=(document.getElementById("buildingNewName").value||"").trim();
   if(!val) return;
   showPopup("กำลังเพิ่มอาคาร...");
@@ -1019,22 +467,768 @@ document.getElementById("buildingSaveBtn").addEventListener("click", async ()=>{
     await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})});
     await loadOptions();
     if(!selectedBuildings.includes(val)){selectedBuildings.push(val);renderBuildingTags()}
-    hidePopup(); closeModal("#buildingModal");
-  }catch(e){ hidePopup(); alert("เพิ่มอาคารไม่สำเร็จ"); }
+    hidePopup();
+    closeModal("#buildingModal");
+  }catch(e){
+    hidePopup();
+    alert("เพิ่มอาคารไม่สำเร็จ");
+  }
+});
+document.getElementById("addSupplierBtn").addEventListener("click",()=>openModal("#supplierModal"));
+document.getElementById("supplierSaveBtn").addEventListener("click",async()=>{
+  const val=(document.getElementById("supplierNewName").value||"").trim();
+  if(!val) return;
+  showPopup("กำลังเพิ่มร้านค้า...");
+  try{
+    await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})});
+    await loadOptions();
+    document.getElementById("supplierExpense").value=val;
+    hidePopup();
+    closeModal("#supplierModal");
+  }catch(e){
+    hidePopup();
+    alert("เพิ่มร้านค้าไม่สำเร็จ");
+  }
 });
 
-/* ---------------------------------------
-   🚀 INIT
-----------------------------------------*/
-async function init(){
-  setMode("เบิก");
-  hookDashboardFilters();
-  showLoader();
-  await loadOptions();  // โหลดข้อมูล + renderDashboard จากใน loadOptions แล้ว
-  hideLoader();
-  renderHistory();
+/* ========== VALIDATION ========== */
+function clearErrors(){
+  document.querySelectorAll(".error").forEach(e=>e.textContent="");
+  document.querySelectorAll("input,select").forEach(el=>el.classList.remove("error-input"));
 }
-window.addEventListener("DOMContentLoaded", init);
+function showError(inputId,msg){
+  const el=document.getElementById(inputId);
+  const err=document.getElementById("err-"+inputId);
+  if(err) err.textContent=msg||"กรอกข้อมูลให้ครบ";
+  if(el) el.classList.add("error-input");
+  if(el && el.scrollIntoView) el.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function validateForm(){
+  clearErrors();
+  let ok=true;
+  const mode=document.getElementById("mode").value;
+  const date=document.getElementById("date").value;
+  const amountRaw=(document.getElementById("amount").value||"").replace(/,/g,"");
+  const amount=parseFloat(amountRaw);
+  const operator=document.getElementById("operator").value;
+
+  if(!date){showError("date","กรุณาเลือกวันที่");ok=false}
+  if(isNaN(amount)){showError("amount","กรุณากรอกจำนวนเงิน");ok=false}
+  if(!operator){showError("operator","กรุณาเลือกผู้ดำเนินการ");ok=false}
+
+  if(mode==="จ่าย"){
+    const need=[["item","กรุณากรอกรายละเอียด"],["supplierExpense","กรุณาเลือกร้านค้า"],["project","กรุณาเลือกโครงการ"],["jobType","กรุณาเลือกประเภทงาน"],["category","กรุณาเลือกหมวดงาน"],["paymentType","กรุณาเลือกประเภทรายการจ่าย"]];
+    need.forEach(([id,msg])=>{const v=document.getElementById(id).value;if(!v){showError(id,msg);ok=false}});
+    if(selectedBuildings.length===0){showError("building","กรุณาเลือก/เพิ่มอาคารอย่างน้อย 1 รายการ");ok=false}
+  }
+  return ok;
+}
+
+/* ========== UPLOAD QUEUE (ยังไม่อัปโหลดจริงจน submit) ========== */
+function humanList(files){return files.map(f=>f.name).join(", ")}
+function renderQueuedChips(type){
+  const chipsEl=document.getElementById(type+"Chips");
+  chipsEl.innerHTML="";
+  const arr = queuedUploads[type==="slip"?"slips":"receipts"];
+  if(arr.length===0) return;
+  // แสดงชื่อไฟล์ธรรมดา (ไม่ใช่ลิงก์ และไม่มีอิโมจิ)
+  const span=document.createElement("span");
+  span.className="chip";
+  span.textContent = arr.length===1 ? arr[0].name : `${arr.length} ไฟล์`;
+  chipsEl.appendChild(span);
+}
+document.getElementById("slipExpense").addEventListener("change",(e)=>{
+  queuedUploads.slips = Array.from(e.target.files||[]);
+  document.getElementById("slipStatus").textContent = queuedUploads.slips.length ? "พร้อมอัปโหลดเมื่อกดบันทึก" : "เตรียมอัปโหลดเมื่อกดบันทึก";
+  renderQueuedChips("slip");
+});
+document.getElementById("receiptExpense").addEventListener("change",(e)=>{
+  queuedUploads.receipts = Array.from(e.target.files||[]);
+  document.getElementById("receiptStatus").textContent = queuedUploads.receipts.length ? "พร้อมอัปโหลดเมื่อกดบันทึก" : "เตรียมอัปโหลดเมื่อกดบันทึก";
+  renderQueuedChips("receipt");
+});
+</script>
+<!-- ======== PART 3/4: HISTORY (group by date + date-range filter + Export PDF, no CSV) ======== -->
+<script>
+/* ========== HISTORY (group by date + date-range filter + export) ========== */
+let historyPage={page:1,perPage:12,filtered:[], start:null, end:null};
+
+/* PDF Export (ผ่านหน้าพิมพ์ — ผู้ใช้เลือก Save as PDF) */
+function printHistoryAsPdf(){
+  const win=window.open("","_blank");
+  const rows = historyPage.filtered;
+  const byDate = {};
+  rows.forEach(r=>{
+    const k=ymd(r.date)||"";
+    if(!byDate[k]) byDate[k]=[];
+    byDate[k].push(r);
+  });
+  const htmlHead = `
+    <html><head><meta charset="utf-8">
+    <title>History Export</title>
+    <style>
+      body{font-family:Tahoma,Arial,sans-serif;padding:16px}
+      h2{margin:0 0 6px}
+      h3{margin:18px 0 8px}
+      table{width:100%;border-collapse:collapse;font-size:12px}
+      th,td{border:1px solid #ddd;padding:6px;text-align:left}
+      th{background:#f1f5f9}
+      a{color:#0ea5e9;text-decoration:none}
+    </style></head><body>
+    <h2>ประวัติการทำรายการ</h2>
+  `;
+  let body="";
+  Object.keys(byDate).sort((a,b)=>new Date(b)-new Date(a)).forEach(d=>{
+    body+=`<h3>${formatDate(d)}</h3>`;
+    body+=`<table><thead><tr>
+      <th>ไอดี</th><th>โหมด</th><th>รายละเอียด</th><th>ร้านค้า</th><th>โครงการ</th><th>อาคาร</th>
+      <th>ประเภทงาน</th><th>หมวดงาน</th><th>ประเภทรายการจ่าย</th><th>จำนวนเงิน</th><th>ผู้ดำเนินการ</th><th>ไฟล์</th>
+    </tr></thead><tbody>`;
+    byDate[d].forEach(r=>{
+      const slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[]);
+      const receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[]);
+      const links = [
+        ...slipsArr.map(u=>`<a href="${u}" target="_blank">ดูสลิป</a>`),
+        ...receiptsArr.map(u=>`<a href="${u}" target="_blank">ดูใบเสร็จ</a>`)
+      ].join(" ");
+      body+=`<tr>
+        <td>${r.id||""}</td><td>${r.mode||""}</td><td>${r.item||""}</td><td>${r.supplier||""}</td><td>${r.project||""}</td>
+        <td>${r.building||""}</td><td>${r.jobType||""}</td><td>${r.category||""}</td><td>${r.paymentType||""}</td>
+        <td>${(Number(r.amount)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td>${r.operator||""}</td><td>${links||""}</td>
+      </tr>`;
+    });
+    body+=`</tbody></table>`;
+  });
+  const htmlFoot = `</body></html>`;
+  win.document.write(htmlHead + body + htmlFoot);
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+/* Filters + Render */
+const applyFiltersDebounced = debounce(applyFilters, 200);
+function applyFilters(){
+  const q=(document.getElementById("searchBox").value||"").toLowerCase();
+  const mode=document.getElementById("filterMode").value;
+  const sort=document.getElementById("sortBy").value;
+  const sDate=historyPage.start, eDate=historyPage.end;
+
+  let arr=records.filter(r=>{
+    const y=ymd(r.date);
+    if(sDate && y && y < sDate) return false;
+    if(eDate && y && y > eDate) return false;
+
+    const s=[r.id,r.item,r.supplier,r.project,r.building,r.operator].join(" ").toLowerCase();
+    if(q&&!s.includes(q)) return false;
+    if(mode && r.mode!==mode) return false;
+    return true;
+  });
+
+  if(sort==="date_desc") arr.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(sort==="date_asc") arr.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(sort==="amount_desc") arr.sort((a,b)=>Math.abs(b.amount)-Math.abs(a.amount));
+  if(sort==="amount_asc") arr.sort((a,b)=>Math.abs(a.amount)-Math.abs(b.amount));
+  if(sort==="operator_asc") arr.sort((a,b)=>String(a.operator).localeCompare(String(b.operator)));
+  if(sort==="operator_desc") arr.sort((a,b)=>String(b.operator).localeCompare(String(a.operator)));
+
+  historyPage.filtered=arr;
+  historyPage.page=1;
+  renderHistoryStatement();
+}
+
+function renderHistoryStatement(){
+  const list=document.getElementById("historyList");
+  list.innerHTML="";
+  const end=historyPage.page*historyPage.perPage;
+  const show=historyPage.filtered.slice(0,end);
+
+  const groups={};
+  show.forEach(r=>{
+    const k=ymd(r.date)||"";
+    if(!groups[k]) groups[k]=[];
+    groups[k].push(r);
+  });
+
+  const today=todayYMD();
+
+  Object.keys(groups).sort((a,b)=>new Date(b)-new Date(a)).forEach(d=>{
+    const header=document.createElement("div");
+    header.className="date-header";
+    header.textContent=(d===today)?"วันนี้":formatDate(d);
+    list.appendChild(header);
+
+    groups[d].forEach(r=>{
+      const isIncome=r.mode==="เบิก";
+      const sign=isIncome?"+":"-";
+      const money=`${sign}${Math.abs(Number(r.amount)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
+      const card=document.createElement("div");
+      card.className="history-card";
+      card.style.borderLeftColor=isIncome?"#06c755":"#d93025";
+
+      const slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[]);
+      const receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[]);
+      // ลบอิโมจิ และไม่ใส่เลขกำกับ ตามบรีฟข้อ 7 และ 6
+      const attChips=[...slipsArr.map(()=>`<span class="chip">ดูสลิป</span>`),
+                      ...receiptsArr.map(()=>`<span class="chip">ดูใบเสร็จ</span>`)].join(" ");
+
+      card.innerHTML=`
+        <div class="history-top">
+          <div class="history-id">${r.id||"-"}</div>
+          <div class="history-amount ${isIncome?'pos':'neg'}">${money}</div>
+        </div>
+        <div class="history-one">${r.item||"-"}</div>
+        <div class="history-operator">ผู้ดำเนินการ: ${r.operator||"-"}</div>
+        <div class="history-detail">
+          <div><b>โครงการ:</b> ${r.project||"-"} | <b>อาคาร:</b> ${r.building||"-"}</div>
+          <div><b>ประเภทงาน:</b> ${r.jobType||"-"} | <b>หมวดงาน:</b> ${r.category||"-"}</div>
+          <div><b>ประเภทรายการจ่าย:</b> ${r.paymentType||"-"}</div>
+          ${attChips?`<div class="history-files">${attChips}</div>`:""}
+        </div>
+      `;
+      // ทำลิงก์คลิกที่ชิปเพื่อเปิดไฟล์ (ใช้ index เดียวกัน)
+      const detail=card.querySelector(".history-detail");
+      card.addEventListener("click",()=>{detail.style.display=(detail.style.display==="block"?"none":"block")});
+      const chips=card.querySelectorAll(".history-files .chip");
+      let pos=0;
+      chips.forEach((chip,i)=>{
+        chip.addEventListener("click",(ev)=>{
+          ev.stopPropagation();
+          const urls=[...slipsArr, ...receiptsArr];
+          const u=urls[pos++];
+          if(pos>urls.length-1) pos=0;
+          if(u) window.open(u,"_blank");
+        });
+      });
+
+      list.appendChild(card);
+    });
+  });
+
+  document.getElementById("loadMoreBtn").style.display=(historyPage.filtered.length> end)?"inline-block":"none";
+}
+
+/* History events */
+document.getElementById("searchBox").addEventListener("input",applyFiltersDebounced);
+document.getElementById("filterMode").addEventListener("change",applyFilters);
+document.getElementById("sortBy").addEventListener("change",applyFilters);
+document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage.page++;renderHistoryStatement()});
+document.getElementById("historyApply").addEventListener("click",()=>{
+  historyPage.start=document.getElementById("historyStart").value||null;
+  historyPage.end=document.getElementById("historyEnd").value||null;
+  applyFilters();
+});
+document.getElementById("exportPdf").addEventListener("click", printHistoryAsPdf);
+function renderHistory(){ applyFilters() }
+</script>
+<!-- ======== PART 4/4: DASHBOARD + DRILLDOWN + EXPORT PDF + LOAD OPTIONS + AMOUNT FORMAT + SUBMIT + INIT ======== -->
+<script>
+/* ========== DASHBOARD: Donut + Drilldown (เงินคงเหลืออันดับแรก สีพิเศษ, Legend ใส่ % ใต้ภาพรวม, Center Text = ยอดเบิกรวม) ========== */
+
+/* มุมมอง legend/tooltip: 'amount' | 'percent' */
+let viewMode = 'percent';
+
+/* แคชสำหรับ group-by ตามระดับ/เส้นทาง/ช่วงวันที่ ลดคำนวณซ้ำ */
+const drillCache = new Map();
+
+/* สร้างสีแบบ deterministic จากชื่อ (ยกเว้น "เงินคงเหลือ" เป็นสีคงที่) */
+function hashColorFromName(name){
+  if(name==="เงินคงเหลือ") return "#4b5563"; // เทาเข้ม ต่างจากรายการอื่นชัดเจน
+  let h=0; for(let i=0;i<name.length;i++){h=(h*31 + name.charCodeAt(i))>>>0}
+  const hue = h % 360;
+  const sat = 60;
+  const light = 55;
+  return `hsl(${hue} ${sat}% ${light}%)`;
+}
+
+/* Top N + Others helper */
+function topNWithOthers(labels, values, N=6){
+  const arr = labels.map((l,i)=>({label:l, value:values[i]}))
+    .sort((a,b)=>b.value-a.value);
+  if(arr.length<=N) return {labels:arr.map(x=>x.label), values:arr.map(x=>x.value)};
+  const top = arr.slice(0, N-1);
+  const othersVal = arr.slice(N-1).reduce((s,x)=>s+x.value,0);
+  return {labels:[...top.map(x=>x.label), "อื่นๆ"], values:[...top.map(x=>x.value), othersVal]};
+}
+
+/* center text update */
+function setCenterText(title, sub){
+  const wrap=document.getElementById("centerText");
+  const big=document.getElementById("centerBig");
+  const s=document.getElementById("centerSub");
+  big.textContent=title;
+  s.textContent=sub;
+  wrap.style.display="flex";
+}
+
+/* Drill state */
+let drill={ level:0, path:[], dims:['project','building','jobType','category','paymentType'], start:null, end:null, hovered:null };
+function withinRange(dateStr){const y=ymd(dateStr); if(!y) return false; if(drill.start&&y<drill.start) return false; if(drill.end&&y>drill.end) return false; return true}
+function filteredData(){return records.filter(r=>withinRange(r.date))}
+function sumIncome(arr){return arr.filter(r=>r.mode==="เบิก").reduce((s,r)=>s+Math.abs(Number(r.amount)||0),0)}
+function groupExpense(arr,key){
+  const m={};
+  arr.filter(r=>r.mode==="จ่าย").forEach(r=>{
+    const k=(r[key]||"ไม่ระบุ").trim();
+    m[k]=(m[k]||0)+Math.abs(Number(r.amount)||0);
+  });
+  return m;
+}
+function applyPath(arr){
+  let out=arr.slice();
+  drill.path.forEach(p=>{
+    out=out.filter(r=>(r[p.dim]||"ไม่ระบุ")===p.value&&r.mode==="จ่าย");
+  });
+  return out;
+}
+
+/* คีย์สำหรับ cache */
+function cacheKey(){
+  const parts=[
+    drill.level,
+    drill.path.map(p=>`${p.dim}:${p.value}`).join(">"),
+    drill.start||"", drill.end||""
+  ];
+  return parts.join("|");
+}
+
+/* เรนเดอร์กราฟโดนัท + Legend */
+function renderDonut(rawLabels, rawValues, title){
+  // "เงินคงเหลือ" เป็นอันแรกเสมอ (ถ้ามี)
+  let labels = rawLabels.slice();
+  let values = rawValues.slice();
+  const idxRemain = labels.indexOf("เงินคงเหลือ");
+  if(idxRemain>0){
+    const [lab] = labels.splice(idxRemain,1);
+    const [val] = values.splice(idxRemain,1);
+    labels = [lab, ...labels];
+    values = [val, ...values];
+  }
+
+  // Top N + Others
+  const d = topNWithOthers(labels, values, 6);
+  labels = d.labels;
+  values = d.values;
+  const total = values.reduce((a,b)=>a+b,0);
+
+  // Colors
+  const colors = labels.map(l=> hashColorFromName(l));
+
+  // Destroy & create chart
+  const ctx=document.getElementById("donutChart").getContext("2d");
+  if(chart){ chart.destroy(); }
+  chart=new Chart(ctx,{
+    type:"doughnut",
+    data:{labels,datasets:[{data:values,backgroundColor:colors}]},
+    options:{
+      responsive:true, cutout:"65%",
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label:(ctx)=>{
+              const val = Number(ctx.parsed)||0;
+              const pct = total>0 ? (val/total*100) : 0;
+              if(viewMode==='percent'){
+                return `${ctx.label}: ${pct.toFixed(2)}%`;
+              }else{
+                return `${ctx.label}: ${val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
+              }
+            }
+          }
+        }
+      },
+      onHover:(evt, els)=>{
+        drill.hovered = els && els.length ? els[0].index : null;
+        updateCenterText(labels, values, title);
+      },
+      onClick:(evt)=>{
+        const points=chart.getElementsAtEventForMode(evt,'nearest',{intersect:true},false);
+        if(!points.length) return;
+        const idx=points[0].index;
+        const label=labels[idx];
+        if(drill.level===0 && label==="เงินคงเหลือ") return;
+        goDeeper(label);
+      }
+    }
+  });
+
+  // Summary (legend)
+  const box=document.getElementById("summaryBox");
+  if(total<=0 || labels.length===0){
+    box.innerHTML=`<h3>${title}</h3><div class="legend-empty">ไม่มีข้อมูลในช่วงที่เลือก</div>`;
+  }else{
+    // ถ้าเป็นภาพรวม: เติม (%) ต่อท้ายชื่อรายการ
+    const isOverview = (drill.level===0);
+    const legendHTML = labels.map((label,i)=>{
+      const val = values[i]||0;
+      const pct = total>0 ? (val/total*100) : 0;
+      const color = colors[i];
+      const right = (viewMode==='percent')
+        ? `${pct.toFixed(2)}%`
+        : `${val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
+      const name = isOverview ? `${label} (${pct.toFixed(2)}%)` : label;
+      return `
+        <div class="legend-item">
+          <span class="legend-dot" style="background:${color}"></span>
+          <span>${name}</span>
+          <b style="margin-left:auto">${right}</b>
+        </div>`;
+    }).join("");
+    box.innerHTML=`<h3>${title}</h3>${legendHTML}`;
+  }
+
+  // Center text
+  updateCenterText(labels, values, title);
+}
+
+/* อัปเดตข้อความกลางโดนัท */
+function updateCenterText(labels, values, title){
+  const total = values.reduce((a,b)=>a+b,0);
+
+  // ถ้าเป็น "ภาพรวม" ให้แสดง "จำนวนเงินเบิกรวมทั้งหมด (บาท)" เสมอ
+  if(drill.level===0){
+    const data=filteredData();
+    const totalIncome = sumIncome(data);
+    setCenterText(
+      `${totalIncome.toLocaleString(undefined,{minimumFractionDigits:0})}฿`,
+      "ยอดเบิกรวมทั้งหมด"
+    );
+    return;
+  }
+
+  if(total<=0){
+    setCenterText("ไม่มีข้อมูล","ปรับช่วงวันที่หรือเพิ่มรายการ");
+    return;
+  }
+  if(drill.hovered!=null){
+    const i=drill.hovered;
+    const val=values[i];
+    const pct=(val/total*100);
+    if(viewMode==='percent'){
+      setCenterText(`${pct.toFixed(1)}%`, labels[i]);
+    }else{
+      setCenterText(`${val.toLocaleString(undefined,{minimumFractionDigits:0})}฿`, labels[i]);
+    }
+  }else{
+    // แสดงสรุประดับปัจจุบัน (ยกเว้นภาพรวมจัดการไปแล้ว)
+    if(viewMode==='percent'){
+      setCenterText(`100%`, title);
+    }else{
+      setCenterText(`${total.toLocaleString(undefined,{minimumFractionDigits:0})}฿`, title);
+    }
+  }
+}
+
+/* เรนเดอร์ตาม drill */
+function renderDrill(){
+  const data=filteredData();
+  const totalFunds=sumIncome(data);
+  const expensesOnly=data.filter(r=>r.mode==="จ่าย");
+
+  // crumbs + back
+  const crumbs=document.getElementById("dbCrumbs");
+  const back=document.getElementById("dbBack");
+  const items=[{dim:"ภาพรวม",value:"ทั้งหมด"}].concat(drill.path);
+  crumbs.innerHTML=items.map((p,i)=> i===0?`<span class="crumb">ภาพรวม</span>`:`<span class="crumb">${p.dim}: ${p.value}</span>`).join("");
+  back.style.display = drill.level>0 ? "inline-block" : "none";
+
+  // ใช้ cache
+  const key = cacheKey();
+  if(drillCache.has(key)){
+    const c = drillCache.get(key);
+    renderDonut(c.labels, c.values, c.title);
+    return;
+  }
+
+  if(drill.level===0){
+    const byProject=groupExpense(expensesOnly,'project');
+    const spentSum=Object.values(byProject).reduce((a,b)=>a+b,0);
+    const remaining=Math.max(totalFunds - spentSum, 0);
+    const labels=["เงินคงเหลือ", ...Object.keys(byProject)];
+    const values=[remaining, ...Object.values(byProject)];
+    const title="ภาพรวม";
+    drillCache.set(key, {labels, values, title});
+    renderDonut(labels, values, title);
+  }else{
+    let scoped=applyPath(data);
+    const dim=drill.dims[drill.level];
+    const parentDim=drill.dims[drill.level-1];
+    const parentName=drill.path[drill.path.length-1]?.value || "";
+    const by=groupExpense(scoped, dim);
+    const labels=Object.keys(by);
+    const vals=Object.values(by);
+    const title=`${parentDim||""} ${parentName} → ${dim}`;
+    drillCache.set(key, {labels, values:vals, title});
+    renderDonut(labels, vals, title);
+  }
+}
+
+function goDeeper(clickedLabel){
+  if(drill.level===0){drill.path.push({dim:'project',value:clickedLabel});drill.level=1}
+  else if(drill.level<drill.dims.length-0){
+    const dim=drill.dims[drill.level];
+    drill.path.push({dim,value:clickedLabel});
+    if(drill.level<drill.dims.length-1) drill.level++;
+  }
+  renderDrill();
+}
+document.getElementById("dbBack").addEventListener("click",()=>{ if(drill.level===0) return; drill.path.pop(); drill.level=Math.max(0,drill.level-1); renderDrill() });
+
+/* Presets */
+document.getElementById("dbPreset").addEventListener("change",(e)=>{
+  const v=e.target.value, t=new Date();
+  const startInput=document.getElementById("dbStart");
+  const endInput=document.getElementById("dbEnd");
+  let s=null, ed=null;
+  if(v==="this_month"){const d1=new Date(t.getFullYear(),t.getMonth(),1);const d2=new Date(t.getFullYear(),t.getMonth()+1,0); s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)}
+  else if(v==="last_month"){const d1=new Date(t.getFullYear(),t.getMonth()-1,1);const d2=new Date(t.getFullYear(),t.getMonth(),0); s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)}
+  else if(v==="this_year"){const d1=new Date(t.getFullYear(),0,1); const d2=new Date(t.getFullYear(),11,31); s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)}
+  else if(v==="last_year"){const y=t.getFullYear()-1; const d1=new Date(y,0,1),d2=new Date(y,11,31); s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)}
+  if(s){startInput.value=s;drill.start=s}
+  if(ed){endInput.value=ed;drill.end=ed}
+});
+document.getElementById("dbApply").addEventListener("click",()=>{drill.start=document.getElementById("dbStart").value||null;drill.end=document.getElementById("dbEnd").value||null;drill.level=0;drill.path=[];drillCache.clear();renderDrill()});
+document.getElementById("dbReset").addEventListener("click",()=>{document.getElementById("dbStart").value="";document.getElementById("dbEnd").value="";document.getElementById("dbPreset").value="";drill.start=null;drill.end=null;drill.level=0;drill.path=[];drillCache.clear();renderDrill()});
+
+/* Toggle view mode */
+document.getElementById("toggleUnit").addEventListener("click",()=>{
+  viewMode = (viewMode==='percent')?'amount':'percent';
+  document.getElementById("toggleUnit").textContent = (viewMode==='percent')?'ดูเป็น %':'ดูเป็น บาท';
+  renderDrill();
+});
+
+/* Export Dashboard as PDF */
+document.getElementById("exportChartPdf").addEventListener("click",()=>{
+  if(!chart) return;
+  const dataUrl = chart.toBase64Image();
+  const win = window.open("","_blank");
+  const startTxt = drill.start ? formatDate(drill.start) : "-";
+  const endTxt = drill.end ? formatDate(drill.end) : "-";
+  const legendHtml = document.getElementById("summaryBox").innerHTML;
+  const html = `
+  <html><head><meta charset="utf-8"><title>Dashboard Export</title>
+  <style>
+    body{font-family:Tahoma,Arial,sans-serif;margin:22px}
+    h2{margin:0 0 8px}
+    .meta{color:#475569;margin-bottom:10px}
+    .legend{margin-top:12px;font-size:14px}
+    .legend .legend-item{display:flex;align-items:center;gap:8px;margin:6px 0}
+    .legend .legend-dot{width:12px;height:12px;border-radius:50%}
+    img{max-width:560px}
+  </style></head><body>
+  <h2>แดชบอร์ด</h2>
+  <div class="meta">ช่วงวันที่: ${startTxt} - ${endTxt}</div>
+  <div><img src="${dataUrl}" alt="chart"></div>
+  <div class="legend">${legendHtml}</div>
+  </body></html>`;
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  win.print();
+});
+
+/* ========== OPTIONS LOAD (มี Loader เปอร์เซ็นต์) ========== */
+function fillSelect(id,arr){
+  const sel=document.getElementById(id);
+  sel.innerHTML=`<option value="">-- เลือก --</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("");
+}
+async function loadOptions(){
+  try{
+    showLoader(5);
+    const res = await fetch(API_URL);
+    setLoader(40);
+    const d=await res.json();
+    setLoader(70);
+
+    records=d.items||[];
+    buildingList=d.options?.buildings||[];
+
+    renderHistory(); setLoader(80);
+    renderDrill();   setLoader(90);
+
+    fillSelect("supplierExpense",d.options?.suppliers||[]);
+    fillSelect("project",d.options?.projects||[]);
+    fillSelect("jobType",d.options?.jobTypes||[]);
+    fillSelect("category",d.options?.categories||[]);
+    fillSelect("paymentType",d.options?.paymentTypes||[]);
+
+    setLoader(100);
+  }catch(e){
+    console.error(e);
+  }finally{
+    hideLoader();
+  }
+}
+
+/* ========== AMOUNT FORMAT (รองรับ '.' และเติม .00 อัตโนมัติ) ========== */
+const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt");
+amountEl.addEventListener("input",()=>{
+  let raw=amountEl.value;
+  if(raw.startsWith(".")) raw="0"+raw;
+
+  let s=raw.replace(/,/g,"").replace(/[^\d.]/g,"");
+  const firstDot=s.indexOf(".");
+  if(firstDot!==-1){
+    const before=s.slice(0,firstDot+1);
+    const after=s.slice(firstDot+1).replace(/\./g,"");
+    s=before+after;
+  }
+
+  let endsWithDot = s.endsWith(".");
+  const [intPartRaw,decPartRaw=""] = s.split(".");
+  const intPart = (intPartRaw||"0").replace(/^0+(?=\d)/,"");
+  const withCommas=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,",");
+
+  amountEl.value = firstDot!==-1 ? (withCommas + (endsWithDot?".":("." + decPartRaw))) : withCommas;
+
+  const num=parseFloat(s);
+  if(!isNaN(num)){
+    const [i,d]=num.toFixed(2).split(".");
+    amountTxt.textContent="("+thaiMoneyText(i,d)+")";
+  }else{
+    amountTxt.textContent="";
+  }
+});
+amountEl.addEventListener("blur",()=>{
+  const raw=(amountEl.value||"").replace(/,/g,"");
+  if(!raw){amountTxt.textContent=""; return;}
+  let num=parseFloat(raw);
+  if(isNaN(num)){amountTxt.textContent=""; return;}
+  amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const [i,d]=num.toFixed(2).split(".");
+  amountTxt.textContent="("+thaiMoneyText(i,d)+")";
+});
+function thaiMoneyText(i,d){
+  const n=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"],p=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"];
+  i=(i||"0").replace(/^0+/,"")||"0"; let t="",L=i.length;
+  for(let k=0;k<L;k++){ let x=parseInt(i[k]); if(x){ if(k==L-1&&x==1&&L>1)t+="เอ็ด"; else if(k==L-2&&x==2)t+="ยี่"; else if(k==L-2&&x==1)t+=""; else t+=n[x]; t+=p[L-k-1] } }
+  if(!d||d==="00")return t+"บาทถ้วน";
+  let s=""; if(d[0]!=="0") s+=(d[0]==="1"?"":d[0]==="2"?"ยี่":n[+d[0]])+"สิบ"; if(d[1]!=="0") s+=(d[1]==="1"?"เอ็ด":n[+d[1]]);
+  return t+"บาท"+s+"สตางค์";
+}
+
+/* ========== SUBMIT (อัปโหลดไฟล์ตอนกดบันทึก ตั้งชื่อไฟล์ตาม ID กลางเดียวกัน และแชร์ไฟล์เดียวกันถ้ามีหลายอาคาร) ========== */
+function uuid(){
+  // สร้าง ID กลาง ใช้ร่วมทุกเรคอร์ดในชุดนี้
+  const t=Date.now().toString(36);
+  const r=Math.random().toString(36).slice(2,8);
+  return `LEDGER-${t}-${r}`.toUpperCase();
+}
+function fileToBase64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result.split(",")[1]);fr.onerror=rej;fr.readAsDataURL(file)})}
+async function uploadWithFixedName(action, base64, mimeType, filenameFixed){
+  const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,data:base64,mimeType,filename:filenameFixed})});
+  const j=await r.json(); if(!j.ok) throw new Error("upload failed"); return j.url;
+}
+
+document.getElementById("form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(!validateForm()) return;
+
+  const mode=document.getElementById("mode").value;
+  const date=document.getElementById("date").value;
+  const amount=parseFloat((document.getElementById("amount").value||"").replace(/,/g,""));
+  const operator=document.getElementById("operator").value;
+  const buildings=selectedBuildings.slice();
+
+  // กำหนด ID กลางชุดนี้ (ใช้กับชื่อไฟล์ และทุกเรคอร์ด)
+  const sharedId = uuid();
+
+  // อัปโหลดไฟล์ (ถ้ามี) ตั้งชื่อเป็น sharedId (ถ้ามีหลายไฟล์ เติม suffix -S1, -S2 / -R1, -R2 เพื่อกันทับ)
+  showPopup("กำลังบันทึกไฟล์...");
+  let slipUrls=[], receiptUrls=[];
+  try{
+    // slips
+    for(let i=0;i<queuedUploads.slips.length;i++){
+      const f=queuedUploads.slips[i];
+      const b64=await fileToBase64(f);
+      const fixedName = (queuedUploads.slips.length===1) ? `${sharedId}` : `${sharedId}-S${i+1}`;
+      const url=await uploadWithFixedName("uploadSlip", b64, f.type, fixedName);
+      slipUrls.push(url);
+    }
+    // receipts
+    for(let i=0;i<queuedUploads.receipts.length;i++){
+      const f=queuedUploads.receipts[i];
+      const b64=await fileToBase64(f);
+      const fixedName = (queuedUploads.receipts.length===1) ? `${sharedId}` : `${sharedId}-R${i+1}`;
+      const url=await uploadWithFixedName("uploadReceipt", b64, f.type, fixedName);
+      receiptUrls.push(url);
+    }
+  }catch(err){
+    console.error(err);
+    showPopup("อัปโหลดไฟล์ล้มเหลว"); setTimeout(hidePopup,1200);
+    return;
+  }
+
+  // เตรียม payloads สำหรับ API (แชร์ลิงก์เดียวกันทุกอาคาร)
+  const splitAmount=(mode==="จ่าย" && buildings.length>0)?(amount/buildings.length):amount;
+  const payloads=[];
+  if(mode==="จ่าย" && buildings.length>0){
+    for(const b of buildings){
+      payloads.push({
+        id: sharedId,
+        mode,date,
+        item:document.getElementById("item").value,
+        supplier:document.getElementById("supplierExpense").value,
+        project:document.getElementById("project").value,
+        building:[b],
+        jobType:document.getElementById("jobType").value,
+        category:document.getElementById("category").value,
+        paymentType:document.getElementById("paymentType").value,
+        amount:-Math.abs(splitAmount),
+        operator,
+        slips: slipUrls.join(","),    // อ้างอิงไฟล์ชุดเดียวกัน
+        receipts: receiptUrls.join(",")
+      });
+    }
+  }else{
+    payloads.push({
+      id: sharedId,
+      mode,date,
+      item:(mode==="จ่าย")?document.getElementById("item").value:"",
+      supplier:(mode==="จ่าย")?document.getElementById("supplierExpense").value:"",
+      project:(mode==="จ่าย")?document.getElementById("project").value:"",
+      building:(mode==="จ่าย")?buildings:[],
+      jobType:(mode==="จ่าย")?document.getElementById("jobType").value:"",
+      category:(mode==="จ่าย")?document.getElementById("category").value:"",
+      paymentType:(mode==="จ่าย")?document.getElementById("paymentType").value:"",
+      amount:(mode==="จ่าย")?-Math.abs(amount):Math.abs(amount),
+      operator,
+      slips: slipUrls.join(","),
+      receipts: receiptUrls.join(",")
+    });
+  }
+
+  showPopup(`กำลังบันทึกข้อมูล (${payloads.length} รายการ)...`);
+  try{
+    for(const p of payloads){
+      const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+      const j=await res.json(); if(!j.ok) throw new Error("fail");
+    }
+    showPopup("บันทึกสำเร็จ"); setTimeout(hidePopup,800);
+
+    // reset
+    document.getElementById("form").reset();
+    queuedUploads={slips:[],receipts:[]};
+    document.getElementById("slipStatus").textContent="เตรียมอัปโหลดเมื่อกดบันทึก";
+    document.getElementById("receiptStatus").textContent="เตรียมอัปโหลดเมื่อกดบันทึก";
+    document.getElementById("slipChips").innerHTML="";
+    document.getElementById("receiptChips").innerHTML="";
+    selectedBuildings=[]; renderBuildingTags();
+    setMode("เบิก");
+    await loadOptions();
+  }catch(err){
+    console.error(err);
+    showPopup("บันทึกล้มเหลว"); setTimeout(hidePopup,1200);
+  }
+});
+
+/* ========== INIT ========== */
+window.addEventListener("DOMContentLoaded",async()=>{
+  setMode("เบิก");
+  await loadOptions();
+});
 </script>
 </body>
 </html>
