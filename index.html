@@ -1,13 +1,17 @@
-<!-- ======== FINAL PART 1/4: DOCTYPE + HEAD ======== -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <title>Satoshi Smart Ledger</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- jsQR สำหรับอ่าน QR จากภาพสลิป -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
   <style>
-    /* ======== GLOBAL STYLES ======== */
+    /* Base */
     body{font-family:"Tahoma",Arial,sans-serif;margin:0;background:#f8f9fb;color:#333}
     .tabs{display:flex;background:#222}
     .tabs button{flex:1;padding:16px;border:none;background:#333;color:#bbb;cursor:pointer;transition:.2s}
@@ -17,9 +21,11 @@
     .card{max-width:1140px;margin:20px auto;background:#fff;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,.1);padding:24px}
     h2{margin:0 0 16px;color:#222}
     label{display:block;margin-top:14px;font-weight:600;font-size:.95rem;color:#444}
-    input,select{width:100%;padding:12px 14px;margin-top:6px;border:1px solid #ddd;border-radius:10px;font-size:1rem;background:#fafafa;transition:.2s}
+    input,select{width:100%;padding:12px 14px;margin-top:6px;border:1px solid #ddd;border-radius:10px;font-size:1rem;box-sizing:border-box;background:#fafafa;transition:.2s}
     input:focus,select:focus{outline:none;border-color:#B27A01;background:#fff;box-shadow:0 0 0 2px rgba(178,122,1,.15)}
+    .hint{font-size:.85rem;color:#64748b;margin-top:6px}
     .error{color:#d93025;font-size:.85rem;margin-top:4px;min-height:18px}
+    .error-input{border-color:#d93025 !important}
     .toggle{display:flex;gap:12px;margin:18px 0}
     .toggle button{flex:1;padding:14px;border:none;border-radius:12px;background:#eee;color:#444;cursor:pointer;transition:.2s;font-size:1rem}
     .toggle button.selected{background:#B27A01;color:#fff;font-weight:600}
@@ -27,50 +33,77 @@
     .full{grid-column:1/-1}
     .submit{margin-top:24px;width:100%;padding:15px;background:#333;color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:1.05rem;font-weight:600;transition:.2s}
     .submit:hover{background:#B27A01}
-    @media(max-width:780px){.row{grid-template-columns:1fr}}
+    .amount-display{margin-top:6px;color:#777;font-style:italic}
+    @media (max-width:780px){.row{grid-template-columns:1fr}}
 
-    /* BUTTONS */
+    /* Buttons */
     .btn{padding:10px 14px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
-    .btn-success{background:#16a34a;border:none;color:#fff;font-weight:700}
+    .btn-ok{border-color:#cbd5e1}
+    .btn-success{border:none;background:#16a34a;color:#fff;font-weight:700;box-shadow:0 2px 6px rgba(22,163,74,.25)}
     .btn-success:hover{background:#15803d}
-    .btn-secondary{padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
     .btn-apply{padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;font-weight:700;cursor:pointer}
+    .btn-secondary{padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;cursor:pointer}
 
-    /* UPLOAD */
+    /* Global popup */
+    #popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center}
+    #popupBox{background:#fff;padding:24px 28px;border-radius:12px;font-size:1.2rem;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+
+    /* Upload chips */
     .upload-row{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
-    .chip{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border:1px solid #e2e8f0;color:#0f172a;padding:6px 10px;border-radius:999px;font-size:.85rem;text-decoration:none}
+    .upload-status{font-size:.9rem;color:#555}
+    .chip{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border:1px solid #e2e8f0;color:#0f172a;padding:6px 10px;border-radius:999px;font-size:.85rem;cursor:pointer;text-decoration:none}
     .chip:hover{background:#e2e8f0}
-    .chip i{font-style:normal;opacity:.6}
+    .chip i{font-style:normal;opacity:.7}
 
-    /* HISTORY */
-    .date-header{font-weight:700;margin:18px 0 8px;color:#111}
-    .history-card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-left:6px solid transparent;cursor:pointer}
-    .history-card:hover{box-shadow:0 3px 10px rgba(0,0,0,.12)}
-    .history-top{display:flex;justify-content:space-between}
-    .history-amount{font-weight:800}
-    .pos{color:#06c755}.neg{color:#d93025}
-    .history-files{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    /* History */
+    .date-header{font-weight:700;color:#0f172a;margin:18px 0 10px}
+    .history-card{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:.2s;cursor:pointer;border-left:6px solid transparent}
+    .history-card:hover{box-shadow:0 3px 10px rgba(0,0,0,0.08)}
+    .history-top{display:flex;justify-content:space-between;align-items:center}
+    .history-id{font-size:.92rem;color:#475569}
+    .history-amount{font-size:1.12rem;font-weight:800}
+    .pos{color:#06c755}
+    .neg{color:#d93025}
+    .history-one{font-size:.95rem;color:#1f2937;margin-top:4px}
+    .history-operator{font-size:.85rem;color:#64748b;margin-top:2px}
+    .history-detail{display:none;padding-top:10px;border-top:1px dashed #e2e8f0;margin-top:10px}
+    .history-files{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px}
+    .slip-status{margin-top:6px;font-size:.9rem}
 
-    /* DASHBOARD */
-    .dash{display:flex;flex-direction:column;gap:28px}
-    #donutWrap{display:flex;align-items:center;justify-content:center;position:relative}
-    .center-text{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;inset:0;pointer-events:none}
+    /* Dashboard */
+    .dash{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;justify-content:center}
+    #donutWrap{width:420px;min-height:420px;display:flex;align-items:center;justify-content:center;position:relative}
+    #donutChart{max-width:420px}
+    .center-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
     .center-text .big{font-weight:800;font-size:1.4rem;color:#111}
     .center-text .sub{font-size:.9rem;color:#64748b}
-    .summary{background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:18px}
+    .summary{min-width:300px;max-width:520px;flex:1;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:18px}
+    .summary h3{margin:0 0 12px}
+    .crumbs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+    .crumb{background:#f1f5f9;border:1px solid #e2e8f0;padding:6px 10px;border-radius:999px;font-size:.85rem}
+    .btn-back{margin-bottom:10px}
+    .filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .mini{padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff}
+    .legend-item{display:flex;align-items:center;gap:8px;margin:6px 0}
+    .legend-dot{width:12px;height:12px;border-radius:50%}
+    .legend-empty{padding:12px;border:1px dashed #e5e7eb;border-radius:10px;background:#f8fafc;color:#64748b}
 
-    /* FORECAST & VENDOR CHARTS */
-    .chart-box{background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:20px}
-    .chart-box h3{margin-top:0;margin-bottom:12px}
-    canvas{max-width:100%}
-
-    /* MODAL */
-    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center}
-    .modal-box{width:90%;max-width:460px;background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.25);padding:20px}
-    .modal-title{font-weight:700;margin-bottom:10px}
-    .btn-cancel{background:#e5e7eb;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+    /* Tag Input */
+    .tag-input{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1px solid #ddd;border-radius:10px;padding:8px;background:#fafafa;cursor:text;position:relative;flex:1}
+    .tag-input input{border:none;outline:none;flex:1;min-width:120px;padding:6px;font-size:.95rem;background:transparent}
+    .tag{display:inline-flex;align-items:center;gap:6px;background:#e2e8f0;color:#111;padding:6px 10px;border-radius:999px;font-size:.9rem}
+    .tag button{border:none;background:transparent;cursor:pointer;color:#555;font-weight:bold}
+    .tag button:hover{color:#d93025}
+    .suggestion-list{position:absolute;left:0;right:0;top:100%;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.1);max-height:180px;overflow-y:auto;z-index:50;margin-top:2px}
+    .suggestion-item{padding:8px 10px;cursor:pointer}
+    .suggestion-item:hover{background:#f1f5f9}
+    /* Modals */
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2100;align-items:center;justify-content:center}
+    .modal-box{width:92%;max-width:480px;background:#fff;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:20px}
+    .modal-title{font-size:1.1rem;font-weight:800;margin:2px 0 10px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+    .btn-cancel{background:#e5e7eb;border:none;border-radius:10px;padding:10px 14px;cursor:pointer}
     .btn-cancel:hover{background:#d1d5db}
-    .error-inline{color:#d93025;font-size:.85rem;margin-top:4px}
   </style>
 </head>
 <body>
@@ -80,7 +113,6 @@
     <button class="tab" data-id="history">ประวัติ</button>
     <button class="tab" data-id="dashboard">แดชบอร์ด</button>
   </div>
-<!-- ======== FINAL PART 2/4: BODY (ADD / HISTORY / DASHBOARD) ======== -->
 
   <!-- ADD PAGE -->
   <section id="add" class="page active">
@@ -158,21 +190,22 @@
           </div>
         </div>
 
+        <!-- Slip/Receipt -->
         <div class="row expense-only" id="filesExpense" style="display:none">
           <div>
             <label>สลิป</label>
-            <!-- เก็บไฟล์ไว้ก่อน ยังไม่อัปโหลด จนกว่าจะได้ ID -->
-            <input type="file" id="slipExpense" multiple accept="image/*,.pdf">
+            <input type="file" id="slipExpense" multiple accept="image/*">
             <div class="upload-row" id="slipStatusRow">
-              <span class="upload-status" id="slipStatus">ยังไม่ได้เลือกไฟล์</span>
+              <span class="upload-status" id="slipStatus">ยังไม่ได้อัปโหลด</span>
               <span id="slipChips"></span>
             </div>
+            <div class="hint" id="slipHint">ระบบจะพยายามอ่าน QR บนสลิป เพื่อตรวจสอบและกรอกจำนวนเงินอัตโนมัติ (แก้ไขได้)</div>
           </div>
           <div>
             <label>ใบเสร็จ</label>
             <input type="file" id="receiptExpense" multiple accept="image/*,.pdf">
             <div class="upload-row" id="receiptStatusRow">
-              <span class="upload-status" id="receiptStatus">ยังไม่ได้เลือกไฟล์</span>
+              <span class="upload-status" id="receiptStatus">ยังไม่ได้อัปโหลด</span>
               <span id="receiptChips"></span>
             </div>
           </div>
@@ -213,8 +246,8 @@
         <input type="date" id="historyStart" class="mini" placeholder="ตั้งแต่วันที่">
         <input type="date" id="historyEnd" class="mini" placeholder="ถึงวันที่">
         <button id="historyApply" class="btn-apply">กรองวันที่</button>
-        <!-- ลบ Export CSV ออก และเปลี่ยน Export PDF เป็น Print Report -->
-        <button id="exportPdf" class="btn-secondary">Print Report</button>
+        <!-- ลบ Export CSV ตามบรีฟ; คงไว้เฉพาะ PDF -->
+        <button id="exportPdf" class="btn-secondary">Export PDF</button>
       </div>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
@@ -237,7 +270,7 @@
       <div id="historyList"></div>
 
       <div style="text-align:center;margin-top:12px">
-        <button id="loadMoreBtn" class="btn">โหลดเพิ่ม</button>
+        <button id="loadMoreBtn" class="btn btn-ok">โหลดเพิ่ม</button>
       </div>
     </div>
   </section>
@@ -259,19 +292,16 @@
         <button class="btn-apply" id="dbApply">นำไปใช้</button>
         <button class="btn" id="dbReset">ล้างตัวกรอง</button>
 
-        <!-- ปุ่ม toggle และ export -->
+        <!-- Toggle บาท/เปอร์เซ็นต์ + Export PDF -->
         <button class="btn" id="toggleUnit" title="สลับมุมมอง จำนวนเงิน/เปอร์เซ็นต์">ดูเป็น %</button>
-        <button class="btn" id="exportPng" title="ดาวน์โหลดกราฟ">ดาวน์โหลดกราฟ (PNG)</button>
-        <!-- ปุ่ม Print Report สำหรับแดชบอร์ด -->
-        <button class="btn" id="printDashboard" title="พิมพ์แดชบอร์ด">Print Report</button>
+        <button class="btn" id="exportPng" title="ดาวน์โหลดกราฟเป็น PDF">ดาวน์โหลดกราฟ (PDF)</button>
       </div>
 
       <div class="crumbs" id="dbCrumbs"></div>
       <button class="btn btn-ok btn-back" id="dbBack" style="display:none">ย้อนกลับ</button>
 
       <div class="dash">
-        <!-- Donut + Summary -->
-        <div id="donutWrap" style="min-height:420px">
+        <div id="donutWrap">
           <canvas id="donutChart"></canvas>
           <div id="centerText" class="center-text" style="display:none">
             <div class="big" id="centerBig">—</div>
@@ -279,18 +309,6 @@
           </div>
         </div>
         <div class="summary" id="summaryBox"></div>
-
-        <!-- NEW: Forecast Trend -->
-        <div class="chart-box">
-          <h3>แนวโน้มค่าใช้จ่ายรายเดือน</h3>
-          <canvas id="forecastChart"></canvas>
-        </div>
-
-        <!-- NEW: Vendor Comparison -->
-        <div class="chart-box">
-          <h3>ร้านค้าที่ใช้จ่ายสูงสุด (Top 10)</h3>
-          <canvas id="vendorChart"></canvas>
-        </div>
       </div>
     </div>
   </section>
@@ -304,10 +322,9 @@
       <div class="modal-title">เพิ่มร้านค้าใหม่</div>
       <label>ชื่อร้านค้าใหม่</label>
       <input type="text" id="supplierNewName" placeholder="เช่น หจก. ตัวอย่างการค้า">
-      <div class="error-inline" id="supplierDupMsg" style="display:none">มีอยู่แล้วในระบบ</div>
       <div class="modal-actions">
         <button type="button" class="btn-cancel" data-close="#supplierModal">ยกเลิก</button>
-        <button type="button" id="supplierSaveBtn" class="btn btn-success" disabled>บันทึก</button>
+        <button type="button" id="supplierSaveBtn" class="btn btn-success">บันทึก</button>
       </div>
     </div>
   </div>
@@ -317,29 +334,37 @@
       <div class="modal-title">เพิ่มอาคารใหม่</div>
       <label>ชื่ออาคารใหม่</label>
       <input type="text" id="buildingNewName" placeholder="เช่น อาคาร A">
-      <div class="error-inline" id="buildingDupMsg" style="display:none">มีอยู่แล้วในระบบ</div>
       <div class="modal-actions">
         <button type="button" class="btn-cancel" data-close="#buildingModal">ยกเลิก</button>
-        <button type="button" id="buildingSaveBtn" class="btn btn-success" disabled>บันทึก</button>
+        <button type="button" id="buildingSaveBtn" class="btn btn-success">บันทึก</button>
       </div>
     </div>
   </div>
-<!-- ======== FINAL PART 3/4: SCRIPT (UPLOAD + DUPLICATE DETECTION + SUBMIT) ======== -->
+
+<!-- ======== SCRIPT: GLOBAL + HELPERS + UI ======== -->
 <script>
-/* ========== GLOBAL CONFIG ========== */
 const API_URL="https://satoshi-smart-ledger.tttta2556.workers.dev/";
-let records=[], preUploaded={slips:[],receipts:[]}, buildingList=[], supplierList=[];
-let selectedBuildings=[];
+let records=[], chart=null;
+let preUploaded={slips:[],receipts:[]};
+let selectedBuildings=[], buildingList=[];
+let viewMode='percent'; // dashboard
+let slipScan={ found:false, crcOk:false, amount:null }; // สรุปจากการอ่าน QR สลิป
 
-/* ========== HELPERS ========== */
-function showPopup(msg){const p=document.getElementById("popup");document.getElementById("popupBox").innerText=msg;p.style.display="flex"}
-function hidePopup(){document.getElementById("popup").style.display="none"}
+/* Helpers */
 function ymd(d){const dt=new Date(d);return isNaN(dt)?null:dt.toISOString().slice(0,10)}
-function todayYMD(){return new Date().toISOString().slice(0,10)}
-function formatDate(d){if(!d)return"";const t=new Date(d);return ("0"+t.getDate()).slice(-2)+"/"+("0"+(t.getMonth()+1)).slice(-2)+"/"+t.getFullYear()}
-function uuid(){return 'xxxxxxxx'.replace(/x/g,()=>((Math.random()*36)|0).toString(36))}
+function formatDate(d){if(!d)return"";const dt=new Date(d);if(isNaN(dt))return d;return ("0"+dt.getDate()).slice(-2)+"/"+("0"+(dt.getMonth()+1)).slice(-2)+"/"+dt.getFullYear()}
+function todayYMD(){const t=new Date();return t.toISOString().slice(0,10)}
+function showPopup(m){document.getElementById("popupBox").innerText=m;document.getElementById("popup").style.display="flex"}
+function hidePopup(){document.getElementById("popup").style.display="none"}
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
 
-/* ========== TABS ========== */
+/* Modal control */
+function openModal(sel){const el=document.querySelector(sel); if(el){el.style.display="flex"; const inp=el.querySelector("input"); if(inp){inp.value=""; setTimeout(()=>inp.focus(),50)}}}
+function closeModal(sel){const el=document.querySelector(sel); if(el){el.style.display="none"}}
+document.querySelectorAll(".btn-cancel").forEach(b=>b.addEventListener("click",()=>closeModal(b.getAttribute("data-close"))));
+window.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeModal("#supplierModal"); closeModal("#buildingModal"); }});
+
+/* Tabs */
 document.querySelectorAll(".tab").forEach(b=>{
   b.addEventListener("click",()=>{
     document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
@@ -347,127 +372,239 @@ document.querySelectorAll(".tab").forEach(b=>{
     b.classList.add("active");
     document.getElementById(b.dataset.id).classList.add("active");
     if(b.dataset.id==="history") renderHistory();
-    if(b.dataset.id==="dashboard") renderDashboardAll();
+    if(b.dataset.id==="dashboard") renderDrill();
   });
 });
 
-/* ========== MODE TOGGLE ========== */
+/* Mode toggle */
 function setMode(m){
   document.getElementById("mode").value=m;
   document.getElementById("btnIncome").classList.toggle("selected",m==="เบิก");
   document.getElementById("btnExpense").classList.toggle("selected",m==="จ่าย");
-  const show=m==="จ่าย";
-  document.querySelectorAll(".expense-only").forEach(e=>e.style.display=show?"grid":"none");
-  document.getElementById("supplierExpenseWrap").style.display=show?"block":"none";
-  if(m==="เบิก") document.getElementById("operator").value="ศุภกร เจิมจรุง";
+  const isIncome=m==="เบิก";
+  document.querySelectorAll(".expense-only").forEach(el=>el.style.display=isIncome?"none":"grid");
+  document.getElementById("supplierExpenseWrap").style.display=isIncome?"none":"block";
+  document.getElementById("filesExpense").style.display=isIncome?"none":"grid";
+  document.getElementById("itemWrap").style.display=isIncome?"none":"block";
+  const op=document.getElementById("operator");
+  if(isIncome){op.value="ศุภกร เจิมจรุง";op.disabled=true}else{op.disabled=false;op.value=""}
+  selectedBuildings=[]; renderBuildingTags();
 }
 document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"));
 document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"));
 
-/* ========== NORMALIZE NAME (กันซ้ำไทย/อังกฤษ) ========== */
-function normalizeName(n){
-  return n.toLowerCase()
-    .replace(/\s+/g,"")
-    .replace(/[^\w\u0E00-\u0E7F]/g,"");
-}
-
-/* ========== DUPLICATE CHECK MODAL (Real-time) ========== */
-function setupDuplicateCheck(inputId, msgId, saveBtnId, listRef){
-  const inp=document.getElementById(inputId);
-  const msg=document.getElementById(msgId);
-  const btn=document.getElementById(saveBtnId);
-  inp.addEventListener("input",()=>{
-    const val=(inp.value||"").trim();
-    if(!val){msg.style.display="none";btn.disabled=true;return;}
-    const dup=listRef.some(x=>normalizeName(x)===normalizeName(val));
-    if(dup){msg.style.display="block";btn.disabled=true;}
-    else{msg.style.display="none";btn.disabled=false;}
-  });
-}
-setupDuplicateCheck("supplierNewName","supplierDupMsg","supplierSaveBtn",supplierList);
-setupDuplicateCheck("buildingNewName","buildingDupMsg","buildingSaveBtn",buildingList);
-
-/* ========== ADD SUPPLIER / BUILDING MODALS ========== */
-function openModal(sel){document.querySelector(sel).style.display="flex"}
-function closeModal(sel){document.querySelector(sel).style.display="none"}
-document.querySelectorAll(".btn-cancel").forEach(b=>b.onclick=()=>closeModal(b.dataset.close));
-
-document.getElementById("addSupplierBtn").onclick=()=>openModal("#supplierModal");
-document.getElementById("addBuildingBtn").onclick=()=>openModal("#buildingModal");
-
-document.getElementById("supplierSaveBtn").onclick=async()=>{
-  const val=document.getElementById("supplierNewName").value.trim();
-  if(!val) return;
-  showPopup("กำลังเพิ่มร้านค้า...");
-  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})});
-  supplierList.push(val);
-  const sel=document.getElementById("supplierExpense");
-  sel.innerHTML+=`<option value="${val}">${val}</option>`;
-  sel.value=val;
-  hidePopup();closeModal("#supplierModal");
-};
-document.getElementById("buildingSaveBtn").onclick=async()=>{
-  const val=document.getElementById("buildingNewName").value.trim();
-  if(!val) return;
-  showPopup("กำลังเพิ่มอาคาร...");
-  await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})});
-  buildingList.push(val);
-  selectedBuildings.push(val);
-  renderBuildingTags();
-  hidePopup();closeModal("#buildingModal");
-};
-
-/* ========== BUILDING TAGS ========== */
+/* Building tags + suggestion */
 function renderBuildingTags(){
   const box=document.getElementById("buildingTags");
   const input=document.getElementById("buildingInput");
-  box.querySelectorAll(".tag").forEach(e=>e.remove());
-  selectedBuildings.forEach((b,i)=>{
-    const t=document.createElement("div");
-    t.className="tag";
-    t.innerHTML=`${b} <button type="button" onclick="removeBuilding(${i})">×</button>`;
-    box.insertBefore(t,input);
+  box.querySelectorAll(".tag").forEach(el=>el.remove());
+  selectedBuildings.forEach((b,idx)=>{
+    const tag=document.createElement("div");
+    tag.className="tag";
+    tag.innerHTML=`${b} <button type="button" onclick="removeBuilding(${idx})">×</button>`;
+    box.insertBefore(tag,input);
   });
 }
-function removeBuilding(i){selectedBuildings.splice(i,1);renderBuildingTags();}
+function removeBuilding(i){selectedBuildings.splice(i,1);renderBuildingTags()}
+function renderBuildingSuggestions(filter=""){
+  const list=document.getElementById("buildingSuggest");
+  list.innerHTML="";
+  const filtered=buildingList.filter(b=>b.toLowerCase().includes(filter.toLowerCase()) && !selectedBuildings.includes(b)).slice(0,8);
+  if(filtered.length===0){list.style.display="none";return}
+  filtered.forEach(b=>{
+    const item=document.createElement("div");
+    item.className="suggestion-item";
+    item.textContent=b;
+    item.addEventListener("click",()=>{
+      selectedBuildings.push(b);renderBuildingTags();
+      document.getElementById("buildingInput").value="";list.style.display="none";
+    });
+    list.appendChild(item);
+  });
+  list.style.display="block";
+}
+document.getElementById("buildingInput").addEventListener("input",e=>renderBuildingSuggestions(e.target.value.trim()));
+document.getElementById("buildingInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&e.target.value.trim()!==""){
+    e.preventDefault();
+    const v=e.target.value.trim();
+    if(!selectedBuildings.includes(v)) selectedBuildings.push(v);
+    e.target.value=""; renderBuildingTags(); document.getElementById("buildingSuggest").style.display="none";
+  }
+});
+document.addEventListener("click",e=>{
+  const box=document.getElementById("buildingTags");
+  if(!box.contains(e.target)) document.getElementById("buildingSuggest").style.display="none";
+});
 
-/* ========== FILE UPLOAD ========== */
-async function fileToBase64(file){
-  return new Promise((res,rej)=>{
-    const fr=new FileReader();
-    fr.onload=()=>res(fr.result.split(",")[1]);
-    fr.onerror=rej;
-    fr.readAsDataURL(file);
-  });
-}
-async function uploadWithName(base64,mimeType,filename,action){
-  const r=await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({action,data:base64,mimeType,filename})
-  });
-  const j=await r.json();
-  if(!j.ok) throw new Error("upload fail");
-  return j.url;
-}
+/* Add option modals */
+document.getElementById("addBuildingBtn").addEventListener("click",()=>openModal("#buildingModal"));
+document.getElementById("buildingSaveBtn").addEventListener("click",async()=>{
+  const val=(document.getElementById("buildingNewName").value||"").trim();
+  if(!val) return;
+  showPopup("กำลังเพิ่มอาคาร...");
+  try{
+    await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Buildings",value:val}})});
+    await loadOptions();
+    if(!selectedBuildings.includes(val)){selectedBuildings.push(val);renderBuildingTags()}
+    hidePopup(); closeModal("#buildingModal");
+  }catch{ hidePopup(); alert("เพิ่มอาคารไม่สำเร็จ"); }
+});
+document.getElementById("addSupplierBtn").addEventListener("click",()=>openModal("#supplierModal"));
+document.getElementById("supplierSaveBtn").addEventListener("click",async()=>{
+  const val=(document.getElementById("supplierNewName").value||"").trim();
+  if(!val) return;
+  showPopup("กำลังเพิ่มร้านค้า...");
+  try{
+    await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({addOption:{type:"Suppliers",value:val}})});
+    await loadOptions();
+    document.getElementById("supplierExpense").value=val;
+    hidePopup(); closeModal("#supplierModal");
+  }catch{ hidePopup(); alert("เพิ่มร้านค้าไม่สำเร็จ"); }
+});
 
-/* ========== VALIDATION ========== */
+/* Validation */
+function clearErrors(){document.querySelectorAll(".error").forEach(e=>e.textContent="");document.querySelectorAll("input,select").forEach(el=>el.classList.remove("error-input"))}
+function showError(inputId,msg){const el=document.getElementById(inputId);const err=document.getElementById("err-"+inputId);if(err) err.textContent=msg||"กรอกข้อมูลให้ครบ";if(el) el.classList.add("error-input");if(el && el.scrollIntoView) el.scrollIntoView({behavior:"smooth",block:"center"})}
 function validateForm(){
+  clearErrors(); let ok=true;
   const mode=document.getElementById("mode").value;
   const date=document.getElementById("date").value;
-  const amount=parseFloat((document.getElementById("amount").value||"").replace(/,/g,""));
+  const amountRaw=(document.getElementById("amount").value||"").replace(/,/g,"");
+  const amount=parseFloat(amountRaw);
   const operator=document.getElementById("operator").value;
-  let ok=true;
-  if(!date){document.getElementById("err-date").textContent="กรุณาเลือกวันที่";ok=false;}
-  if(isNaN(amount)){document.getElementById("err-amount").textContent="กรุณากรอกจำนวนเงิน";ok=false;}
-  if(!operator){document.getElementById("err-operator").textContent="กรุณาเลือกผู้ดำเนินการ";ok=false;}
-  if(mode==="จ่าย" && selectedBuildings.length===0){
-    document.getElementById("err-building").textContent="กรุณาเลือก/เพิ่มอาคาร";ok=false;
+  if(!date){showError("date","กรุณาเลือกวันที่");ok=false}
+  if(isNaN(amount)){showError("amount","กรุณากรอกจำนวนเงิน");ok=false}
+  if(!operator){showError("operator","กรุณาเลือกผู้ดำเนินการ");ok=false}
+  if(mode==="จ่าย"){
+    const need=[["item","กรุณากรอกรายละเอียด"],["supplierExpense","กรุณาเลือกร้านค้า"],["project","กรุณาเลือกโครงการ"],["jobType","กรุณาเลือกประเภทงาน"],["category","กรุณาเลือกหมวดงาน"],["paymentType","กรุณาเลือกประเภทรายการจ่าย"]];
+    need.forEach(([id,msg])=>{const v=document.getElementById(id).value;if(!v){showError(id,msg);ok=false}});
+    if(selectedBuildings.length===0){showError("building","กรุณาเลือก/เพิ่มอาคารอย่างน้อย 1 รายการ");ok=false}
   }
   return ok;
 }
 
-/* ========== SUBMIT FORM (แนบไฟล์ตาม ID + groupId) ========== */
+/* Upload helpers */
+function fileToBase64(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(fr.result.split(",")[1]);fr.onerror=rej;fr.readAsDataURL(file)})}
+async function uploadBase64(action,base64,mimeType,filename){
+  const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,data:base64,mimeType,filename})});
+  const j=await r.json(); if(!j.ok) throw new Error("upload failed"); return j.url;
+}
+
+/* ==== EMV/CRC + QR decode for slip ==== */
+function parseEMV(hex){
+  const out={}; let i=0;
+  while(i<hex.length){
+    const tag=hex.slice(i,i+2); i+=2; if(i>=hex.length) break;
+    const len=parseInt(hex.slice(i,i+2),16); i+=2;
+    const val=hex.slice(i,i+len*2); i+=len*2;
+    out[tag]=val;
+  }
+  return out;
+}
+function crc16IBM(hexStr){ // hexStr uppercase, no spaces
+  let crc=0xFFFF;
+  for(let i=0;i<hexStr.length;i+=2){
+    const b=parseInt(hexStr.substr(i,2),16);
+    crc ^= b;
+    for(let j=0;j<8;j++){
+      const mix=crc & 1;
+      crc >>= 1;
+      if(mix) crc ^= 0xA001;
+    }
+  }
+  const lo=(crc & 0xFF), hi=((crc>>8)&0xFF);
+  return (lo.toString(16)+hi.toString(16)).toUpperCase().padStart(4,"0");
+}
+function verifyEMVCRC(raw){
+  const HEX=raw.toUpperCase().replace(/[^0-9A-F]/g,'');
+  const tlv=parseEMV(HEX);
+  if(!tlv['63']) return false;
+  const withoutCRC=HEX.replace(/63..[0-9A-F]{4}$/,'')+'6304';
+  const calc=crc16IBM(withoutCRC);
+  return calc===tlv['63'];
+}
+function emvAmount(raw){
+  const HEX=raw.toUpperCase().replace(/[^0-9A-F]/g,'');
+  const tlv=parseEMV(HEX);
+  if(!tlv['54']) return null;
+  const bytes=tlv['54'].match(/.{1,2}/g).map(h=>parseInt(h,16));
+  const s=String.fromCharCode(...bytes);
+  const n=parseFloat(s);
+  return isNaN(n)?null:n;
+}
+function drawImageToCanvas(file){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');
+      c.width=img.width; c.height=img.height;
+      const ctx=c.getContext('2d');
+      ctx.drawImage(img,0,0);
+      const data=ctx.getImageData(0,0,c.width,c.height);
+      resolve({data,canvas:c});
+    };
+    img.onerror=reject;
+    img.src=URL.createObjectURL(file);
+  });
+}
+async function scanSlipQR(file){
+  try{
+    const {data}=await drawImageToCanvas(file);
+    const code=jsQR(data.data, data.width, data.height);
+    if(!code) return {found:false};
+    const raw=code.data || "";
+    const ok=verifyEMVCRC(raw);
+    const amt=emvAmount(raw);
+    return {found:true, crcOk:ok, amount:amt};
+  }catch{ return {found:false}; }
+}
+
+/* preUpload now also scans slip, autofill amount & decide status */
+async function preUpload(inputEl,type){
+  const files=Array.from(inputEl.files||[]); if(files.length===0) return [];
+  const statusEl=document.getElementById(type+"Status");
+  const chipsEl=document.getElementById(type+"Chips");
+  statusEl.textContent="กำลังอัปโหลด...";
+  chipsEl.innerHTML="";
+  const urls=[];
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+
+    // เฉพาะสลิป: สแกน QR จากไฟล์แรก เพื่อช่วยตัดสินสถานะและเติมจำนวนเงิน
+    if(type==="slip" && i===0){
+      slipScan={found:false,crcOk:false,amount:null};
+      const scan=await scanSlipQR(f);
+      slipScan=scan;
+      if(scan.found && scan.amount!=null){
+        const amountEl=document.getElementById("amount");
+        amountEl.value=Number(scan.amount).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+        const [ii,dd]=Number(scan.amount).toFixed(2).split(".");
+        document.getElementById("amountTxt").textContent="("+thaiMoneyText(ii,dd)+")";
+        document.getElementById("slipHint").textContent="ดึงยอดจากสลิปอัตโนมัติแล้ว (สามารถแก้ไขได้)";
+      }else{
+        document.getElementById("slipHint").textContent="ไม่พบ/อ่าน QR ไม่ได้ ระบบจะตั้งสถานะรอตรวจสอบ";
+      }
+    }
+
+    // อัปโหลดไฟล์
+    const b64=await fileToBase64(f);
+    const action=(type==="slip")?"uploadSlip":"uploadReceipt";
+    const url=await uploadBase64(action,b64,f.type,f.name);
+    urls.push(url);
+
+    const chip=document.createElement("a");
+    chip.className="chip"; chip.href=url; chip.target="_blank";
+    chip.innerHTML=`<i>🔗</i>${type==="slip"?"ดูสลิป":"ดูใบเสร็จ"}${files.length>1?(" "+(i+1)):""}`;
+    chipsEl.appendChild(chip);
+  }
+  statusEl.textContent="อัปโหลดเสร็จสิ้น";
+  return urls;
+}
+document.getElementById("slipExpense").addEventListener("change",async(e)=>{try{preUploaded.slips=await preUpload(e.target,"slip")}catch{document.getElementById("slipStatus").textContent="อัปโหลดล้มเหลว"}});
+document.getElementById("receiptExpense").addEventListener("change",async(e)=>{try{preUploaded.receipts=await preUpload(e.target,"receipt")}catch{document.getElementById("receiptStatus").textContent="อัปโหลดล้มเหลว"}});
+
+/* Submit (add verifyStatus from slipScan) */
 document.getElementById("form").addEventListener("submit",async e=>{
   e.preventDefault();
   if(!validateForm()) return;
@@ -477,79 +614,118 @@ document.getElementById("form").addEventListener("submit",async e=>{
   const amount=parseFloat((document.getElementById("amount").value||"").replace(/,/g,""));
   const operator=document.getElementById("operator").value;
   const buildings=selectedBuildings.slice();
-  const groupId=uuid();
-  const split=(mode==="จ่าย"&&buildings.length>0)?(amount/buildings.length):amount;
-  showPopup("กำลังบันทึก...");
+  const slips=preUploaded.slips.slice();
+  const receipts=preUploaded.receipts.slice();
 
-  try{
-    // Upload slip/receipt หลังได้ groupId
-    let slipUrls=[],receiptUrls=[];
-    const slipInput=document.getElementById("slipExpense");
-    const receiptInput=document.getElementById("receiptExpense");
-    const slipFiles=Array.from(slipInput.files||[]);
-    const receiptFiles=Array.from(receiptInput.files||[]);
-    for(let i=0;i<slipFiles.length;i++){
-      const b64=await fileToBase64(slipFiles[i]);
-      const url=await uploadWithName(b64,slipFiles[i].type,`slip_${groupId}_${i+1}.jpg`,"uploadSlip");
-      slipUrls.push(url);
+  // ตัดสิน verifyStatus แบบง่าย:
+  // - ถ้าอ่าน QR เจอ + CRC ถูก และ (ไม่มี Tag54 หรือ Tag54 == amount ฟอร์ม) → ยืนยันแล้ว
+  // - อื่น ๆ → รอตรวจสอบ
+  let verifyStatus="รอตรวจสอบ";
+  if(slipScan.found && slipScan.crcOk){
+    if(slipScan.amount==null || Math.abs(Number(slipScan.amount)-Number(amount))<0.005){
+      verifyStatus="ยืนยันแล้ว";
     }
-    for(let i=0;i<receiptFiles.length;i++){
-      const b64=await fileToBase64(receiptFiles[i]);
-      const url=await uploadWithName(b64,receiptFiles[i].type,`receipt_${groupId}_${i+1}.pdf`,"uploadReceipt");
-      receiptUrls.push(url);
-    }
+  }
 
-    // สร้าง payloads แยกอาคาร
-    const payloads=[];
-    if(mode==="จ่าย"){
-      for(const [idx,b] of buildings.entries()){
-        payloads.push({
-          mode,date,groupId,
-          item:document.getElementById("item").value,
-          supplier:document.getElementById("supplierExpense").value,
-          project:document.getElementById("project").value,
-          building:[b],
-          jobType:document.getElementById("jobType").value,
-          category:document.getElementById("category").value,
-          paymentType:document.getElementById("paymentType").value,
-          amount:-Math.abs(split),
-          operator,
-          slips:(idx===0)?slipUrls:[],  // แนบเฉพาะรายการแรก
-          receipts:(idx===0)?receiptUrls:[]
-        });
-      }
-    }else{
+  const splitAmount=(mode==="จ่าย" && buildings.length>0)?(amount/buildings.length):amount;
+
+  const payloads=[];
+  if(mode==="จ่าย" && buildings.length>0){
+    for(const b of buildings){
       payloads.push({
-        mode,date,groupId,
-        item:"",supplier:"",project:"",
-        building:[],jobType:"",category:"",
-        paymentType:"",amount:Math.abs(amount),
-        operator,slips:[],receipts:[]
+        mode,date,
+        item:document.getElementById("item").value,
+        supplier:document.getElementById("supplierExpense").value,
+        project:document.getElementById("project").value,
+        building:[b],
+        jobType:document.getElementById("jobType").value,
+        category:document.getElementById("category").value,
+        paymentType:document.getElementById("paymentType").value,
+        amount:-Math.abs(splitAmount),
+        operator, slips, receipts,
+        verifyStatus
       });
     }
+  }else{
+    payloads.push({
+      mode,date,
+      item:(mode==="จ่าย")?document.getElementById("item").value:"",
+      supplier:(mode==="จ่าย")?document.getElementById("supplierExpense").value:"",
+      project:(mode==="จ่าย")?document.getElementById("project").value:"",
+      building:(mode==="จ่าย")?buildings:[],
+      jobType:(mode==="จ่าย")?document.getElementById("jobType").value:"",
+      category:(mode==="จ่าย")?document.getElementById("category").value:"",
+      paymentType:(mode==="จ่าย")?document.getElementById("paymentType").value:"",
+      amount:(mode==="จ่าย")?-Math.abs(amount):Math.abs(amount),
+      operator, slips, receipts,
+      verifyStatus
+    });
+  }
 
+  showPopup(`กำลังบันทึก (${payloads.length} รายการ)...`);
+  try{
     for(const p of payloads){
-      const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
-      const j=await r.json();
-      if(!j.ok) throw new Error("save failed");
+      const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+      const j=await res.json(); if(!j.ok) throw new Error("fail");
     }
+    showPopup("บันทึกสำเร็จ ✅"); setTimeout(hidePopup,800);
 
-    showPopup("บันทึกสำเร็จ");setTimeout(hidePopup,900);
+    // reset
     document.getElementById("form").reset();
-    document.getElementById("slipExpense").value="";
-    document.getElementById("receiptExpense").value="";
-    selectedBuildings=[];renderBuildingTags();
+    preUploaded={slips:[],receipts:[]};
+    document.getElementById("slipStatus").textContent="ยังไม่ได้อัปโหลด";
+    document.getElementById("receiptStatus").textContent="ยังไม่ได้อัปโหลด";
+    document.getElementById("slipChips").innerHTML="";
+    document.getElementById("receiptChips").innerHTML="";
+    slipScan={found:false,crcOk:false,amount:null};
+    selectedBuildings=[]; renderBuildingTags();
+    setMode("เบิก");
+    await loadOptions();
   }catch(err){
     console.error(err);
-    showPopup("เกิดข้อผิดพลาด");setTimeout(hidePopup,1500);
+    showPopup("บันทึกล้มเหลว ❌"); setTimeout(hidePopup,1200);
   }
 });
 </script>
-<!-- ======== FINAL PART 4/4: HISTORY + DASHBOARD + LOAD OPTIONS + INIT ======== -->
-<script>
-/* ------------------------ HISTORY: FILTER + RENDER + PRINT ------------------------ */
 
+<!-- ======== SCRIPT: HISTORY + DASHBOARD + LOAD OPTIONS + AMOUNT ======== -->
+<script>
+/* ---------- HISTORY (PDF export + slip status) ---------- */
 let historyPage={page:1,perPage:12,filtered:[], start:null, end:null};
+const applyFiltersDebounced=debounce(applyFilters,200);
+
+function printHistoryAsPdf(){
+  const win=window.open("","_blank");
+  const rows=historyPage.filtered;
+  const byDate={};
+  rows.forEach(r=>{const k=ymd(r.date)||""; if(!byDate[k]) byDate[k]=[]; byDate[k].push(r)});
+  const htmlHead=`<html><head><meta charset="utf-8"><title>History Export</title>
+  <style>
+  body{font-family:Tahoma,Arial,sans-serif;padding:16px}
+  h2{margin:0 0 6px} h3{margin:18px 0 8px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{border:1px solid #ddd;padding:6px;text-align:left} th{background:#f1f5f9}
+  </style></head><body><h2>ประวัติการทำรายการ</h2>`;
+  let body="";
+  Object.keys(byDate).sort((a,b)=>new Date(b)-new Date(a)).forEach(d=>{
+    body+=`<h3>${formatDate(d)}</h3><table><thead><tr>
+      <th>ไอดี</th><th>โหมด</th><th>รายละเอียด</th><th>ร้านค้า</th><th>โครงการ</th><th>อาคาร</th>
+      <th>ประเภทงาน</th><th>หมวดงาน</th><th>ประเภทรายการจ่าย</th><th>จำนวนเงิน</th><th>ผู้ดำเนินการ</th><th>สถานะสลิป</th>
+    </tr></thead><tbody>`;
+    byDate[d].forEach(r=>{
+      body+=`<tr>
+        <td>${r.id||""}</td><td>${r.mode||""}</td><td>${r.item||""}</td><td>${r.supplier||""}</td><td>${r.project||""}</td>
+        <td>${r.building||""}</td><td>${r.jobType||""}</td><td>${r.category||""}</td><td>${r.paymentType||""}</td>
+        <td>${(Number(r.amount)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td>${r.operator||""}</td><td>${r.verifyStatus||"รอตรวจสอบ"}</td>
+      </tr>`;
+    });
+    body+=`</tbody></table>`;
+  });
+  const htmlFoot=`</body></html>`;
+  win.document.write(htmlHead+body+htmlFoot);
+  win.document.close(); win.focus(); win.print();
+}
 
 function applyFilters(){
   const q=(document.getElementById("searchBox").value||"").toLowerCase();
@@ -561,9 +737,8 @@ function applyFilters(){
     const y=ymd(r.date);
     if(sDate && y && y < sDate) return false;
     if(eDate && y && y > eDate) return false;
-
-    const s=[r.id,r.item,r.supplier,r.project,r.building,r.operator,(r.groupId||"")].join(" ").toLowerCase();
-    if(q && !s.includes(q)) return false;
+    const s=[r.id,r.item,r.supplier,r.project,r.building,r.operator].join(" ").toLowerCase();
+    if(q&&!s.includes(q)) return false;
     if(mode && r.mode!==mode) return false;
     return true;
   });
@@ -575,63 +750,33 @@ function applyFilters(){
   if(sort==="operator_asc") arr.sort((a,b)=>String(a.operator).localeCompare(String(b.operator)));
   if(sort==="operator_desc") arr.sort((a,b)=>String(b.operator).localeCompare(String(a.operator)));
 
-  historyPage.filtered=arr;
-  historyPage.page=1;
-  renderHistoryStatement();
-}
-
-const applyFiltersDebounced = debounce(applyFilters, 180);
-
-function findGroupFiles(groupId){
-  if(!groupId) return {slips:[], receipts:[]};
-  // หา record แรกใน group ที่มีไฟล์
-  const found = records.find(r=>r.groupId===groupId && ((r.slips&&r.slips.length) || (r.receipts&&r.receipts.length)));
-  return {
-    slips: found ? (Array.isArray(found.slips)?found.slips:String(found.slips).split(",").filter(Boolean)) : [],
-    receipts: found ? (Array.isArray(found.receipts)?found.receipts:String(found.receipts).split(",").filter(Boolean)) : []
-  };
+  historyPage.filtered=arr; historyPage.page=1; renderHistoryStatement();
 }
 
 function renderHistoryStatement(){
-  const list=document.getElementById("historyList");
-  list.innerHTML="";
+  const list=document.getElementById("historyList"); list.innerHTML="";
   const end=historyPage.page*historyPage.perPage;
   const show=historyPage.filtered.slice(0,end);
-
-  const groups={};
-  show.forEach(r=>{
-    const k=ymd(r.date)||"";
-    if(!groups[k]) groups[k]=[];
-    groups[k].push(r);
-  });
-
+  const groups={}; show.forEach(r=>{const k=ymd(r.date)||""; if(!groups[k]) groups[k]=[]; groups[k].push(r)});
   const today=todayYMD();
 
   Object.keys(groups).sort((a,b)=>new Date(b)-new Date(a)).forEach(d=>{
-    const header=document.createElement("div");
-    header.className="date-header";
-    header.textContent=(d===today)?"วันนี้":formatDate(d);
+    const header=document.createElement("div"); header.className="date-header"; header.textContent=(d===today)?"วันนี้":formatDate(d);
     list.appendChild(header);
 
     groups[d].forEach(r=>{
       const isIncome=r.mode==="เบิก";
       const sign=isIncome?"+":"-";
       const money=`${sign}${Math.abs(Number(r.amount)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
-
-      const card=document.createElement("div");
-      card.className="history-card";
+      const card=document.createElement("div"); card.className="history-card";
       card.style.borderLeftColor=isIncome?"#06c755":"#d93025";
 
-      // ใช้ไฟล์จากแถวแรกของ groupId เดียวกัน (กรณีหลายอาคาร)
-      const gf = findGroupFiles(r.groupId);
-      const slipsArr = gf.slips;
-      const receiptsArr = gf.receipts;
+      const slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[]);
+      const receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[]);
+      const attChips=[...slipsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>ดูสลิป${slipsArr.length>1?(" "+(i+1)):""}</a>`),
+                      ...receiptsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>ดูใบเสร็จ${receiptsArr.length>1?(" "+(i+1)):""}</a>`)].join(" ");
 
-      // ชื่อปุ่มลิงก์: ดูสลิป / ดูใบเสร็จ (ไม่มีอิโมจิ)
-      const attChips=[
-        ...slipsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank">ดูสลิป${slipsArr.length>1?(" "+(i+1)):""}</a>`),
-        ...receiptsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank">ดูใบเสร็จ${receiptsArr.length>1?(" "+(i+1)):""}</a>`)
-      ].join(" ");
+      const slipStatusTxt = r.verifyStatus || "รอตรวจสอบ";
 
       card.innerHTML=`
         <div class="history-top">
@@ -640,11 +785,12 @@ function renderHistoryStatement(){
         </div>
         <div class="history-one">${r.item||"-"}</div>
         <div class="history-operator">ผู้ดำเนินการ: ${r.operator||"-"}</div>
-        <div class="history-detail" style="display:none;margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px">
+        <div class="history-detail">
           <div><b>โครงการ:</b> ${r.project||"-"} | <b>อาคาร:</b> ${r.building||"-"}</div>
           <div><b>ประเภทงาน:</b> ${r.jobType||"-"} | <b>หมวดงาน:</b> ${r.category||"-"}</div>
           <div><b>ประเภทรายการจ่าย:</b> ${r.paymentType||"-"}</div>
           ${attChips?`<div class="history-files">${attChips}</div>`:""}
+          <div class="slip-status"><b>สถานะสลิป:</b> ${slipStatusTxt}</div>
         </div>
       `;
       const detail=card.querySelector(".history-detail");
@@ -656,364 +802,150 @@ function renderHistoryStatement(){
   document.getElementById("loadMoreBtn").style.display=(historyPage.filtered.length> end)?"inline-block":"none";
 }
 
-function renderHistory(){ applyFilters(); }
-
-function printHistoryAsPdf(){
-  const rows = historyPage.filtered;
-  const byDate = {};
-  rows.forEach(r=>{
-    const k=ymd(r.date)||"";
-    if(!byDate[k]) byDate[k]=[];
-    byDate[k].push(r);
-  });
-
-  const win=window.open("","_blank");
-  const now = new Date();
-  const ts = now.toLocaleString("th-TH",{hour12:false});
-
-  const htmlHead=`
-    <html><head><meta charset="utf-8">
-    <title>Print Report</title>
-    <style>
-      body{font-family:Tahoma,Arial,sans-serif;padding:18px;color:#111}
-      h1{margin:0 0 8px;font-size:20px}
-      h2{margin:16px 0 8px;font-size:16px}
-      .meta{margin-bottom:12px;color:#374151}
-      table{width:100%;border-collapse:collapse;font-size:12px}
-      th,td{border:1px solid #e5e7eb;padding:6px 8px;text-align:left}
-      th{background:#f3f4f6}
-      tr:nth-child(even) td{background:#fafafa}
-      footer{margin-top:18px;font-size:11px;color:#6b7280}
-    </style></head><body>
-    <h1>Satoshi Smart Ledger – ประวัติการทำรายการ</h1>
-    <div class="meta">พิมพ์เมื่อ: ${ts}</div>
-  `;
-
-  let body="";
-  Object.keys(byDate).sort((a,b)=>new Date(b)-new Date(a)).forEach(d=>{
-    body+=`<h2>${formatDate(d)}</h2>`;
-    body+=`<table><thead><tr>
-      <th>ไอดี</th><th>โหมด</th><th>รายละเอียด</th><th>ร้านค้า</th><th>โครงการ</th><th>อาคาร</th>
-      <th>ประเภทงาน</th><th>หมวดงาน</th><th>ประเภทรายการจ่าย</th><th>จำนวนเงิน</th><th>ผู้ดำเนินการ</th><th>ไฟล์แนบ</th>
-    </tr></thead><tbody>`;
-    byDate[d].forEach(r=>{
-      const gf=findGroupFiles(r.groupId);
-      const linkTxt=[
-        ...gf.slips.map((u,i)=>`<a href="${u}" target="_blank">ดูสลิป${gf.slips.length>1?(" "+(i+1)):""}</a>`),
-        ...gf.receipts.map((u,i)=>`<a href="${u}" target="_blank">ดูใบเสร็จ${gf.receipts.length>1?(" "+(i+1)):""}</a>`)
-      ].join(" | ");
-      body+=`<tr>
-        <td>${r.id||""}</td><td>${r.mode||""}</td><td>${r.item||""}</td><td>${r.supplier||""}</td><td>${r.project||""}</td>
-        <td>${r.building||""}</td><td>${r.jobType||""}</td><td>${r.category||""}</td><td>${r.paymentType||""}</td>
-        <td>${(Number(r.amount)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-        <td>${r.operator||""}</td>
-        <td>${linkTxt||""}</td>
-      </tr>`;
-    });
-    body+=`</tbody></table>`;
-  });
-
-  const htmlFoot=`<footer>สร้างโดย Satoshi Smart Ledger</footer></body></html>`;
-  win.document.write(htmlHead+body+htmlFoot);
-  win.document.close();win.focus();win.print();
-}
-
+/* History events */
 document.getElementById("searchBox").addEventListener("input",applyFiltersDebounced);
 document.getElementById("filterMode").addEventListener("change",applyFilters);
 document.getElementById("sortBy").addEventListener("change",applyFilters);
 document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage.page++;renderHistoryStatement()});
-document.getElementById("historyApply").addEventListener("click",()=>{
-  historyPage.start=document.getElementById("historyStart").value||null;
-  historyPage.end=document.getElementById("historyEnd").value||null;
-  applyFilters();
-});
+document.getElementById("historyApply").addEventListener("click",()=>{historyPage.start=document.getElementById("historyStart").value||null;historyPage.end=document.getElementById("historyEnd").value||null;applyFilters()});
 document.getElementById("exportPdf").addEventListener("click", printHistoryAsPdf);
+function renderHistory(){ applyFilters() }
 
-
-/* ------------------------ DASHBOARD: DONUT + FORECAST + VENDOR ------------------------ */
-
-let donutChart=null, forecastChart=null, vendorChart=null;
-let viewMode='percent';  // ยังคง toggle เดิมไว้สำหรับ tooltip/legend
-
+/* ---------- DASHBOARD ---------- */
+let drill={ level:0, path:[], dims:['project','building','jobType','category','paymentType'], start:null, end:null, hovered:null };
+const drillCache=new Map();
+function withinRange(dateStr){const y=ymd(dateStr); if(!y) return false; if(drill.start&&y<drill.start) return false; if(drill.end&&y>drill.end) return false; return true}
+function filteredData(){return records.filter(r=>withinRange(r.date))}
 function sumIncome(arr){return arr.filter(r=>r.mode==="เบิก").reduce((s,r)=>s+Math.abs(Number(r.amount)||0),0)}
-function sumExpense(arr){return arr.filter(r=>r.mode==="จ่าย").reduce((s,r)=>s+Math.abs(Number(r.amount)||0),0)}
-function withinDbRange(dateStr){const y=ymd(dateStr); const s=document.getElementById("dbStart").value||null; const e=document.getElementById("dbEnd").value||null; if(!y) return false; if(s&&y<s) return false; if(e&&y>e) return false; return true}
-function filteredDbData(){return records.filter(r=>withinDbRange(r.date))}
+function groupExpense(arr,key){const m={};arr.filter(r=>r.mode==="จ่าย").forEach(r=>{const k=(r[key]||"ไม่ระบุ").trim();m[k]=(m[k]||0)+Math.abs(Number(r.amount)||0)});return m}
+function applyPath(arr){let out=arr.slice();drill.path.forEach(p=>{out=out.filter(r=>(r[p.dim]||"ไม่ระบุ")===p.value&&r.mode==="จ่าย")});return out}
+function hashColorFromName(name){let h=0;for(let i=0;i<name.length;i++){h=(h*31+name.charCodeAt(i))>>>0}const hue=h%360;return `hsl(${hue} 60% 55%)`}
+function topNWithOthers(labels,values,N=6){const arr=labels.map((l,i)=>({label:l,value:values[i]})).sort((a,b)=>b.value-a.value);if(arr.length<=N)return{labels:arr.map(x=>x.label),values:arr.map(x=>x.value)};const top=arr.slice(0,N-1);const othersVal=arr.slice(N-1).reduce((s,x)=>s+x.value,0);return{labels:[...top.map(x=>x.label),"อื่นๆ"],values:[...top.map(x=>x.value),othersVal]}
 
-function groupExpenseBy(arr,key){
-  const m={};
-  arr.filter(r=>r.mode==="จ่าย").forEach(r=>{
-    const k=(r[key]||"ไม่ระบุ").trim();
-    m[k]=(m[k]||0)+Math.abs(Number(r.amount)||0);
-  });
-  return m;
-}
-function topNWithOthers(labels, values, N=6){
-  const arr = labels.map((l,i)=>({label:l, value:values[i]})).sort((a,b)=>b.value-a.value);
-  if(arr.length<=N) return {labels:arr.map(x=>x.label), values:arr.map(x=>x.value)};
-  const top = arr.slice(0, N-1);
-  const othersVal = arr.slice(N-1).reduce((s,x)=>s+x.value,0);
-  return {labels:[...top.map(x=>x.label), "อื่นๆ"], values:[...top.map(x=>x.value), othersVal]};
-}
-function hashColorFromName(name){
-  let h=0; for(let i=0;i<name.length;i++){h=(h*31 + name.charCodeAt(i))>>>0}
-  const hue=h%360, sat=60, light=55;
-  return `hsl(${hue} ${sat}% ${light}%)`;
+function setCenterText(title,sub){const wrap=document.getElementById("centerText");document.getElementById("centerBig").textContent=title;document.getElementById("centerSub").textContent=sub;wrap.style.display="flex"}
+
+function updateCenterText(labels,values,title){
+  const total=values.reduce((a,b)=>a+b,0);
+  if(total<=0){setCenterText("ไม่มีข้อมูล","ปรับช่วงวันที่หรือเพิ่มรายการ");return}
+  if(drill.hovered!=null){
+    const i=drill.hovered; const val=values[i]; const pct=(val/total*100);
+    if(viewMode==='percent'){ setCenterText(`${pct.toFixed(1)}%`,labels[i]); }
+    else{ setCenterText(`${val.toLocaleString(undefined,{minimumFractionDigits:0})}฿`,labels[i]); }
+  }else{
+    if(viewMode==='percent'){ setCenterText(`100%`,title); }
+    else{ setCenterText(`${total.toLocaleString(undefined,{minimumFractionDigits:0})}฿`,title); }
+  }
 }
 
-function renderDonut(){
-  const data=filteredDbData();
-  const incomeTotal=sumIncome(data);
-  const byProject=groupExpenseBy(data,'project');
-  const spentSum=Object.values(byProject).reduce((a,b)=>a+b,0);
-  const remaining=Math.max(incomeTotal - spentSum, 0);
-
-  // เงินคงเหลือเป็นรายการแรกเสมอ
-  const rawLabels=["เงินคงเหลือ", ...Object.keys(byProject)];
-  const rawValues=[remaining, ...Object.values(byProject)];
-
-  const {labels, values} = topNWithOthers(rawLabels, rawValues, 6);
-  const total = values.reduce((a,b)=>a+b,0);
-  const colors = labels.map(l => l==="เงินคงเหลือ" ? "#cbd5e1" : hashColorFromName(l));
-
+function renderDonut(rawLabels,rawValues,title){
+  const {labels,values}=topNWithOthers(rawLabels,rawValues,6);
+  const total=values.reduce((a,b)=>a+b,0);
+  const colors=labels.map(l=> l==="เงินคงเหลือ"?"#cbd5e1":hashColorFromName(l));
   const ctx=document.getElementById("donutChart").getContext("2d");
-  if(donutChart) donutChart.destroy();
-  donutChart=new Chart(ctx,{
+  if(chart) chart.destroy();
+  chart=new Chart(ctx,{
     type:"doughnut",
     data:{labels,datasets:[{data:values,backgroundColor:colors}]},
     options:{
-      responsive:true,cutout:"65%",
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{
-          label:(ctx)=>{
-            const val=Number(ctx.parsed)||0;
-            const pct=(total? val/total*100:0);
-            return viewMode==='percent'
-              ? `${ctx.label}: ${pct.toFixed(2)}%`
-              : `${ctx.label}: ${val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
-          }
-        }}
-      }
+      responsive:true, cutout:"65%",
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>{const val=Number(c.parsed)||0;const pct=(val/total*100);return viewMode==='percent'?`${c.label}: ${pct.toFixed(2)}%`:`${c.label}: ${val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;}}}},
+      onHover:(evt,els)=>{drill.hovered=els&&els.length?els[0].index:null;updateCenterText(labels,values,title)},
+      onClick:(evt)=>{const p=chart.getElementsAtEventForMode(evt,'nearest',{intersect:true},false);if(!p.length)return;const idx=p[0].index;const label=labels[idx];if(drill.level===0&&label==="เงินคงเหลือ")return;goDeeper(label);}
     }
   });
 
-  // Summary (legend)
   const box=document.getElementById("summaryBox");
-  if(total<=0 || labels.length===0){
-    box.innerHTML=`<h3>ภาพรวม</h3><div class="legend-empty">ไม่มีข้อมูลในช่วงที่เลือก</div>`;
+  if(total<=0||labels.length===0){ box.innerHTML=`<h3>${title}</h3><div class="legend-empty">ไม่มีข้อมูลในช่วงที่เลือก</div>`; }
+  else{
+    const legendHTML=labels.map((label,i)=>{const val=values[i]||0;const pct=(val/total*100);const color=colors[i];const right=(viewMode==='percent')?`${pct.toFixed(2)}%`:`${val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;return `<div class="legend-item"><span class="legend-dot" style="background:${color}"></span><span>${label}</span><b style="margin-left:auto">${right}</b></div>`}).join("");
+    box.innerHTML=`<h3>${title}</h3>${legendHTML}`;
+  }
+  updateCenterText(labels,values,title);
+}
+
+function cacheKey(){return [drill.level,drill.path.map(p=>`${p.dim}:${p.value}`).join(">"),drill.start||"",drill.end||""].join("|")}
+function renderDrill(){
+  const data=filteredData(); const totalFunds=sumIncome(data); const expensesOnly=data.filter(r=>r.mode==="จ่าย");
+  const crumbs=document.getElementById("dbCrumbs"); const back=document.getElementById("dbBack");
+  const items=[{dim:"ภาพรวม",value:"ทั้งหมด"}].concat(drill.path);
+  crumbs.innerHTML=items.map((p,i)=> i===0?`<span class="crumb">ภาพรวม</span>`:`<span class="crumb">${p.dim}: ${p.value}</span>`).join("");
+  back.style.display=drill.level>0?"inline-block":"none";
+
+  const key=cacheKey(); if(drillCache.has(key)){const c=drillCache.get(key); renderDonut(c.labels,c.values,c.title); return;}
+
+  if(drill.level===0){
+    const byProject=groupExpense(expensesOnly,'project');
+    const spentSum=Object.values(byProject).reduce((a,b)=>a+b,0);
+    const remaining=Math.max(totalFunds - spentSum, 0);
+    const labels=["เงินคงเหลือ",...Object.keys(byProject)];
+    const values=[remaining,...Object.values(byProject)];
+    const title="ภาพรวม";
+    drillCache.set(key,{labels,values,title}); renderDonut(labels,values,title);
   }else{
-    const legendHTML = labels.map((label,i)=>{
-      const val = values[i]||0;
-      const pct = (total? val/total*100:0);
-      const color = colors[i];
-      const right = (viewMode==='percent')
-        ? `${pct.toFixed(2)}%`
-        : `${val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`;
-      return `
-        <div class="legend-item">
-          <span class="legend-dot" style="background:${color}"></span>
-          <span>${label}</span>
-          <b style="margin-left:auto">${right}</b>
-        </div>`;
-    }).join("");
-    box.innerHTML=`<h3>ภาพรวม</h3>${legendHTML}`;
+    let scoped=applyPath(data);
+    const dim=drill.dims[drill.level];
+    const parentDim=drill.dims[drill.level-1];
+    const parentName=drill.path[drill.path.length-1]?.value || "";
+    const by=groupExpense(scoped, dim);
+    const labels=Object.keys(by), vals=Object.values(by);
+    const title=`${parentDim||""} ${parentName} → ${dim}`;
+    drillCache.set(key,{labels,values:vals,title}); renderDonut(labels,vals,title);
   }
-
-  // Center text = เบิกรวมทั้งหมด (บาท)
-  const centerWrap=document.getElementById("centerText");
-  const big=document.getElementById("centerBig");
-  const sub=document.getElementById("centerSub");
-  big.textContent = `${incomeTotal.toLocaleString(undefined,{minimumFractionDigits:0})}฿`;
-  sub.textContent = 'เบิกรวมทั้งหมด';
-  centerWrap.style.display="flex";
 }
+function goDeeper(label){ if(drill.level===0){drill.path.push({dim:'project',value:label});drill.level=1}else if(drill.level<drill.dims.length-0){const dim=drill.dims[drill.level];drill.path.push({dim,value:label});if(drill.level<drill.dims.length-1)drill.level++} renderDrill() }
+document.getElementById("dbBack").addEventListener("click",()=>{ if(drill.level===0) return; drill.path.pop(); drill.level=Math.max(0,drill.level-1); renderDrill() });
 
-/* Forecast: รายเดือนเฉพาะ "จ่าย" */
-function renderForecastChart(){
-  const ctx=document.getElementById("forecastChart").getContext("2d");
-  if(forecastChart) forecastChart.destroy();
-
-  const data=filteredDbData().filter(r=>r.mode==="จ่าย");
-  if(data.length===0){
-    forecastChart=new Chart(ctx,{type:"line",data:{labels:[],datasets:[{data:[]}]}});
-    return;
-  }
-  // group by YYYY-MM
-  const map=new Map();
-  data.forEach(r=>{
-    const y=new Date(r.date);
-    const key=`${y.getFullYear()}-${("0"+(y.getMonth()+1)).slice(-2)}`;
-    const val=Math.abs(Number(r.amount)||0);
-    map.set(key,(map.get(key)||0)+val);
-  });
-  const keys=[...map.keys()].sort();
-  const vals=keys.map(k=>map.get(k));
-  const avg = vals.reduce((a,b)=>a+b,0)/(vals.length||1);
-
-  forecastChart=new Chart(ctx,{
-    type:"line",
-    data:{labels:keys,datasets:[
-      {label:"ค่าใช้จ่ายรายเดือน",data:vals,tension:.3,fill:false},
-      {label:"ค่าเฉลี่ย",data:vals.map(()=>avg),borderDash:[6,6],tension:0,fill:false}
-    ]},
-    options:{
-      responsive:true,
-      plugins:{legend:{display:true}},
-      scales:{y:{ticks:{callback:(v)=>v.toLocaleString()}}}
-    }
-  });
-}
-
-/* Vendor Comparison: Top 10 ร้านค้า */
-function renderVendorChart(){
-  const ctx=document.getElementById("vendorChart").getContext("2d");
-  if(vendorChart) vendorChart.destroy();
-
-  const data=filteredDbData().filter(r=>r.mode==="จ่าย");
-  const m={}; // supplier -> sum
-  data.forEach(r=>{
-    const k=(r.supplier||"ไม่ระบุ").trim();
-    m[k]=(m[k]||0)+Math.abs(Number(r.amount)||0);
-  });
-  const entries=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const labels=entries.map(e=>e[0]);
-  const values=entries.map(e=>e[1]);
-
-  vendorChart=new Chart(ctx,{
-    type:"bar",
-    data:{labels,datasets:[{label:"ยอดรวม (บาท)",data:values,backgroundColor:labels.map(l=>hashColorFromName(l))}]},
-    options:{
-      indexAxis:"y",
-      responsive:true,
-      plugins:{legend:{display:false},tooltip:{callbacks:{
-        label:(ctx)=>`${Number(ctx.parsed.x||0).toLocaleString()} บาท`
-      }}},
-      scales:{x:{ticks:{callback:(v)=>Number(v).toLocaleString()}}}
-    }
-  });
-}
-
-function renderDashboardAll(){
-  renderDonut();
-  renderForecastChart();
-  renderVendorChart();
-}
-
-document.getElementById("toggleUnit").addEventListener("click",()=>{
-  viewMode = (viewMode==='percent')?'amount':'percent';
-  document.getElementById("toggleUnit").textContent = (viewMode==='percent')?'ดูเป็น %':'ดูเป็น บาท';
-  renderDashboardAll();
+document.getElementById("dbPreset").addEventListener("change",(e)=>{const v=e.target.value,t=new Date();const sEl=document.getElementById("dbStart"), eEl=document.getElementById("dbEnd");let s=null,ed=null;
+  if(v==="this_month"){const d1=new Date(t.getFullYear(),t.getMonth(),1);const d2=new Date(t.getFullYear(),t.getMonth()+1,0); s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)}
+  else if(v==="last_month"){const d1=new Date(t.getFullYear(),t.getMonth()-1,1);const d2=new Date(t.getFullYear(),t.getMonth(),0); s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)}
+  else if(v==="this_year"){const d1=new Date(t.getFullYear(),0,1); const d2=new Date(t.getFullYear(),11,31); s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)}
+  else if(v==="last_year"){const y=t.getFullYear()-1; const d1=new Date(y,0,1),d2=new Date(y,11,31); s=d1.toISOString().slice(0,10); ed=d2.toISOString().slice(0,10)}
+  if(s){sEl.value=s;drill.start=s} if(ed){eEl.value=ed;drill.end=ed}
 });
+document.getElementById("dbApply").addEventListener("click",()=>{drill.start=document.getElementById("dbStart").value||null;drill.end=document.getElementById("dbEnd").value||null;drill.level=0;drill.path=[];drillCache.clear();renderDrill()});
+document.getElementById("dbReset").addEventListener("click",()=>{document.getElementById("dbStart").value="";document.getElementById("dbEnd").value="";document.getElementById("dbPreset").value="";drill.start=null;drill.end=null;drill.level=0;drill.path=[];drillCache.clear();renderDrill()});
+document.getElementById("toggleUnit").addEventListener("click",()=>{viewMode=(viewMode==='percent')?'amount':'percent';document.getElementById("toggleUnit").textContent=(viewMode==='percent')?'ดูเป็น %':'ดูเป็น บาท';renderDrill()});
 
+/* Export donut as PDF (เปิดหน้าพิมพ์พร้อมรูปกราฟ) */
 document.getElementById("exportPng").addEventListener("click",()=>{
-  if(!donutChart) return;
-  const link=document.createElement("a");
-  link.href=donutChart.toBase64Image();
-  link.download=`dashboard_${todayYMD()}.png`;
-  link.click();
-});
-
-/* Print Report (Dashboard): รวม 3 กราฟ + หัวกระดาษ + Timestamp */
-document.getElementById("printDashboard").addEventListener("click",()=>{
+  if(!chart) return;
+  const dataURL=chart.toBase64Image("image/png",1.0);
   const win=window.open("","_blank");
-  const now=new Date();
-  const ts=now.toLocaleString("th-TH",{hour12:false});
-
-  const donutImg = donutChart ? donutChart.toBase64Image() : "";
-  const forecastImg = forecastChart ? forecastChart.toBase64Image() : "";
-  const vendorImg = vendorChart ? vendorChart.toBase64Image() : "";
-
-  const html=`
-  <html><head><meta charset="utf-8"><title>Print Report</title>
-    <style>
-      body{font-family:Tahoma,Arial,sans-serif;padding:18px;color:#111}
-      h1{margin:0 0 8px;font-size:20px}
-      h2{margin:16px 0 8px;font-size:16px}
-      .meta{margin-bottom:12px;color:#374151}
-      .imgwrap{margin:8px 0 18px}
-      .imgwrap img{max-width:100%}
-      footer{margin-top:18px;font-size:11px;color:#6b7280}
-    </style>
-  </head><body>
-    <h1>Satoshi Smart Ledger – Dashboard Summary</h1>
-    <div class="meta">พิมพ์เมื่อ: ${ts}</div>
-
-    <h2>ภาพรวม</h2>
-    <div class="imgwrap">${donutImg?`<img src="${donutImg}">`:"ไม่มีข้อมูล"}</div>
-
-    <h2>แนวโน้มค่าใช้จ่ายรายเดือน</h2>
-    <div class="imgwrap">${forecastImg?`<img src="${forecastImg}">`:"ไม่มีข้อมูล"}</div>
-
-    <h2>ร้านค้าที่ใช้จ่ายสูงสุด (Top 10)</h2>
-    <div class="imgwrap">${vendorImg?`<img src="${vendorImg}">`:"ไม่มีข้อมูล"}</div>
-
-    <footer>สร้างโดย Satoshi Smart Ledger</footer>
-  </body></html>`;
-  win.document.write(html);
-  win.document.close();win.focus();win.print();
+  const html=`<html><head><meta charset="utf-8"><title>Dashboard</title>
+  <style>body{font-family:Tahoma,Arial,sans-serif;padding:16px;text-align:center} h2{margin-bottom:12px}</style>
+  </head><body><h2>แดชบอร์ด</h2><img src="${dataURL}" style="max-width:100%"><script>window.print()</script></body></html>`;
+  win.document.write(html); win.document.close(); win.focus();
 });
 
-
-/* ------------------------ LOAD OPTIONS + INIT ------------------------ */
-
-function fillSelect(id,arr){
-  const sel=document.getElementById(id);
-  sel.innerHTML=`<option value="">-- เลือก --</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("");
-}
-
+/* Options load */
+function fillSelect(id,arr){const sel=document.getElementById(id); sel.innerHTML=`<option value="">-- เลือก --</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("")}
 async function loadOptions(){
   const d=await fetch(API_URL).then(r=>r.json());
   records=d.items||[];
-
-  // options
-  supplierList = d.options?.suppliers || [];
-  buildingList = d.options?.buildings || [];
-  fillSelect("supplierExpense", supplierList);
-  fillSelect("project", d.options?.projects || []);
-  fillSelect("jobType", d.options?.jobTypes || []);
-  fillSelect("category", d.options?.categories || []);
-  fillSelect("paymentType", d.options?.paymentTypes || []);
-
-  // render
-  renderHistory();
-  renderDashboardAll();
+  buildingList=d.options.buildings||[];
+  renderHistory(); renderDrill();
+  fillSelect("supplierExpense",d.options.suppliers||[]);
+  fillSelect("project",d.options.projects||[]);
+  fillSelect("jobType",d.options.jobTypes||[]);
+  fillSelect("category",d.options.categories||[]);
+  fillSelect("paymentType",d.options.paymentTypes||[]);
 }
 
-/* Amount formatting from your original (kept the same behavior) */
+/* Amount formatting */
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt");
 amountEl.addEventListener("input",()=>{
-  let raw=amountEl.value;
-  if(raw.startsWith(".")) raw="0"+raw;
+  let raw=amountEl.value; if(raw.startsWith(".")) raw="0"+raw;
   let s=raw.replace(/,/g,"").replace(/[^\d.]/g,"");
-  const firstDot=s.indexOf(".");
-  if(firstDot!==-1){
-    const before=s.slice(0,firstDot+1);
-    const after=s.slice(firstDot+1).replace(/\./g,"");
-    s=before+after;
-  }
-  let endsWithDot = s.endsWith(".");
-  const [intPartRaw,decPartRaw=""] = s.split(".");
-  const intPart = (intPartRaw||"0").replace(/^0+(?=\d)/,"");
-  const withCommas=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,",");
-  amountEl.value = firstDot!==-1 ? (withCommas + (endsWithDot?".":("." + decPartRaw))) : withCommas;
-
+  const firstDot=s.indexOf("."); if(firstDot!==-1){const before=s.slice(0,firstDot+1);const after=s.slice(firstDot+1).replace(/\./g,""); s=before+after}
+  let endsWithDot=s.endsWith("."); const [intRaw,decRaw=""]=s.split("."); const intPart=(intRaw||"0").replace(/^0+(?=\d)/,""); const withCommas=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,",");
+  amountEl.value=firstDot!==-1 ? (withCommas + (endsWithDot?".":("." + decRaw))) : withCommas;
   const num=parseFloat(s);
-  if(!isNaN(num)){
-    const [i,d]=num.toFixed(2).split(".");
-    amountTxt.textContent="("+thaiMoneyText(i,d)+")";
-  }else{
-    amountTxt.textContent="";
-  }
+  if(!isNaN(num)){const [i,d]=num.toFixed(2).split("."); amountTxt.textContent="("+thaiMoneyText(i,d)+")"}else{amountTxt.textContent=""}
 });
 amountEl.addEventListener("blur",()=>{
-  const raw=(amountEl.value||"").replace(/,/g,"");
-  if(!raw){amountTxt.textContent=""; return;}
-  let num=parseFloat(raw);
-  if(isNaN(num)){amountTxt.textContent=""; return;}
-  amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-  const [i,d]=num.toFixed(2).split(".");
-  amountTxt.textContent="("+thaiMoneyText(i,d)+")";
+  const raw=(amountEl.value||"").replace(/,/g,""); if(!raw){amountTxt.textContent=""; return;}
+  let num=parseFloat(raw); if(isNaN(num)){amountTxt.textContent=""; return;}
+  amountEl.value=num.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); const [i,d]=num.toFixed(2).split("."); amountTxt.textContent="("+thaiMoneyText(i,d)+")";
 });
 function thaiMoneyText(i,d){
   const n=["ศูนย์","หนึ่ง","สอง","สาม","สี่","ห้า","หก","เจ็ด","แปด","เก้า"],p=["","สิบ","ร้อย","พัน","หมื่น","แสน","ล้าน"];
@@ -1025,13 +957,7 @@ function thaiMoneyText(i,d){
 }
 
 /* INIT */
-window.addEventListener("DOMContentLoaded",async()=>{
-  // ค่าเริ่มต้น: เบิก
-  document.getElementById("mode").value="เบิก";
-  document.getElementById("btnIncome").classList.add("selected");
-  await loadOptions();
-});
+window.addEventListener("DOMContentLoaded",async()=>{ setMode("เบิก"); await loadOptions() });
 </script>
 </body>
 </html>
-<!-- ======== END FINAL PART 4/4 ======== -->
