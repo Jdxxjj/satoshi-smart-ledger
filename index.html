@@ -653,12 +653,11 @@ function renderHistoryStatement(){
       const attChips=[...slipsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>ดูสลิป${slipsArr.length>1?(" "+(i+1)):""}</a>`),
                       ...receiptsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>ดูใบเสร็จ${receiptsArr.length>1?(" "+(i+1)):""}</a>`)].join(" ");
 
-      /* ตรงนี้แก้ตามบรีฟ:
-         - เอาคำว่า "ID:" ออก (เหลือไอดีตรงๆ)
-         - ตัดวันที่ในบัตรออก (วันที่อยู่เฉพาะหัวกลุ่มแล้ว) */
+      /* แก้ตามบรีฟ:
+         - เอา "• (เบิก)/(จ่าย)" ออก */
       card.innerHTML=`
         <div class="history-top">
-          <div class="history-id">${r.id||"-"} • (${r.mode})</div>
+          <div class="history-id">${r.id||"-"}</div>
           <div class="history-amount ${isIncome?'pos':'neg'}">${money}</div>
         </div>
         <div class="history-one">${r.item||"-"}</div>
@@ -691,7 +690,7 @@ document.getElementById("historyApply").addEventListener("click",()=>{
 });
 function renderHistory(){ applyFilters() }
 
-/* ========== DASHBOARD: Donut + Drilldown ========== */
+/* ========== DASHBOARD: Donut + Drilldown (with %) ========== */
 let drill={ level:0, path:[], dims:['project','building','jobType','category','paymentType'], start:null, end:null };
 function withinRange(dateStr){const y=ymd(dateStr); if(!y) return false; if(drill.start&&y<drill.start) return false; if(drill.end&&y>drill.end) return false; return true}
 function filteredData(){return records.filter(r=>withinRange(r.date))}
@@ -699,7 +698,11 @@ function sumIncome(arr){return arr.filter(r=>r.mode==="เบิก").reduce((s,
 function groupExpense(arr,key){const m={};arr.filter(r=>r.mode==="จ่าย").forEach(r=>{const k=(r[key]||"ไม่ระบุ").trim();m[k]=(m[k]||0)+Math.abs(Number(r.amount)||0)});return m}
 function applyPath(arr){let out=arr.slice();drill.path.forEach(p=>{out=out.filter(r=>(r[p.dim]||"ไม่ระบุ")===p.value&&r.mode==="จ่าย")});return out}
 function rndColor(i){const base=["#0ea5e9","#22c55e","#f97316","#a855f7","#eab308","#ef4444","#06b6d4","#84cc16","#f43f5e","#14b8a6"];return base[i%base.length]}
-function renderDonut(labels,values,colors,title,legend){
+
+/* อัปเดต: renderDonut คำนวณ % และแสดงทั้งใน legend และ tooltip */
+function renderDonut(labels,values,colors,title){
+  const total = values.reduce((a,b)=>a+b,0) || 1;
+
   const ctx=document.getElementById("donutChart").getContext("2d");
   if(chart) chart.destroy();
   chart=new Chart(ctx,{
@@ -707,7 +710,18 @@ function renderDonut(labels,values,colors,title,legend){
     data:{labels,datasets:[{data:values,backgroundColor:colors}]},
     options:{
       responsive:true, cutout:"65%",
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(ctx)=>`${ctx.label}: ${Number(ctx.parsed).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท`}}},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label:(ctx)=>{
+              const val = Number(ctx.parsed)||0;
+              const pct = (val/total*100);
+              return `${ctx.label}: ${val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท (${pct.toFixed(2)}%)`;
+            }
+          }
+        }
+      },
       onClick:(evt)=>{
         const points=chart.getElementsAtEventForMode(evt,'nearest',{intersect:true},false);
         if(!points.length) return;
@@ -718,11 +732,26 @@ function renderDonut(labels,values,colors,title,legend){
       }
     }
   });
+
   const box=document.getElementById("summaryBox");
-  box.innerHTML=`<h3>${title}</h3>` + legend.map(x=>`
-    <div class="legend-item"><span class="legend-dot" style="background:${x.color}"></span>
-    <span>${x.label}</span><b style="margin-left:auto">${x.value.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท</b></div>`).join("");
+  // สร้าง legend พร้อมเปอร์เซ็นต์
+  const legendHTML = labels.map((label,i)=>{
+    const val = values[i]||0;
+    const pct = (val/total*100);
+    const color = colors[i];
+    return `
+      <div class="legend-item">
+        <span class="legend-dot" style="background:${color}"></span>
+        <span>${label}</span>
+        <b style="margin-left:auto">
+          ${val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} บาท (${pct.toFixed(2)}%)
+        </b>
+      </div>`;
+  }).join("");
+
+  box.innerHTML=`<h3>${title}</h3>${legendHTML}`;
 }
+
 function renderDrill(){
   const data=filteredData();
   const totalFunds=sumIncome(data);
@@ -735,9 +764,9 @@ function renderDrill(){
     const labels=["เงินคงเหลือ", ...Object.keys(byProject)];
     const values=[remaining, ...Object.values(byProject)];
     const colors=["#cbd5e1", ...labels.slice(1).map((_,i)=>rndColor(i))];
-    const legend=[{label:"เงินคงเหลือ",value:remaining,color:"#cbd5e1"}]
-      .concat(Object.keys(byProject).map((k,i)=>({label:k,value:byProject[k],color:colors[i+1]})));
-    renderDonut(labels,values,colors,"ภาพรวม (100% = เงินเบิกรวม)",legend);
+
+    // เปลี่ยนชื่อหัวข้อ: เอา "(100% = เงินเบิกรวม)" ออก
+    renderDonut(labels,values,colors,"ภาพรวม");
   }else{
     let scoped=applyPath(data);
     const dim=drill.dims[drill.level];
@@ -747,8 +776,7 @@ function renderDrill(){
     const labels=Object.keys(by);
     const vals=Object.values(by);
     const colors=labels.map((_,i)=>rndColor(i));
-    const legend=labels.map((k,i)=>({label:k,value:by[k],color:colors[i]}));
-    renderDonut(labels,vals,colors,`${parentDim||""} ${parentName} → ${dim}`, legend);
+    renderDonut(labels,vals,colors,`${parentDim||""} ${parentName} → ${dim}`);
   }
 
   const crumbs=document.getElementById("dbCrumbs");
@@ -803,28 +831,21 @@ async function loadOptions(){
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt");
 amountEl.addEventListener("input",()=>{
   let raw=amountEl.value;
+  if(raw.startsWith(".")) raw="0"+raw; // เริ่มด้วย '.' ได้
 
-  // อนุญาตเริ่มด้วย '.' -> แปลงเป็น '0.'
-  if(raw.startsWith(".")) raw="0"+raw;
-
-  // กรองเป็นตัวเลขและจุด
-  let s=raw.replace(/,/g,"").replace(/[^\d.]/g,"");
-
-  // กันหลายจุด: เหลือเฉพาะจุดแรก
+  let s=raw.replace(/,/g,"").replace(/[^\d.]/g,""); // ตัวเลข+จุด
   const firstDot=s.indexOf(".");
   if(firstDot!==-1){
     const before=s.slice(0,firstDot+1);
     const after=s.slice(firstDot+1).replace(/\./g,"");
-    s=before+after;
+    s=before+after; // เหลือจุดแรก
   }
 
-  // แยกส่วนเพื่อใส่คอมมาในส่วนจำนวนเต็ม
   let endsWithDot = s.endsWith(".");
   const [intPartRaw,decPartRaw=""] = s.split(".");
   const intPart = (intPartRaw||"0").replace(/^0+(?=\d)/,"");
   const withCommas=intPart.replace(/\B(?=(\d{3})+(?!\d))/g,",");
 
-  // รักษา '.' ระหว่างพิมพ์หากผู้ใช้เพิ่งพิมพ์จุด
   amountEl.value = firstDot!==-1 ? (withCommas + (endsWithDot?".":("." + decPartRaw))) : withCommas;
 
   const num=parseFloat(s);
