@@ -589,7 +589,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
       const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
       const j=await res.json(); if(!j.ok) throw new Error("fail");
     }
-    showPopup("บันทึกสำเร็จ ✅"); setTimeout(hidePopup,800);
+    showPopup("บันทึกสำเร็จ"); setTimeout(hidePopup,800);
 
     // reset
     document.getElementById("form").reset();
@@ -603,7 +603,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
     await loadOptions();
   }catch(err){
     console.error(err);
-    showPopup("บันทึกล้มเหลว ❌"); setTimeout(hidePopup,1200);
+    showPopup("บันทึกล้มเหลว"); setTimeout(hidePopup,1200);
   }
 });
 </script>
@@ -1120,3 +1120,4 @@ window.addEventListener("DOMContentLoaded",async()=>{ setMode("เบิก"); a
 </body>
 </html>
 <!-- ======== END PART 3/3 ======== -->
+
