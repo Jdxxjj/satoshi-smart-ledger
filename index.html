@@ -37,6 +37,7 @@
     .btn-ok{border-color:#cbd5e1}
     .btn-success{border:none;background:#16a34a;color:#fff;font-weight:700;box-shadow:0 2px 6px rgba(22,163,74,.25)}
     .btn-success:hover{background:#15803d}
+    .btn-apply{padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;font-weight:700;cursor:pointer}
 
     /* Global popup (saving) */
     #popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center}
@@ -74,7 +75,6 @@
     .btn-back{margin-bottom:10px}
     .filter-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
     .mini{padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff}
-    .btn-apply{padding:8px 14px;border:none;border-radius:8px;background:#0ea5e9;color:#fff;font-weight:700;cursor:pointer}
     .legend-item{display:flex;align-items:center;gap:8px;margin:6px 0}
     .legend-dot{width:12px;height:12px;border-radius:50%}
 
@@ -229,6 +229,14 @@
   <section id="history" class="page">
     <div class="card">
       <h2>ประวัติการทำรายการ</h2>
+
+      <!-- Date range filters -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <input type="date" id="historyStart" class="mini" placeholder="ตั้งแต่วันที่">
+        <input type="date" id="historyEnd" class="mini" placeholder="ถึงวันที่">
+        <button id="historyApply" class="btn-apply">กรองวันที่</button>
+      </div>
+
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
         <input type="text" id="searchBox" placeholder="ค้นหารายการ..." style="flex:2;padding:10px;border:1px solid #ccc;border-radius:8px">
         <select id="filterMode" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px">
@@ -245,7 +253,9 @@
           <option value="operator_desc">ผู้ดำเนินการ (Z→A)</option>
         </select>
       </div>
+
       <div id="historyList"></div>
+
       <div style="text-align:center;margin-top:12px">
         <button id="loadMoreBtn" class="btn btn-ok">โหลดเพิ่ม</button>
       </div>
@@ -356,7 +366,7 @@ function setMode(m){
 document.getElementById("btnIncome").addEventListener("click",()=>setMode("เบิก"));
 document.getElementById("btnExpense").addEventListener("click",()=>setMode("จ่าย"));
 
-/* ========== BUILDING TAG + SUGGESTION (ดึงจาก sheet ผ่าน loadOptions) ========== */
+/* ========== BUILDING TAG + SUGGESTION (ดึงรายการจาก loadOptions) ========== */
 function renderBuildingTags(){
   const box=document.getElementById("buildingTags");
   const input=document.getElementById("buildingInput");
@@ -369,7 +379,6 @@ function renderBuildingTags(){
   });
 }
 function removeBuilding(i){selectedBuildings.splice(i,1);renderBuildingTags()}
-
 function renderBuildingSuggestions(filter=""){
   const list=document.getElementById("buildingSuggest");
   list.innerHTML="";
@@ -409,7 +418,7 @@ document.addEventListener("click",e=>{
   if(!box.contains(e.target)) document.getElementById("buildingSuggest").style.display="none";
 });
 
-/* ===== popup-based add buttons (green) ===== */
+/* ===== Popup-based add buttons (green) ===== */
 document.getElementById("addBuildingBtn").addEventListener("click",()=>openModal("#buildingModal"));
 document.getElementById("buildingSaveBtn").addEventListener("click",async()=>{
   const val=(document.getElementById("buildingNewName").value||"").trim();
@@ -426,7 +435,6 @@ document.getElementById("buildingSaveBtn").addEventListener("click",async()=>{
     alert("เพิ่มอาคารไม่สำเร็จ");
   }
 });
-
 document.getElementById("addSupplierBtn").addEventListener("click",()=>openModal("#supplierModal"));
 document.getElementById("supplierSaveBtn").addEventListener("click",async()=>{
   const val=(document.getElementById("supplierNewName").value||"").trim();
@@ -579,14 +587,20 @@ document.getElementById("form").addEventListener("submit",async e=>{
 </script>
 <!-- ======== PART 3/3: HISTORY, DASHBOARD, LOAD OPTIONS, AMOUNT FORMAT, INIT ======== -->
 <script>
-/* ========== HISTORY (group by date) ========== */
-let historyPage={page:1,perPage:12,filtered:[]};
+/* ========== HISTORY (group by date + date-range filter) ========== */
+let historyPage={page:1,perPage:12,filtered:[], start:null, end:null};
+
 function applyFilters(){
   const q=(document.getElementById("searchBox").value||"").toLowerCase();
   const mode=document.getElementById("filterMode").value;
   const sort=document.getElementById("sortBy").value;
+  const sDate=historyPage.start, eDate=historyPage.end;
 
   let arr=records.filter(r=>{
+    const y=ymd(r.date);
+    if(sDate && y && y < sDate) return false;
+    if(eDate && y && y > eDate) return false;
+
     const s=[r.id,r.item,r.supplier,r.project,r.building,r.operator].join(" ").toLowerCase();
     if(q&&!s.includes(q)) return false;
     if(mode && r.mode!==mode) return false;
@@ -604,6 +618,7 @@ function applyFilters(){
   historyPage.page=1;
   renderHistoryStatement();
 }
+
 function renderHistoryStatement(){
   const list=document.getElementById("historyList");
   list.innerHTML="";
@@ -638,9 +653,12 @@ function renderHistoryStatement(){
       const attChips=[...slipsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>ดูสลิป${slipsArr.length>1?(" "+(i+1)):""}</a>`),
                       ...receiptsArr.map((u,i)=>`<a class="chip" href="${u}" target="_blank"><i>🔗</i>ดูใบเสร็จ${receiptsArr.length>1?(" "+(i+1)):""}</a>`)].join(" ");
 
+      /* ตรงนี้แก้ตามบรีฟ:
+         - เอาคำว่า "ID:" ออก (เหลือไอดีตรงๆ)
+         - ตัดวันที่ในบัตรออก (วันที่อยู่เฉพาะหัวกลุ่มแล้ว) */
       card.innerHTML=`
         <div class="history-top">
-          <div class="history-id">ID: ${r.id||"-"} • ${formatDate(r.date)} (${r.mode})</div>
+          <div class="history-id">${r.id||"-"} • (${r.mode})</div>
           <div class="history-amount ${isIncome?'pos':'neg'}">${money}</div>
         </div>
         <div class="history-one">${r.item||"-"}</div>
@@ -660,10 +678,17 @@ function renderHistoryStatement(){
 
   document.getElementById("loadMoreBtn").style.display=(historyPage.filtered.length> end)?"inline-block":"none";
 }
+
+/* History filter events */
 document.getElementById("searchBox").addEventListener("input",applyFilters);
 document.getElementById("filterMode").addEventListener("change",applyFilters);
 document.getElementById("sortBy").addEventListener("change",applyFilters);
 document.getElementById("loadMoreBtn").addEventListener("click",()=>{historyPage.page++;renderHistoryStatement()});
+document.getElementById("historyApply").addEventListener("click",()=>{
+  historyPage.start=document.getElementById("historyStart").value||null;
+  historyPage.end=document.getElementById("historyEnd").value||null;
+  applyFilters();
+});
 function renderHistory(){ applyFilters() }
 
 /* ========== DASHBOARD: Donut + Drilldown ========== */
