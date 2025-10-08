@@ -292,7 +292,6 @@
         </select>
         <button class="btn-apply" id="dbApply">นำไปใช้</button>
         <button class="btn" id="dbReset">ล้างตัวกรอง</button>
-        <button class="btn" id="toggleUnit" title="สลับมุมมอง จำนวนเงิน/เปอร์เซ็นต์">ดูเป็น %</button>
         <button class="btn" id="exportChartPdf" title="ส่งออกเป็น PDF">Export PDF</button>
       </div>
 
@@ -950,12 +949,6 @@ document.getElementById("dbPreset").addEventListener("change",(e)=>{
 });
 document.getElementById("dbApply").addEventListener("click",()=>{drill.start=document.getElementById("dbStart").value||null;drill.end=document.getElementById("dbEnd").value||null;drill.level=0;drill.path=[];drillCache.clear();renderDrill()});
 document.getElementById("dbReset").addEventListener("click",()=>{document.getElementById("dbStart").value="";document.getElementById("dbEnd").value="";document.getElementById("dbPreset").value="";drill.start=null;drill.end=null;drill.level=0;drill.path=[];drillCache.clear();renderDrill()});
-
-document.getElementById("toggleUnit").addEventListener("click",()=>{
-  viewMode = (viewMode==='percent')?'amount':'percent';
-  document.getElementById("toggleUnit").textContent = (viewMode==='percent')?'ดูเป็น %':'ดูเป็น บาท';
-  renderDrill();
-});
 
 document.getElementById("exportChartPdf").addEventListener("click",()=>{
   if(!chart) return;
