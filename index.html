@@ -1,4 +1,3 @@
-<!-- ======== PART 1/4: DOCTYPE + HEAD (Chart.js + Global Styles + Loader%) ======== -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -44,7 +43,7 @@
     #popup{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;justify-content:center;align-items:center}
     #popupBox{background:#fff;padding:24px 28px;border-radius:12px;font-size:1.2rem;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 
-    /* Loader (New % Spinner) */
+    /* Loader (แก้ไข: ลบเปอร์เซ็นต์ เหลือแค่หมุน) */
     #loaderOverlay{position:fixed;inset:0;background:rgba(0,0,0,.65);color:#fff;display:none;align-items:center;justify-content:center;z-index:3000;flex-direction:column;font-size:1.3rem;font-weight:600}
     #loaderSpinner{border:5px solid rgba(255,255,255,.2);border-top:5px solid #facc15;border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite;margin-bottom:16px}
     @keyframes spin{to{transform:rotate(360deg)}}
@@ -107,10 +106,10 @@
   </style>
 </head>
 <body>
-  <!-- Loader Overlay -->
+  <!-- Loader Overlay (แก้ไข: ลบข้อความเปอร์เซ็นต์) -->
   <div id="loaderOverlay">
     <div id="loaderSpinner"></div>
-    <div>กำลังโหลด... <span id="loaderPercent">0%</span></div>
+    <div>กำลังโหลด...</div>
   </div>
 
   <!-- Tabs -->
@@ -119,6 +118,7 @@
     <button class="tab" data-id="history">ประวัติ</button>
     <button class="tab" data-id="dashboard">แดชบอร์ด</button>
   </div>
+
   <!-- ADD PAGE -->
   <section id="add" class="page active">
     <div class="card">
@@ -244,12 +244,10 @@
     <div class="card">
       <h2>ประวัติการทำรายการ</h2>
 
-      <!-- Date range filters -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <input type="date" id="historyStart" class="mini" placeholder="ตั้งแต่วันที่">
         <input type="date" id="historyEnd" class="mini" placeholder="ถึงวันที่">
         <button id="historyApply" class="btn-apply">กรองวันที่</button>
-        <!-- ลบปุ่ม Export CSV ตามบรีฟข้อ 2 -->
         <button id="exportPdf" class="btn-secondary">Export PDF</button>
       </div>
 
@@ -294,9 +292,6 @@
         </select>
         <button class="btn-apply" id="dbApply">นำไปใช้</button>
         <button class="btn" id="dbReset">ล้างตัวกรอง</button>
-
-        <!-- ปรับตามบรีฟข้อ 3: ตัดดาวน์โหลด PNG และเพิ่ม Export PDF -->
-        <button class="btn" id="toggleUnit" title="สลับมุมมอง จำนวนเงิน/เปอร์เซ็นต์">ดูเป็น %</button>
         <button class="btn" id="exportChartPdf" title="ส่งออกเป็น PDF">Export PDF</button>
       </div>
 
@@ -344,12 +339,11 @@
     </div>
   </div>
 
-<!-- ======== PART 2/4: SCRIPT – GLOBAL, HELPERS, TABS, MODE, TAG+SUGGESTION, VALIDATION, UPLOAD QUEUE ======== -->
 <script>
 /* ========== GLOBAL CONFIG ========== */
 const API_URL="https://satoshi-smart-ledger.tttta2556.workers.dev/";
 let records=[], chart=null;
-let queuedUploads={slips:[], receipts:[]}; // เปลี่ยนเป็นคิวไฟล์จริง ยังไม่อัปโหลด
+let queuedUploads={slips:[], receipts:[]};
 let selectedBuildings=[];
 let buildingList=[];
 
@@ -360,11 +354,9 @@ function todayYMD(){const t=new Date();return t.toISOString().slice(0,10)}
 function showPopup(m){document.getElementById("popupBox").innerText=m;document.getElementById("popup").style.display="flex"}
 function hidePopup(){document.getElementById("popup").style.display="none"}
 
-/* Loader% */
+/* Loader (แก้ไข: ลบฟังก์ชัน setLoader และลบ parameter) */
 const loaderEl=document.getElementById("loaderOverlay");
-const loaderPct=document.getElementById("loaderPercent");
-function showLoader(pct=0){loaderEl.style.display="flex";loaderPct.textContent=`${pct}%`;}
-function setLoader(pct){loaderPct.textContent=`${pct}%`;}
+function showLoader(){loaderEl.style.display="flex";}
 function hideLoader(){loaderEl.style.display="none";}
 
 /* Debounce */
@@ -524,14 +516,13 @@ function validateForm(){
   return ok;
 }
 
-/* ========== UPLOAD QUEUE (ยังไม่อัปโหลดจริงจน submit) ========== */
+/* ========== UPLOAD QUEUE ========== */
 function humanList(files){return files.map(f=>f.name).join(", ")}
 function renderQueuedChips(type){
   const chipsEl=document.getElementById(type+"Chips");
   chipsEl.innerHTML="";
   const arr = queuedUploads[type==="slip"?"slips":"receipts"];
   if(arr.length===0) return;
-  // แสดงชื่อไฟล์ธรรมดา (ไม่ใช่ลิงก์ และไม่มีอิโมจิ)
   const span=document.createElement("span");
   span.className="chip";
   span.textContent = arr.length===1 ? arr[0].name : `${arr.length} ไฟล์`;
@@ -547,13 +538,10 @@ document.getElementById("receiptExpense").addEventListener("change",(e)=>{
   document.getElementById("receiptStatus").textContent = queuedUploads.receipts.length ? "พร้อมอัปโหลดเมื่อกดบันทึก" : "เตรียมอัปโหลดเมื่อกดบันทึก";
   renderQueuedChips("receipt");
 });
-</script>
-<!-- ======== PART 3/4: HISTORY (group by date + date-range filter + Export PDF, no CSV) ======== -->
-<script>
-/* ========== HISTORY (group by date + date-range filter + export) ========== */
+
+/* ========== HISTORY ========== */
 let historyPage={page:1,perPage:12,filtered:[], start:null, end:null};
 
-/* PDF Export (ผ่านหน้าพิมพ์ — ผู้ใช้เลือก Save as PDF) */
 function printHistoryAsPdf(){
   const win=window.open("","_blank");
   const rows = historyPage.filtered;
@@ -607,7 +595,6 @@ function printHistoryAsPdf(){
   win.print();
 }
 
-/* Filters + Render */
 const applyFiltersDebounced = debounce(applyFilters, 200);
 function applyFilters(){
   const q=(document.getElementById("searchBox").value||"").toLowerCase();
@@ -669,7 +656,6 @@ function renderHistoryStatement(){
 
       const slipsArr=(r.slips?String(r.slips).split(",").filter(Boolean):[]);
       const receiptsArr=(r.receipts?String(r.receipts).split(",").filter(Boolean):[]);
-      // ลบอิโมจิ และไม่ใส่เลขกำกับ ตามบรีฟข้อ 7 และ 6
       const attChips=[...slipsArr.map(()=>`<span class="chip">ดูสลิป</span>`),
                       ...receiptsArr.map(()=>`<span class="chip">ดูใบเสร็จ</span>`)].join(" ");
 
@@ -687,7 +673,6 @@ function renderHistoryStatement(){
           ${attChips?`<div class="history-files">${attChips}</div>`:""}
         </div>
       `;
-      // ทำลิงก์คลิกที่ชิปเพื่อเปิดไฟล์ (ใช้ index เดียวกัน)
       const detail=card.querySelector(".history-detail");
       card.addEventListener("click",()=>{detail.style.display=(detail.style.display==="block"?"none":"block")});
       const chips=card.querySelectorAll(".history-files .chip");
@@ -709,7 +694,6 @@ function renderHistoryStatement(){
   document.getElementById("loadMoreBtn").style.display=(historyPage.filtered.length> end)?"inline-block":"none";
 }
 
-/* History events */
 document.getElementById("searchBox").addEventListener("input",applyFiltersDebounced);
 document.getElementById("filterMode").addEventListener("change",applyFilters);
 document.getElementById("sortBy").addEventListener("change",applyFilters);
@@ -721,20 +705,13 @@ document.getElementById("historyApply").addEventListener("click",()=>{
 });
 document.getElementById("exportPdf").addEventListener("click", printHistoryAsPdf);
 function renderHistory(){ applyFilters() }
-</script>
-<!-- ======== PART 4/4: DASHBOARD + DRILLDOWN + EXPORT PDF + LOAD OPTIONS + AMOUNT FORMAT + SUBMIT + INIT ======== -->
-<script>
-/* ========== DASHBOARD: Donut + Drilldown (เงินคงเหลืออันดับแรก สีพิเศษ, Legend ใส่ % ใต้ภาพรวม, Center Text = ยอดเบิกรวม) ========== */
 
-/* มุมมอง legend/tooltip: 'amount' | 'percent' */
+/* ========== DASHBOARD ========== */
 let viewMode = 'percent';
-
-/* แคชสำหรับ group-by ตามระดับ/เส้นทาง/ช่วงวันที่ ลดคำนวณซ้ำ */
 const drillCache = new Map();
 
-/* สร้างสีแบบ deterministic จากชื่อ (ยกเว้น "เงินคงเหลือ" เป็นสีคงที่) */
 function hashColorFromName(name){
-  if(name==="เงินคงเหลือ") return "#4b5563"; // เทาเข้ม ต่างจากรายการอื่นชัดเจน
+  if(name==="เงินคงเหลือ") return "#4b5563";
   let h=0; for(let i=0;i<name.length;i++){h=(h*31 + name.charCodeAt(i))>>>0}
   const hue = h % 360;
   const sat = 60;
@@ -742,7 +719,6 @@ function hashColorFromName(name){
   return `hsl(${hue} ${sat}% ${light}%)`;
 }
 
-/* Top N + Others helper */
 function topNWithOthers(labels, values, N=6){
   const arr = labels.map((l,i)=>({label:l, value:values[i]}))
     .sort((a,b)=>b.value-a.value);
@@ -752,7 +728,6 @@ function topNWithOthers(labels, values, N=6){
   return {labels:[...top.map(x=>x.label), "อื่นๆ"], values:[...top.map(x=>x.value), othersVal]};
 }
 
-/* center text update */
 function setCenterText(title, sub){
   const wrap=document.getElementById("centerText");
   const big=document.getElementById("centerBig");
@@ -762,7 +737,6 @@ function setCenterText(title, sub){
   wrap.style.display="flex";
 }
 
-/* Drill state */
 let drill={ level:0, path:[], dims:['project','building','jobType','category','paymentType'], start:null, end:null, hovered:null };
 function withinRange(dateStr){const y=ymd(dateStr); if(!y) return false; if(drill.start&&y<drill.start) return false; if(drill.end&&y>drill.end) return false; return true}
 function filteredData(){return records.filter(r=>withinRange(r.date))}
@@ -783,7 +757,6 @@ function applyPath(arr){
   return out;
 }
 
-/* คีย์สำหรับ cache */
 function cacheKey(){
   const parts=[
     drill.level,
@@ -793,9 +766,7 @@ function cacheKey(){
   return parts.join("|");
 }
 
-/* เรนเดอร์กราฟโดนัท + Legend */
 function renderDonut(rawLabels, rawValues, title){
-  // "เงินคงเหลือ" เป็นอันแรกเสมอ (ถ้ามี)
   let labels = rawLabels.slice();
   let values = rawValues.slice();
   const idxRemain = labels.indexOf("เงินคงเหลือ");
@@ -806,16 +777,13 @@ function renderDonut(rawLabels, rawValues, title){
     values = [val, ...values];
   }
 
-  // Top N + Others
   const d = topNWithOthers(labels, values, 6);
   labels = d.labels;
   values = d.values;
   const total = values.reduce((a,b)=>a+b,0);
 
-  // Colors
   const colors = labels.map(l=> hashColorFromName(l));
 
-  // Destroy & create chart
   const ctx=document.getElementById("donutChart").getContext("2d");
   if(chart){ chart.destroy(); }
   chart=new Chart(ctx,{
@@ -854,12 +822,10 @@ function renderDonut(rawLabels, rawValues, title){
     }
   });
 
-  // Summary (legend)
   const box=document.getElementById("summaryBox");
   if(total<=0 || labels.length===0){
     box.innerHTML=`<h3>${title}</h3><div class="legend-empty">ไม่มีข้อมูลในช่วงที่เลือก</div>`;
   }else{
-    // ถ้าเป็นภาพรวม: เติม (%) ต่อท้ายชื่อรายการ
     const isOverview = (drill.level===0);
     const legendHTML = labels.map((label,i)=>{
       const val = values[i]||0;
@@ -879,15 +845,12 @@ function renderDonut(rawLabels, rawValues, title){
     box.innerHTML=`<h3>${title}</h3>${legendHTML}`;
   }
 
-  // Center text
   updateCenterText(labels, values, title);
 }
 
-/* อัปเดตข้อความกลางโดนัท */
 function updateCenterText(labels, values, title){
   const total = values.reduce((a,b)=>a+b,0);
 
-  // ถ้าเป็น "ภาพรวม" ให้แสดง "จำนวนเงินเบิกรวมทั้งหมด (บาท)" เสมอ
   if(drill.level===0){
     const data=filteredData();
     const totalIncome = sumIncome(data);
@@ -912,7 +875,6 @@ function updateCenterText(labels, values, title){
       setCenterText(`${val.toLocaleString(undefined,{minimumFractionDigits:0})}฿`, labels[i]);
     }
   }else{
-    // แสดงสรุประดับปัจจุบัน (ยกเว้นภาพรวมจัดการไปแล้ว)
     if(viewMode==='percent'){
       setCenterText(`100%`, title);
     }else{
@@ -921,20 +883,17 @@ function updateCenterText(labels, values, title){
   }
 }
 
-/* เรนเดอร์ตาม drill */
 function renderDrill(){
   const data=filteredData();
   const totalFunds=sumIncome(data);
   const expensesOnly=data.filter(r=>r.mode==="จ่าย");
 
-  // crumbs + back
   const crumbs=document.getElementById("dbCrumbs");
   const back=document.getElementById("dbBack");
   const items=[{dim:"ภาพรวม",value:"ทั้งหมด"}].concat(drill.path);
   crumbs.innerHTML=items.map((p,i)=> i===0?`<span class="crumb">ภาพรวม</span>`:`<span class="crumb">${p.dim}: ${p.value}</span>`).join("");
   back.style.display = drill.level>0 ? "inline-block" : "none";
 
-  // ใช้ cache
   const key = cacheKey();
   if(drillCache.has(key)){
     const c = drillCache.get(key);
@@ -976,7 +935,6 @@ function goDeeper(clickedLabel){
 }
 document.getElementById("dbBack").addEventListener("click",()=>{ if(drill.level===0) return; drill.path.pop(); drill.level=Math.max(0,drill.level-1); renderDrill() });
 
-/* Presets */
 document.getElementById("dbPreset").addEventListener("change",(e)=>{
   const v=e.target.value, t=new Date();
   const startInput=document.getElementById("dbStart");
@@ -992,14 +950,12 @@ document.getElementById("dbPreset").addEventListener("change",(e)=>{
 document.getElementById("dbApply").addEventListener("click",()=>{drill.start=document.getElementById("dbStart").value||null;drill.end=document.getElementById("dbEnd").value||null;drill.level=0;drill.path=[];drillCache.clear();renderDrill()});
 document.getElementById("dbReset").addEventListener("click",()=>{document.getElementById("dbStart").value="";document.getElementById("dbEnd").value="";document.getElementById("dbPreset").value="";drill.start=null;drill.end=null;drill.level=0;drill.path=[];drillCache.clear();renderDrill()});
 
-/* Toggle view mode */
 document.getElementById("toggleUnit").addEventListener("click",()=>{
   viewMode = (viewMode==='percent')?'amount':'percent';
   document.getElementById("toggleUnit").textContent = (viewMode==='percent')?'ดูเป็น %':'ดูเป็น บาท';
   renderDrill();
 });
 
-/* Export Dashboard as PDF */
 document.getElementById("exportChartPdf").addEventListener("click",()=>{
   if(!chart) return;
   const dataUrl = chart.toBase64Image();
@@ -1029,24 +985,22 @@ document.getElementById("exportChartPdf").addEventListener("click",()=>{
   win.print();
 });
 
-/* ========== OPTIONS LOAD (มี Loader เปอร์เซ็นต์) ========== */
+/* ========== OPTIONS LOAD (แก้ไข: ลบการอัปเดตเปอร์เซ็นต์) ========== */
 function fillSelect(id,arr){
   const sel=document.getElementById(id);
   sel.innerHTML=`<option value="">-- เลือก --</option>`+(arr||[]).map(v=>`<option value="${v}">${v}</option>`).join("");
 }
 async function loadOptions(){
   try{
-    showLoader(5);
+    showLoader();
     const res = await fetch(API_URL);
-    setLoader(40);
     const d=await res.json();
-    setLoader(70);
 
     records=d.items||[];
     buildingList=d.options?.buildings||[];
 
-    renderHistory(); setLoader(80);
-    renderDrill();   setLoader(90);
+    renderHistory();
+    renderDrill();
 
     fillSelect("supplierExpense",d.options?.suppliers||[]);
     fillSelect("project",d.options?.projects||[]);
@@ -1054,7 +1008,6 @@ async function loadOptions(){
     fillSelect("category",d.options?.categories||[]);
     fillSelect("paymentType",d.options?.paymentTypes||[]);
 
-    setLoader(100);
   }catch(e){
     console.error(e);
   }finally{
@@ -1062,7 +1015,7 @@ async function loadOptions(){
   }
 }
 
-/* ========== AMOUNT FORMAT (รองรับ '.' และเติม .00 อัตโนมัติ) ========== */
+/* ========== AMOUNT FORMAT ========== */
 const amountEl=document.getElementById("amount"), amountTxt=document.getElementById("amountTxt");
 amountEl.addEventListener("input",()=>{
   let raw=amountEl.value;
@@ -1109,9 +1062,8 @@ function thaiMoneyText(i,d){
   return t+"บาท"+s+"สตางค์";
 }
 
-/* ========== SUBMIT (อัปโหลดไฟล์ตอนกดบันทึก ตั้งชื่อไฟล์ตาม ID กลางเดียวกัน และแชร์ไฟล์เดียวกันถ้ามีหลายอาคาร) ========== */
+/* ========== SUBMIT ========== */
 function uuid(){
-  // สร้าง ID กลาง ใช้ร่วมทุกเรคอร์ดในชุดนี้
   const t=Date.now().toString(36);
   const r=Math.random().toString(36).slice(2,8);
   return `LEDGER-${t}-${r}`.toUpperCase();
@@ -1132,14 +1084,11 @@ document.getElementById("form").addEventListener("submit",async e=>{
   const operator=document.getElementById("operator").value;
   const buildings=selectedBuildings.slice();
 
-  // กำหนด ID กลางชุดนี้ (ใช้กับชื่อไฟล์ และทุกเรคอร์ด)
   const sharedId = uuid();
 
-  // อัปโหลดไฟล์ (ถ้ามี) ตั้งชื่อเป็น sharedId (ถ้ามีหลายไฟล์ เติม suffix -S1, -S2 / -R1, -R2 เพื่อกันทับ)
   showPopup("กำลังบันทึกไฟล์...");
   let slipUrls=[], receiptUrls=[];
   try{
-    // slips
     for(let i=0;i<queuedUploads.slips.length;i++){
       const f=queuedUploads.slips[i];
       const b64=await fileToBase64(f);
@@ -1147,7 +1096,6 @@ document.getElementById("form").addEventListener("submit",async e=>{
       const url=await uploadWithFixedName("uploadSlip", b64, f.type, fixedName);
       slipUrls.push(url);
     }
-    // receipts
     for(let i=0;i<queuedUploads.receipts.length;i++){
       const f=queuedUploads.receipts[i];
       const b64=await fileToBase64(f);
@@ -1161,7 +1109,6 @@ document.getElementById("form").addEventListener("submit",async e=>{
     return;
   }
 
-  // เตรียม payloads สำหรับ API (แชร์ลิงก์เดียวกันทุกอาคาร)
   const splitAmount=(mode==="จ่าย" && buildings.length>0)?(amount/buildings.length):amount;
   const payloads=[];
   if(mode==="จ่าย" && buildings.length>0){
@@ -1178,7 +1125,7 @@ document.getElementById("form").addEventListener("submit",async e=>{
         paymentType:document.getElementById("paymentType").value,
         amount:-Math.abs(splitAmount),
         operator,
-        slips: slipUrls.join(","),    // อ้างอิงไฟล์ชุดเดียวกัน
+        slips: slipUrls.join(","),
         receipts: receiptUrls.join(",")
       });
     }
@@ -1208,7 +1155,6 @@ document.getElementById("form").addEventListener("submit",async e=>{
     }
     showPopup("บันทึกสำเร็จ"); setTimeout(hidePopup,800);
 
-    // reset
     document.getElementById("form").reset();
     queuedUploads={slips:[],receipts:[]};
     document.getElementById("slipStatus").textContent="เตรียมอัปโหลดเมื่อกดบันทึก";
@@ -1232,4 +1178,3 @@ window.addEventListener("DOMContentLoaded",async()=>{
 </script>
 </body>
 </html>
-<!-- ======== END PART 4/4 ======== -->
